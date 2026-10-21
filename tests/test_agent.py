@@ -289,7 +289,8 @@ class AgentTests(unittest.TestCase):
 
 class WebTests(unittest.TestCase):
     def test_http_api_auth_origin_run_save_reopen(self):
-        with tempfile.TemporaryDirectory() as temp:
+        # Stop the server before removing its workspace (Windows locks open databases).
+        with tempfile.TemporaryDirectory() as temp, contextlib.ExitStack() as cleanup:
             store=core.Store(temp);store.import_evidence(FIXTURES)
             with socket.socket() as sock:
                 sock.bind(("127.0.0.1",0));port=sock.getsockname()[1]
@@ -299,7 +300,7 @@ class WebTests(unittest.TestCase):
                 proc.terminate()
                 try: proc.communicate(timeout=4)
                 except subprocess.TimeoutExpired: proc.kill();proc.communicate()
-            self.addCleanup(stop)
+            cleanup.callback(stop)
             base=f"http://127.0.0.1:{port}"
             for _ in range(100):
                 try:

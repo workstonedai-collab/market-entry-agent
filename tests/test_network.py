@@ -59,13 +59,14 @@ class NetworkTests(unittest.TestCase):
     try:
      for event in events:
       time.sleep(delay);self.wfile.write(('data: '+(json.dumps(event) if isinstance(event,dict) else event)+'\n\n').encode());self.wfile.flush()
-    except (BrokenPipeError,ConnectionResetError):pass
+    except (BrokenPipeError,ConnectionResetError,ConnectionAbortedError):pass
   server=ThreadingHTTPServer(('127.0.0.1',0),Handler);threading.Thread(target=server.serve_forever,daemon=True).start();self.addCleanup(server.server_close);self.addCleanup(server.shutdown)
   return 'http://127.0.0.1:'+str(server.server_port)+'/v1'
  def test_stream_activity_outlives_idle_window(self):
-  events=[{'choices':[{'delta':{'reasoning_content':'private reasoning'}}]}]+[{'choices':[{'delta':{'content':c}}]} for c in ['{"action":','"recall",','"arguments":{}}']]+[{'choices':[{'delta':{},'finish_reason':'stop'}]},'[DONE]']
-  base=self.stream(events,.03);p=transport.completion(base,'',{'stream':True},2,.07)
-  self.assertGreater(.03*len(events),.07);self.assertEqual(json.loads(p['choices'][0]['message']['content'])['action'],'recall');self.assertNotIn('private reasoning',json.dumps(p))
+  # Keep total stream time beyond idle timeout with room for runner scheduling.
+  events=[{'choices':[{'delta':{'reasoning_content':'private reasoning'}}]}]*12+[{'choices':[{'delta':{'content':c}}]} for c in ['{"action":','"recall",','"arguments":{}}']]+[{'choices':[{'delta':{},'finish_reason':'stop'}]},'[DONE]']
+  base=self.stream(events,.05);p=transport.completion(base,'',{'stream':True},10,.5)
+  self.assertGreater(.05*len(events),.5);self.assertEqual(json.loads(p['choices'][0]['message']['content'])['action'],'recall');self.assertNotIn('private reasoning',json.dumps(p))
  def test_incomplete_stream_is_not_a_completed_action(self):
   base=self.stream([{'choices':[{'delta':{'content':'{}'}}]}])
   with self.assertRaisesRegex(RuntimeError,'incomplete'):transport.completion(base,'',{},2)
