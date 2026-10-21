@@ -12,7 +12,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from urllib.request import Request, urlopen
+from urllib.request import Request, ProxyHandler, build_opener
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -24,6 +24,8 @@ def verify():
     env = {key: value for key, value in os.environ.items() if not key.startswith("AGENT_")}
     # A legacy redirected stream must not prevent Unicode JSON or serving the UI.
     env.update(PYTHONUTF8="0", PYTHONIOENCODING="cp1252", NO_PROXY="127.0.0.1,localhost", no_proxy="127.0.0.1,localhost")
+    # Loopback verification must not use host or system-configured HTTP proxies.
+    http = build_opener(ProxyHandler({}))
     checks = []
     with tempfile.TemporaryDirectory(prefix="field-agent-portable-") as temporary:
         workspace = Path(temporary) / "研究 work space"
@@ -79,26 +81,26 @@ def verify():
             deadline = time.monotonic() + 15
             while True:
                 try:
-                    with urlopen(base + "/health", timeout=1) as response:
+                    with http.open(base + "/health", timeout=1) as response:
                         health = json.load(response)
                     break
-                except OSError:
+                except OSError as exc:
                     if server.poll() is not None or time.monotonic() >= deadline:
-                        raise RuntimeError("Local web server did not become ready") from None
+                        raise RuntimeError("Local web server did not become ready (" + type(exc).__name__ + ": " + str(exc) + ")") from None
                     time.sleep(.1)
             assert health["version"] == metadata["version"]
-            with urlopen(base + "/", timeout=5) as response:
+            with http.open(base + "/", timeout=5) as response:
                 assert b"RESEARCH BRIEF" in response.read()
             headers = {"Authorization": "Bearer " + token, "Content-Type": "application/json"}
-            with urlopen(Request(base + "/api/country?code=VNM", headers=headers), timeout=5) as response:
+            with http.open(Request(base + "/api/country?code=VNM", headers=headers), timeout=5) as response:
                 assert json.load(response)["baseline"]["code"] == "VNM"
             body = json.dumps({"mission": mission, "engine": "demo"}, ensure_ascii=False).encode("utf-8")
-            with urlopen(Request(base + "/api/runs", data=body, headers=headers), timeout=5) as response:
+            with http.open(Request(base + "/api/runs", data=body, headers=headers), timeout=5) as response:
                 assert response.status == 202
                 run_id = json.load(response)["id"]
             deadline = time.monotonic() + 15
             while True:
-                with urlopen(Request(base + "/api/runs/" + run_id, headers=headers), timeout=5) as response:
+                with http.open(Request(base + "/api/runs/" + run_id, headers=headers), timeout=5) as response:
                     saved = json.load(response)
                 if saved["state"] in ("completed", "failed"):
                     break
