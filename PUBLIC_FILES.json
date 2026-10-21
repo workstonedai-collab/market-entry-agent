@@ -2,6 +2,7 @@
   "files": [
     ".dockerignore",
     ".env.example",
+    ".gitattributes",
     ".github/ISSUE_TEMPLATE/bug_report.md",
     ".github/workflows/ci.yml",
     ".gitignore",
@@ -30,6 +31,7 @@
     "docs/roadmap.md",
     "docs/runtime.md",
     "docs/shared-core.md",
+    "docs/windows.md",
     "examples/README.md",
     "examples/demo-evidence.json",
     "examples/mission.json",
@@ -42,6 +44,7 @@
     "scripts/check_core.py",
     "scripts/check_hermes.py",
     "scripts/check_public_release.py",
+    "scripts/verify_portability.py",
     "shared-core.json",
     "skills/market-entry-agent/SKILL.md",
     "src/market_entry_agent/__init__.py",
@@ -58,6 +61,7 @@
     "src/market_entry_agent/web.html",
     "tests/test_agent.py",
     "tests/test_countries.py",
-    "tests/test_network.py"
+    "tests/test_network.py",
+    "tests/test_portability.py"
   ]
 }

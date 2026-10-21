@@ -35,4 +35,4 @@ def build(wgi_file,bready_file,as_of):
     'countries':list(sorted(countries.values(),key=lambda x:x['name']))}
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--wgi',required=True);p.add_argument('--bready',required=True);p.add_argument('--as-of',required=True);p.add_argument('--output',required=True);a=p.parse_args()
-    data=build(a.wgi,a.bready,a.as_of);Path(a.output).write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n');print(json.dumps({'countries':len(data['countries']),'bready':sum(c['bready'] is not None for c in data['countries'])}))
+    data=build(a.wgi,a.bready,a.as_of);Path(a.output).write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');print(json.dumps({'countries':len(data['countries']),'bready':sum(c['bready'] is not None for c in data['countries'])}))

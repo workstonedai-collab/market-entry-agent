@@ -4,22 +4,52 @@ permissions:
   contents: read
 jobs:
   test:
-    runs-on: ubuntu-latest
+    name: Runtime (${{ matrix.os }}, Python ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
         python: ['3.11', '3.12', '3.13']
+    env:
+      PYTHONUTF8: '0'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - run: python scripts/check_public_release.py
-      - run: python -m pip install .
-      - run: python -m unittest discover -s tests -v
-      - run: python scripts/check_core.py
-      - run: market-entry-agent --workspace "$RUNNER_TEMP/demo" demo > "$RUNNER_TEMP/run.json"
-      - run: market-entry-agent --workspace "$RUNNER_TEMP/demo" list
-      - run: python -m pip wheel --no-deps . -w dist
+      - name: Public source and identity boundary
+        run: python scripts/check_public_release.py
+      - name: Install the package
+        run: python -m pip install .
+      - name: Runtime and recovery regressions
+        run: python -m unittest discover -s tests -v
+      - name: Shared core integrity with normalized checkout
+        run: python scripts/check_core.py
+      - name: CLI and HTTP in an isolated Unicode workspace
+        run: python scripts/verify_portability.py
+      - name: Build universal wheel
+        run: python -m pip wheel --no-deps . -w dist
+  windows-install:
+    name: Windows clean PowerShell install
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Follow the documented venv route without activation
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $venv = Join-Path $env:RUNNER_TEMP 'agent venv'
+          python -m venv "$venv"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $python = Join-Path $venv 'Scripts\python.exe'
+          & "$python" -m pip install .
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & "$python" scripts/verify_portability.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
   container:
     runs-on: ubuntu-latest
     steps:

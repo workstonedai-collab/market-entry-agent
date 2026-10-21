@@ -1,4 +1,4 @@
-"""Field Agent Core 0.4.0: bounded research, evidence and durable runs.
+"""Field Agent Core 0.4.1: bounded research, evidence and durable runs.
 
 Vendored identically by both projects; no production data or private integrations.
 """
@@ -23,7 +23,7 @@ from urllib.parse import urlsplit, urljoin
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
-CORE_VERSION = "0.4.0"
+CORE_VERSION = "0.4.1"
 MAX_BYTES = 1_000_000
 
 

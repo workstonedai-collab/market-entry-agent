@@ -25,7 +25,7 @@ def key(value):
 
 @lru_cache(maxsize=1)
 def dataset():
-    return json.loads(Path(__file__).with_name('data').joinpath('country-baselines.json').read_text())
+    return json.loads(Path(__file__).with_name('data').joinpath('country-baselines.json').read_text(encoding='utf-8'))
 
 def lookup(value):
     sought=key(value)

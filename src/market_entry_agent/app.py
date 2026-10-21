@@ -4,6 +4,7 @@ import argparse
 import hmac
 import json
 import os
+import sys
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -81,7 +82,7 @@ def serve(store, host, port):
             if path == "/":
                 return self.reply(200, asset, "text/html; charset=utf-8")
             if path == "/health":
-                return self.reply(200, {"status": "ok", "product": SPEC["id"], "version": "0.4.0"})
+                return self.reply(200, {"status": "ok", "product": SPEC["id"], "version": "0.4.1"})
             if path == "/api/countries":
                 from .countries import catalog
                 return self.reply(200, catalog())
@@ -172,6 +173,10 @@ def serve(store, host, port):
 
 
 def main(argv=None):
+    # Keep redirected JSON and diagnostics readable on legacy Windows code pages.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description=SPEC["tagline"])
     parser.add_argument("--workspace", default=f"~/.field-agents/{SPEC['id']}", help="Private state directory; use a separate one for each customer")
     parser.add_argument("--evidence-db", default=None, help="Optional shared public evidence database")

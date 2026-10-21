@@ -6,6 +6,8 @@ GitHub publication delivers source, release artifacts and CI. It is separate fro
 
 Install from the repository and run `market-entry-agent demo`, then `market-entry-agent serve`. State defaults to `~/.field-agents/market-entry-agent`. Use an explicit `--workspace` when serving different customers. Start `worker` separately if monitoring is desired.
 
+Native Windows: follow the [PowerShell installation guide](windows.md), including explicit workspace, model configuration, exports and optional worker operation. Existing macOS/Linux commands and workspace defaults remain supported.
+
 ## Container
 
 ```bash
@@ -21,7 +23,7 @@ Export model environment variables before creating the containers if using model
 
 ## Remote operator
 
-Run behind an authenticated TLS reverse proxy. Set `AGENT_UI_ALLOWED_HOSTS` to the exact external hostname(s), pass the Host header consistently, and keep the token in place. Do not use the standard-library server as an unauthenticated public multi-user service. Configure backups for the workspace volume. These recipes are for self-hosting; no hosted domain or SLA is included in v0.2.
+Run behind an authenticated TLS reverse proxy. Set `AGENT_UI_ALLOWED_HOSTS` to the exact external hostname(s), pass the Host header consistently, and keep the token in place. Do not use the standard-library server as an unauthenticated public multi-user service. Configure backups for the workspace volume. These recipes are for self-hosting; no hosted domain or SLA is included in v0.4.1.
 
 ## Verification
 

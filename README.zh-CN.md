@@ -10,7 +10,7 @@
 
 **开放范围与交流：** 国区评分配方、分项权重、贡献计算与通用研究步骤已公开。部分进一步的研究方法、专用提示词和相关知识内容暂未开源。如有需要或希望进一步交流，欢迎[联系作者](https://github.com/workstonedai-collab)或提交[项目 Issue](https://github.com/workstonedai-collab/market-entry-agent/issues/new)；私人资料请勿直接发布在公开 Issue。
 
-[English](README.md) · [公开示例](examples/README.md) · [联网使用](docs/live-research.md) · [Hermes 接入](docs/hermes.md) · [部署](docs/deployment.md)
+[English](README.md) · [公开示例](examples/README.md) · [联网使用](docs/live-research.md) · [Hermes 接入](docs/hermes.md) · [Windows 安装](docs/windows.md) · [部署](docs/deployment.md)
 
 ## 国区看板：从背景到行动
 
@@ -136,6 +136,8 @@ flowchart TB
 </details>
 
 ## 先跑通一个示例
+
+下面为 macOS / Linux 命令。Windows 可直接使用 Python，无需 WSL；请看 [PowerShell 安装与使用说明](docs/windows.md)，包括模型设置、中文路径、保存恢复、导出和常见问题。自动检查覆盖三个系统的 Python 3.11–3.13，并单独验证 Windows 独立环境安装。
 
 ```bash
 git clone https://github.com/workstonedai-collab/market-entry-agent.git
