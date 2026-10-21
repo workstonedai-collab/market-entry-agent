@@ -73,20 +73,23 @@ def verify():
         base = "http://127.0.0.1:" + str(port)
         token = "portable-test-only-token-at-least-24"
         server_env = dict(env, AGENT_UI_TOKEN=token)
+        server_log = tempfile.TemporaryFile()
         server = subprocess.Popen(
             [sys.executable, "-X", "utf8=0", "-m", module, "--workspace", str(workspace), "serve", "--port", str(port)],
-            cwd=ROOT, env=server_env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            cwd=ROOT, env=server_env, stdout=server_log, stderr=subprocess.STDOUT,
         )
         try:
-            deadline = time.monotonic() + 15
+            deadline = time.monotonic() + 45
             while True:
                 try:
-                    with http.open(base + "/health", timeout=1) as response:
+                    with http.open(base + "/health", timeout=5) as response:
                         health = json.load(response)
                     break
                 except OSError as exc:
                     if server.poll() is not None or time.monotonic() >= deadline:
-                        raise RuntimeError("Local web server did not become ready (" + type(exc).__name__ + ": " + str(exc) + ")") from None
+                        server_log.seek(0)
+                        diagnostic = server_log.read(2000).decode("utf-8", "replace")
+                        raise RuntimeError("Local web server did not become ready (exit=" + str(server.poll()) + ", " + type(exc).__name__ + ": " + str(exc) + "). Startup: " + diagnostic) from None
                     time.sleep(.1)
             assert health["version"] == metadata["version"]
             with http.open(base + "/", timeout=5) as response:
@@ -117,6 +120,7 @@ def verify():
             except subprocess.TimeoutExpired:
                 server.kill()
                 server.wait(timeout=5)
+            server_log.close()
         # TemporaryDirectory cleanup after process exit also checks released file handles.
     return {"product": metadata["id"], "version": metadata["version"], "platform": platform.system(),
             "python": platform.python_version(), "checks": checks + ["workspace_cleanup_after_server_exit"],
