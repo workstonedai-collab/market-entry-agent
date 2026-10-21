@@ -1,0 +1,15 @@
+{
+  "question": "比较越南与印度尼西亚的公开国区指标，并列出还需要查证的问题。",
+  "countries": [
+    "Vietnam",
+    "Indonesia"
+  ],
+  "topics": [
+    "trade",
+    "investment",
+    "logistics"
+  ],
+  "context": "虚构演示：设备出口团队正在收集公开资料。",
+  "max_steps": 12,
+  "deadline_seconds": 180
+}

@@ -1,0 +1,4 @@
+{
+  "sources": [],
+  "_instructions": "Add your licensed/public HTTPS RSS/Atom feed: id, url, allowed_hosts, countries, topics. Empty by design; no private production source list is included."
+}

@@ -1,0 +1,33 @@
+{
+  "schema": "field-agent/v1",
+  "id": "market-entry-agent",
+  "version": "0.4.0",
+  "entrypoint": "market-entry-agent",
+  "python_module": "market_entry_agent",
+  "engines": {
+    "demo": "Deterministic synthetic demonstration",
+    "model": "Model-directed JSON action loop"
+  },
+  "tools": [
+    "country_baseline",
+    "research_plan",
+    "web_search",
+    "fetch_page",
+    "search_evidence",
+    "read_evidence",
+    "recall",
+    "list_sources",
+    "fetch_feed",
+    "finish"
+  ],
+  "evidence_schema": "schemas/evidence-v1.schema.json",
+  "interfaces": [
+    "cli",
+    "local-web",
+    "http"
+  ],
+  "external_sending": false,
+  "shared_core": "shared-core.json",
+  "license": "MIT",
+  "name_zh": "企业出海咨询/国区营商环境监测智能体"
+}

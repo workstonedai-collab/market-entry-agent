@@ -1,0 +1,14 @@
+{
+  "question": "读取越南和印度尼西亚的公开治理分项，说明来源、统计期和缺失情况。",
+  "countries": [
+    "Vietnam",
+    "Indonesia"
+  ],
+  "topics": [
+    "country-baseline",
+    "governance"
+  ],
+  "context": "公开数据演示，不包含真实客户资料。",
+  "max_steps": 8,
+  "deadline_seconds": 180
+}

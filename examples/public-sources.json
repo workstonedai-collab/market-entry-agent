@@ -1,0 +1,18 @@
+{
+  "sources": [
+    {
+      "id": "uk-dbt",
+      "url": "https://www.gov.uk/government/organisations/department-for-business-and-trade.atom",
+      "allowed_hosts": [
+        "www.gov.uk"
+      ],
+      "countries": [
+        "UK"
+      ],
+      "topics": [
+        "trade"
+      ],
+      "kind": "feed"
+    }
+  ]
+}

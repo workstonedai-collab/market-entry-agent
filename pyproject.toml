@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "market-entry-agent"
+version = "0.4.0"
+description = "A self-hosted market-entry research agent combining company context, country evidence, operating changes and commercial opportunities."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "workstonedai-collab"}]
+dependencies = []
+classifiers = ["Development Status :: 3 - Alpha", "Programming Language :: Python :: 3", "Topic :: Scientific/Engineering :: Artificial Intelligence"]
+
+[project.scripts]
+market-entry-agent = "market_entry_agent.app:main"
+
+[project.urls]
+Repository = "https://github.com/workstonedai-collab/market-entry-agent"
+Issues = "https://github.com/workstonedai-collab/market-entry-agent/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+market_entry_agent = ["web.html", "data/*.json"]

@@ -1,0 +1,78 @@
+{
+  "schema": "field-evidence/v1",
+  "records": [
+    {
+      "title": "虚构演练：越南示例港口临时通行安排",
+      "body": "虚构场景。示例港口公告称将对部分泊位实施48小时检修，其他泊位继续开放。公告没有说明企业实际货物是否受影响。",
+      "url": "https://port.example/vn/notice-01",
+      "countries": [
+        "Vietnam"
+      ],
+      "topics": [
+        "logistics"
+      ],
+      "event_key": "fictional-port-maintenance",
+      "published_at": "2026-01-10T08:00:00Z",
+      "status": "synthetic"
+    },
+    {
+      "title": "虚构演练：示例港口后续恢复记录",
+      "body": "虚构场景。同一示例港口的后续记录称检修已完成，通行恢复；未提供独立航运数据。应与前一版公告一起理解，不应只保留限制信号。",
+      "url": "https://port.example/vn/notice-02",
+      "countries": [
+        "Vietnam"
+      ],
+      "topics": [
+        "logistics"
+      ],
+      "event_key": "fictional-port-maintenance",
+      "published_at": "2026-01-12T08:00:00Z",
+      "status": "synthetic"
+    },
+    {
+      "title": "虚构演练：印度尼西亚设备进口政策征求意见",
+      "body": "虚构场景。示例部门发布设备进口证书草案，仍在征求意见，没有确定生效日期；适用产品归类有待确认。不能把草案当作已经生效的规定。",
+      "url": "https://policy.example/id/draft-01",
+      "countries": [
+        "Indonesia"
+      ],
+      "topics": [
+        "trade",
+        "investment"
+      ],
+      "event_key": "fictional-equipment-consultation",
+      "published_at": "2026-01-11T08:00:00Z",
+      "status": "synthetic"
+    },
+    {
+      "title": "虚构演练：工业设备经销合作线索",
+      "body": "虚构场景。示例行业协会宣布举办工业设备供需对接活动，涉及越南与印度尼西亚的经销企业；没有提供订单或市场规模数据。这是潜在渠道研究线索，不是风险预警或成交承诺。",
+      "url": "https://industry.example/asean/meeting-01",
+      "countries": [
+        "Vietnam",
+        "Indonesia"
+      ],
+      "topics": [
+        "opportunity",
+        "investment"
+      ],
+      "event_key": "fictional-distributor-event",
+      "published_at": "2026-01-12T09:00:00Z",
+      "status": "synthetic"
+    },
+    {
+      "title": "虚构演练：法国消费品展会",
+      "body": "虚构场景。该记录用于验证国区与行业过滤，不应混入东南亚工业设备或供应链任务。",
+      "url": "https://industry.example/fr/fair-01",
+      "countries": [
+        "France"
+      ],
+      "topics": [
+        "consumer"
+      ],
+      "event_key": "fictional-unrelated",
+      "published_at": "2026-01-12T09:00:00Z",
+      "status": "synthetic"
+    }
+  ]
+}

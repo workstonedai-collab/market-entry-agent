@@ -1,0 +1,14 @@
+{
+  "version": "0.4.0",
+  "module": "market_entry_agent",
+  "files": {
+    "core.py": "bbb9677e8afe7bbbc84515fe58e68200c48c11d314ddfee106ff18a33ee86fae",
+    "app.py": "392f5406289bfba2abb306ecbc5a94a40333339fc850cc32daa827ff6829ee1f",
+    "web.html": "543ca72f70c9f59534587e9d57b3ccd08c9b2c9e8e23292c71783355110e1c4c",
+    "net.py": "e531453c3db5cc178fb6af774b3866cc2a223dbe3f7dd00ff6cdd76f8fd50fbd",
+    "transport.py": "32e29ed147e0477d88b0b408774c33e54bdfa7d43fc77c4e5500fd979873ed8b",
+    "countries.py": "682b64da1b19e59504bfd8a7a77e3688e28c67a179f73467eab47cc155458174",
+    "research.py": "0a1a72cd7ead27bf5efb493cd3e76ded0908ec29d1014cc39180a332911c56ad",
+    "data/country-baselines.json": "9a7f1e21946d6a8d1c92cf11ca55ea775e72765b2576c1f847f2adde13f7702e"
+  }
+}

@@ -1,0 +1,27 @@
+services:
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:8712:8712"
+    environment:
+      AGENT_UI_TOKEN: ${AGENT_UI_TOKEN:?Set a random AGENT_UI_TOKEN of at least 24 characters}
+      AGENT_UI_ALLOWED_HOSTS: ${AGENT_UI_ALLOWED_HOSTS:-}
+      AGENT_MODEL_BASE_URL: ${AGENT_MODEL_BASE_URL:-}
+      AGENT_MODEL_NAME: ${AGENT_MODEL_NAME:-}
+      AGENT_MODEL_API_KEY: ${AGENT_MODEL_API_KEY:-}
+    volumes:
+      - state:/workspace
+    restart: unless-stopped
+  worker:
+    profiles: [monitor]
+    build: .
+    command: ["worker"]
+    environment:
+      AGENT_MODEL_BASE_URL: ${AGENT_MODEL_BASE_URL:-}
+      AGENT_MODEL_NAME: ${AGENT_MODEL_NAME:-}
+      AGENT_MODEL_API_KEY: ${AGENT_MODEL_API_KEY:-}
+    volumes:
+      - state:/workspace
+    restart: unless-stopped
+volumes:
+  state:
