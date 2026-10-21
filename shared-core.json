@@ -3,7 +3,7 @@
   "module": "market_entry_agent",
   "files": {
     "core.py": "ab7e4c6d5fbf7d39fbd5eb666ebc196dadf7c6bd46073d7c7bcb60809750f70e",
-    "app.py": "844d018d52ee06e4923c934af94663a0597e44aaa34b884da22eaef9a2d4e6d9",
+    "app.py": "4e32963df187b333bc3c00087b2ac9a0b50e1b9307853fb717c85874d5fb3bb0",
     "web.html": "543ca72f70c9f59534587e9d57b3ccd08c9b2c9e8e23292c71783355110e1c4c",
     "net.py": "e531453c3db5cc178fb6af774b3866cc2a223dbe3f7dd00ff6cdd76f8fd50fbd",
     "transport.py": "32e29ed147e0477d88b0b408774c33e54bdfa7d43fc77c4e5500fd979873ed8b",

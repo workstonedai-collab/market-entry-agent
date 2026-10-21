@@ -3,6 +3,7 @@
 ## 0.4.1
 
 - Native Windows installation guide; existing macOS/Linux entrypoints and workspace defaults retained.
+- Local web startup no longer waits on reverse DNS; regression checks cover unavailable name resolution.
 - Explicit UTF-8 country snapshots and CLI output, portable release paths and LF source checkout.
 - Windows/macOS/Linux Python 3.11–3.13 CI, separate PowerShell venv install, locale/path regressions and CLI/HTTP persistence checks.
 - Windows 原生安装、中文路径与输出、报告重开与导出验证；公开内容与匿名身份检查保持启用。

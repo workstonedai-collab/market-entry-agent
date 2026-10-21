@@ -1,5 +1,6 @@
 """Regressions for locale, file paths and persisted results across host systems."""
 import importlib
+from http.server import BaseHTTPRequestHandler
 import json
 import os
 from pathlib import Path
@@ -7,12 +8,20 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 MODULE = "market_entry_agent"
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class PortabilityTests(unittest.TestCase):
+    def test_http_startup_does_not_depend_on_reverse_dns(self):
+        app = importlib.import_module(MODULE + ".app")
+        with patch("socket.getfqdn", side_effect=AssertionError("Unexpected DNS lookup")):
+            with app.AgentHTTPServer(("127.0.0.1", 0), BaseHTTPRequestHandler) as server:
+                self.assertEqual(server.server_name, "127.0.0.1")
+                self.assertGreater(server.server_port, 0)
+
     def test_country_data_under_non_utf8_locale(self):
         # C locale on POSIX, ANSI code page on Windows; -X utf8=0 disables the override.
         code = "import locale,json;locale.setlocale(locale.LC_CTYPE,'C');from " + MODULE + ".countries import baseline;print(json.dumps(baseline('VNM')['name']))"

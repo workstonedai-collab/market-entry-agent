@@ -9,10 +9,19 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from socketserver import TCPServer
 from urllib.parse import urlsplit, parse_qs
 
 from .core import Agent, Store, atomic_json, fetch_feed, load_json, markdown, validate_mission
 from .product import SPEC
+
+
+class AgentHTTPServer(ThreadingHTTPServer):
+    def server_bind(self):
+        # The bound address is sufficient; reverse DNS must not delay local startup.
+        TCPServer.server_bind(self)
+        self.server_name = self.server_address[0]
+        self.server_port = self.server_address[1]
 
 
 def public_run(run):
@@ -162,7 +171,7 @@ def serve(store, host, port):
             except (ValueError, KeyError, TypeError) as exc:
                 self.reply(400, {"error": str(exc)[:180]})
 
-    server = ThreadingHTTPServer((host, port), Handler)
+    server = AgentHTTPServer((host, port), Handler)
     print(f"{SPEC['name']}: http://{host}:{server.server_port} (local workspace)", flush=True)
     try:
         server.serve_forever()
