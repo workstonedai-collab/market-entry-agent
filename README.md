@@ -35,6 +35,8 @@ New to deployment? Give this repository to your own coding agent. Ask it to run 
 
 Reports now use a versioned writing skill during initial drafting. Compare event assessments, record entry-route tradeoffs and next checks, and inspect source retrieval status. See [report writing and case evaluation](docs/report-quality.md).
 
+Three additional historical cases can be run individually to inspect the agent’s direct output: `cbam-importer`, `cptpp-origin`, `eudr-furniture`. Inputs, returned JSON actions and raw reports are retained privately for comparison. [Case instructions](docs/report-quality.md#用几组真实事件检查直接生成的原稿).
+
 ## Continue the business project
 
 Keep the product, buyers, capabilities and constraints alongside the markets and entry routes under consideration. Compare options across demand, access, channels, delivery, economics and risk, then record the assumptions and work each option depends on. Changed enterprise conditions flag older options for another look while preserving the original reasoning.

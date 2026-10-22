@@ -1,0 +1,205 @@
+{
+  "schema": "report-cases/v1",
+  "retrieval_mode": "fixed_public_corpus",
+  "notice": "真实历史公告的署名摘要；企业条件虚构。仅检验历史资料分析，不是当前法律、航运建议或完整覆盖。",
+  "cases": [
+    {
+      "id": "cbam-importer",
+      "mission": {
+        "question": "这次 CBAM 简化对德国经销和荷兰直接买方两条进入路径有多大影响？有限预算下先推进哪条，拿到什么资料后可以改变选择？",
+        "context": "虚构企业测试条件：截至2025年9月29日，一家中国钢制工业零件企业准备试销。德国经销商口头愿意担任进口商，但未提供其全年累计进口量；荷兰买方希望我方承担更多进口手续。试单预计20吨，具体CN编码、毛利及合规服务报价未知。团队两人，首轮验证预算10万元人民币，尚未设立欧盟实体。",
+        "countries": [
+          "Germany",
+          "Netherlands"
+        ],
+        "topics": [
+          "cbam",
+          "trade"
+        ],
+        "as_of": "2025-09-29T23:59:59Z",
+        "search_queries": [],
+        "max_steps": 12,
+        "max_model_calls": 13,
+        "deadline_seconds": 600,
+        "output_sections": [
+          "decision_options",
+          "validation_priorities"
+        ]
+      },
+      "sources": [
+        {
+          "title": "Council and Parliament CBAM provisional agreement, 18 June 2025",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2025/06/18/carbon-border-adjustment-mechanism-cbam-council-and-parliament-strike-a-deal-on-its-simplification/",
+          "published_at": "2025-06-18T00:00:00Z",
+          "countries": [
+            "Germany",
+            "Netherlands"
+          ],
+          "topics": [
+            "cbam",
+            "trade"
+          ],
+          "body": "资料摘要：欧盟理事会2025年6月18日公告称就 CBAM 简化达成临时协议，包含按每进口商每年累计质量计算的50吨门槛；公告明确仍需理事会和议会认可后正式通过。这里记录的是临时协议阶段，不据此认定个别产品或进口商已获豁免。",
+          "status": "source_claim",
+          "retrieval_kind": "attributed_public_summary",
+          "observed_at": "2026-10-22T00:00:00Z",
+          "date_basis": "publication_date_only"
+        },
+        {
+          "title": "Council adopts CBAM simplification, 29 September 2025",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2025/09/29/cbam-council-signs-off-simplification-to-the-eu-carbon-leakage-instrument/",
+          "published_at": "2025-09-29T00:00:00Z",
+          "countries": [
+            "Germany",
+            "Netherlands"
+          ],
+          "topics": [
+            "cbam",
+            "trade"
+          ],
+          "body": "资料摘要：欧盟理事会2025年9月29日通过 CBAM 简化法规，公告描述每进口商每年50吨的新质量门槛，并说明下一步在官方公报刊登后第三天生效。本例验证从临时协议到通过的阶段变化；不能把每个出口商的货量直接当作每进口商年度累计量，也不自动判断产品适用性。",
+          "status": "source_claim",
+          "retrieval_kind": "attributed_public_summary",
+          "observed_at": "2026-10-22T00:00:00Z",
+          "date_basis": "publication_date_only"
+        }
+      ],
+      "review_focus": [
+        "20吨试单不能直接等同进口商每年50吨门槛；通过不等于已刊登生效。",
+        "比较责任、订单验证与预算，不编国家需求排名、税率或利润。"
+      ]
+    },
+    {
+      "id": "cptpp-origin",
+      "mission": {
+        "question": "英国加入 CPTPP 后，我们应先做马来西亚经销试单，还是先在英国建立贸易中转公司？请说明进入路径、经济取舍和第一轮验证重点。",
+        "context": "虚构企业测试条件：截至2024年12月15日，中国制造工业泵及零件企业拟拓展马来西亚工业客户。中国工厂完成生产，未计划在英国加工；有两家马来西亚经销线索，无已确认订单。未来90天验证预算20万元人民币、两名销售，无当地售后人员，HS编码、适用税率及终端买方规格未确认。",
+        "countries": [
+          "Malaysia",
+          "UK"
+        ],
+        "topics": [
+          "investment",
+          "trade"
+        ],
+        "as_of": "2024-12-15T23:59:59Z",
+        "search_queries": [],
+        "max_steps": 12,
+        "max_model_calls": 13,
+        "deadline_seconds": 600,
+        "output_sections": [
+          "decision_options",
+          "validation_priorities"
+        ]
+      },
+      "sources": [
+        {
+          "title": "UK counting down to CPTPP entry into force",
+          "url": "https://www.gov.uk/government/news/uk-counting-down-to-cptpp-entry-into-force",
+          "published_at": "2024-12-05T00:00:00Z",
+          "countries": [
+            "UK",
+            "Malaysia"
+          ],
+          "topics": [
+            "trade",
+            "investment"
+          ],
+          "body": "资料摘要：英国驻马来西亚高级专员公署2024年12月5日公告称，英国CPTPP加入安排将在12月15日生效，成为英马首次自贸协定关系。公告提到机械零部件、电气电子等领域的潜在机会及原产地规则可能扩大中间品选择，未提供任何中国企业产品的税则号、适用税率或客户采购承诺。",
+          "status": "source_claim",
+          "retrieval_kind": "attributed_public_summary",
+          "observed_at": "2026-10-22T00:00:00Z",
+          "date_basis": "publication_date_only"
+        },
+        {
+          "title": "UK joins CPTPP, 15 December 2024",
+          "url": "https://www.gov.uk/government/news/2-billion-boost-to-growth-as-uk-joins-major-trade-group",
+          "published_at": "2024-12-15T00:00:00Z",
+          "countries": [
+            "UK",
+            "Malaysia"
+          ],
+          "topics": [
+            "trade",
+            "investment"
+          ],
+          "body": "资料摘要：英国政府2024年12月15日公告加入CPTPP，提到包括英马在内已完成批准成员之间的生效安排；部分其他成员生效时间不同。公告预计英国经济长期每年可能增加20亿英镑，属宏观估计；并举例说明成员国零部件与原产地规则可能影响最终产品优惠资格。公告没有认定中国制造产品经英国或马来西亚转运便能享受优惠，也未证明个别企业盈利。",
+          "status": "source_claim",
+          "retrieval_kind": "attributed_public_summary",
+          "observed_at": "2026-10-22T00:00:00Z",
+          "date_basis": "publication_date_only"
+        }
+      ],
+      "review_focus": [
+        "不把转运等同原产地或宏观20亿增长当企业收益。",
+        "经销验证、售后和中转新增成本如何决定优先级。"
+      ]
+    },
+    {
+      "id": "eudr-furniture",
+      "mission": {
+        "question": "EUDR 延期后，木家具出口项目可以暂停追溯准备，把预算全用于获客吗？请比较先补资料和先扩销量两种安排，给出未来六周的可行顺序。",
+        "context": "虚构企业测试条件：截至2024年12月18日，一家木家具商拟向德国与荷兰卖办公桌，当前未签约。两个买方已询问木材来源文件但未给清单；上游能给采购发票，尚无完整产地追溯档案。预算8万元人民币，一名外贸人员，具体商品编码、买方规模、法定角色及采购截止日未知。",
+        "countries": [
+          "Germany",
+          "Netherlands"
+        ],
+        "topics": [
+          "eudr",
+          "trade"
+        ],
+        "as_of": "2024-12-18T23:59:59Z",
+        "search_queries": [],
+        "max_steps": 12,
+        "max_model_calls": 13,
+        "deadline_seconds": 600,
+        "output_sections": [
+          "decision_options",
+          "validation_priorities"
+        ]
+      },
+      "sources": [
+        {
+          "title": "Council and Parliament agree targeted EUDR amendment",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2024/12/03/eu-deforestation-law-council-and-parliament-agree-on-its-targeted-amendment/",
+          "published_at": "2024-12-03T00:00:00Z",
+          "countries": [
+            "Germany",
+            "Netherlands"
+          ],
+          "topics": [
+            "trade",
+            "eudr"
+          ],
+          "body": "资料摘要：欧盟理事会2024年12月3日公告与议会达成临时协议，拟延后毁林法规适用日期12个月，仍需认可并正式通过；此次修订不改变规则实质。公告列出木材、橡胶、咖啡等及其部分衍生品，涉及尽职调查与无毁林要求。新闻没有提供某家具型号的归类或采购方合同要求。",
+          "status": "source_claim",
+          "retrieval_kind": "attributed_public_summary",
+          "observed_at": "2026-10-22T00:00:00Z",
+          "date_basis": "publication_date_only"
+        },
+        {
+          "title": "Council formally adopts EUDR one-year postponement",
+          "url": "https://www.consilium.europa.eu/en/press/press-releases/2024/12/18/eu-deforestation-law-council-formally-adopts-its-one-year-postponement/",
+          "published_at": "2024-12-18T00:00:00Z",
+          "countries": [
+            "Germany",
+            "Netherlands"
+          ],
+          "topics": [
+            "trade",
+            "eudr"
+          ],
+          "body": "资料摘要：欧盟理事会2024年12月18日正式通过毁林法规适用日期延后一年的修订，公告描述规则从2025年12月30日开始适用，并说明下一步签署、刊登官方公报。延后旨在使经营者准备尽职调查；不是取消法规。此为2024年12月18日历史时点公告，不用于说明当前实施日期；没有给出买方采购时点或企业木材供应链可追溯性。",
+          "status": "source_claim",
+          "retrieval_kind": "attributed_public_summary",
+          "observed_at": "2026-10-22T00:00:00Z",
+          "date_basis": "publication_date_only"
+        }
+      ],
+      "review_focus": [
+        "历史时点延期不等于取消要求；法规日期与买方合同条件分开。",
+        "有限预算下是否小批验证、向谁拿什么资料、达成什么条件再扩大。"
+      ]
+    }
+  ]
+}

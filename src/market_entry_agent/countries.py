@@ -99,15 +99,21 @@ def compare(countries):
         points.append({'dimension':dim,'label':rows[0]['wgi'][dim]['label'],'values':values,'higher_point_estimate':[code for code,value in values.items() if value==maximum],'interpretation':'Point estimates only; no significance test or country suitability ranking'})
     return {'countries':rows,'common_wgi':points,'same_basis':same,'ranking':None,'note':'同口径分项可比较，细微分差不构成统计显著或企业选国结论。' if same else '覆盖或公式不同，不合并排序；请对照共同分项和各自缺口。','event_adjustment':None}
 
+def available_at(mission):
+    """Whether the bundled derivative existed at the task's historical cutoff."""
+    if not mission.get('as_of'):
+        return True
+    stamp=datetime.fromisoformat(mission['as_of'].replace('Z','+00:00'))
+    cutoff=stamp.replace(tzinfo=stamp.tzinfo or timezone.utc)
+    return cutoff >= datetime.fromisoformat(dataset()['available_from'])
+
+
 def evidence(store, countries, mission):
     result=compare(countries)
     for row in result['countries']:
         if not matches(mission['countries'],row['code']): raise ValueError('Country baseline outside mission scope')
-    if mission.get('as_of'):
-        stamp=datetime.fromisoformat(mission['as_of'].replace('Z','+00:00'))
-        cutoff=stamp.replace(tzinfo=stamp.tzinfo or timezone.utc)
-        if cutoff<datetime.fromisoformat(dataset()['available_from']):
-            raise ValueError('Current country snapshot was not available at historical as_of; use a versioned historical dataset')
+    if not available_at(mission):
+        raise ValueError('Current country snapshot was not available at historical as_of; use a versioned historical dataset')
     records=[]
     for row in result['countries']:
         records.append({'title':row['name']+' · 国区营商环境研究参考基线','body':json.dumps(row,ensure_ascii=False),'url':row['sources'][0]['url'],

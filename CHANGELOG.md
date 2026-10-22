@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.1 — 2026-10-22
+
+- Three explicit fixed-corpus historical decision cases per product; preserve direct JSON actions, reports and reproducible receipts in a private directory.
+- Initial writing guidance preserves date roles, threshold scope, market/intermediary roles and consistent proposed budgets; reduce repeated optional sections.
+- Historical task catalogs omit an unavailable current baseline and empty registered-source lists, retaining execution-time guards.
+- Case-runner regressions cover source scope, saved raw output, overwrite protection and bounded inputs; stdlib runtime, existing storage and OS support retained.
+
 ## 0.7.0 — 2026-10-22
 
 - Default frozen report-writing skill with versioned receipts; no extra rewrite call.

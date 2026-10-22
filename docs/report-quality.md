@@ -54,3 +54,45 @@ Windows 可以直接使用虚拟环境 Python：
 新任务只向模型展示具备前提的工具：没有公开查询就不展示搜索，没有相应已登记来源就不展示来源刷新，没有项目编号就不展示项目读取。工具执行时仍检查范围与权限。
 
 Report-writing instructions are frozen per run and applied during initial drafting. Live evaluation is opt-in and uses historical public summaries with fictional business conditions. Saved reports and additive decision fields remain compatible; no external delivery, mandatory rewrite loop or automatic writing-quality score is introduced.
+
+## 用几组真实事件检查直接生成的原稿
+
+新增 [历史案例集](../examples/report-cases.json)，每个项目三组。事件和公告真实，企业、预算和订单条件为虚构测试情景。采用固定、署名的公开来源摘要；任务不要求额外搜索，避免相互冲突的取材指令。它检验资料到业务判断的路径，不代表完整事故调查、现行法规意见或真实客户成果。
+
+| 案例编号 | 要处理的决策 |
+|---|---|
+| `cbam-importer` | CBAM简化与两种进口责任安排 |
+| `cptpp-origin` | 英国加入CPTPP与马来西亚经销验证 |
+| `eudr-furniture` | EUDR历史延期与木家具资料准备 |
+
+先查看案例，不调用模型：
+
+```bash
+python scripts/evaluate_cases.py --list
+```
+
+确认环境中已经配置所需模型后，显式选择一组。每组最多13次模型调用、12个动作，每次执行最多600秒；不会自动运行整套案例或调用额外润色模型。
+
+```bash
+python scripts/evaluate_cases.py --case cbam-importer --output ../private-case-run
+```
+
+Windows 使用相同参数：
+
+```powershell
+& ".\.venv\Scripts\python.exe" scripts/evaluate_cases.py --case cbam-importer --output ..\private-case-run
+```
+
+工具保存 `input.json`、`actions.jsonl`、`report.json`、`report.md`、`receipt.json` 和人工阅读提纲，以及私有工作空间。`actions.jsonl` 是模型实际返回的JSON动作，不含提供商隐藏推理或认证头；报告附带运行框架的来源、时间等元数据，正文不作人工改写。输出目录必须在仓库外且为空，避免覆盖旧原稿。失败保留进度，按 [运行与恢复](runtime.md) 使用回执中的任务编号恢复；调用上限跨恢复继续累计。重跑应新建目录。
+
+检查标准以能否使用为准：表达通顺、回答题设、解释业务影响、给出下一步和改变选择的条件。日期对象、来源归属、预算前后一致和责任边界属于实质检查，不用“AI味分数”、字数或禁词数量替代。允许提出有依据的条件判断；不要求每份报告填满所有可选章节。发现错误时修改生成规则或资料表达后另起任务，旧原稿保留。示例摘要经过取舍，同一机构的两份公告也不等于独立交叉印证。
+
+首次写作进一步区分装运/过境/到港、批准/生效/适用、目标市场/中转地；方案满足一个条件不自动成为最优方案。预算建议按验证节点释放，给出金额时核对比例和余款。历史任务不会向模型展示尚未存在的当前基线，也不展示空的登记来源列表；执行层原有历史范围与来源检查继续生效。
+
+The case runner is opt-in, preserves unchanged agent output, and keeps all run artifacts outside the repository. The three fixtures are historical public summaries plus fictional business conditions. Review is practical and case-based; it is not an automatic quality gate or proof of general accuracy. Existing report fields, optional extensions and cross-platform commands remain supported.
+
+## 本轮实际运行记录（2026-10-22）
+
+本轮六个独立案例均由 MiniMax-M3.1-Flash 实际生成并保存，正文与保存的模型JSON动作逐字段对照，未手动润色后代替原稿。修订关注过境/抵港混淆、获客预算前后矛盾、中转地与销售目标混用，以及无关联事件不自动限制人员。巴拿马摘要和题设另做了歧义澄清，不能把该例改进全部归因于写作规则。
+
+仍可见长句、重复的谨慎表述、个别审批措辞和方案条件不够一致，故未将这些原稿作为标准答案发布，也不承诺每句正确。部分运行发生协议、步骤预算或TLS连接失败，失败回执保留，恢复结果单独记录；不以完成状态替代语义质量判断。运行原稿、内部评估和凭据留在仓库外。

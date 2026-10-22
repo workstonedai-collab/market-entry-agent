@@ -1,3 +1,9 @@
+# v0.7.1 · 直接生成报告的真实案例验证
+
+新增每个项目三组历史事件案例和显式运行工具，保留未经人工改写的模型动作、报告及回执。改进首次写作对日期节点、来源与题设、方案取舍和预算的处理；历史任务避免无效基线和空来源查询。实际运行结果及局限见报告质量文档。
+
+Existing data, report fields, public dashboards and optional extensions remain supported. Cross-platform runtime stays standard-library only. Evaluation artifacts, credentials, private prompts and internal research materials remain outside the repository.
+
 # v0.7.0 · Report writing, decision paths and source freshness
 
 - Default frozen report-writing skill with versioned receipts; no extra rewrite call.

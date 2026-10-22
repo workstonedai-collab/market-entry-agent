@@ -42,6 +42,7 @@
     "examples/public-data-mission.json",
     "examples/public-project-case.json",
     "examples/public-sources.json",
+    "examples/report-cases.json",
     "examples/sources.json",
     "pyproject.toml",
     "schemas/evidence-v1.schema.json",
@@ -49,6 +50,7 @@
     "scripts/check_core.py",
     "scripts/check_hermes.py",
     "scripts/check_public_release.py",
+    "scripts/evaluate_cases.py",
     "scripts/evaluate_reports.py",
     "scripts/verify_kernel.py",
     "scripts/verify_portability.py",
@@ -84,6 +86,7 @@
     "tests/test_network.py",
     "tests/test_portability.py",
     "tests/test_projects.py",
+    "tests/test_report_cases.py",
     "tests/test_ui.py"
   ]
 }
