@@ -8,6 +8,7 @@ def field(kind, **kwargs):
 
 TEXT = field("string", minLength=1, maxLength=128)
 SCHEMAS = {
+    "project_state": ({"kind":TEXT,"id":TEXT}, []),
     "country_baseline": ({"countries": field("array", maxItems=5, items=TEXT)}, []),
     "research_plan": ({}, []),
     "web_search": ({"query_index": field("integer", minimum=0, maximum=5)}, ["query_index"]),
@@ -53,6 +54,7 @@ def check(schema, value, label="arguments"):
 
 
 OUTPUTS = {
+    "project_state": {"project":field("object"),"guide":field("object")},
     "country_baseline": {"evidence_ids": field("array", items=TEXT), "comparison": field("object")},
     "research_plan": {"schema": TEXT, "lenses": field("array")},
     "web_search": {"query": field("string"), "results": field("array")},
@@ -82,13 +84,15 @@ class ToolRegistry:
                               "workspace_writes": item["name"] in ("country_baseline", "web_search", "fetch_page", "fetch_feed", "load_skill", "finish"),
                               "network": item["name"] in ("web_search", "fetch_page", "fetch_feed"),
                               "timeout_seconds": {"web_search": 40, "fetch_page": 25, "fetch_feed": 12}.get(item["name"]),
-                              "reuse": item["name"] in ("read_evidence", "research_plan", "load_skill", "country_baseline", "search_evidence", "list_sources", "recall")}
+                              "reuse": item["name"] in ("project_state", "read_evidence", "research_plan", "load_skill", "country_baseline", "search_evidence", "list_sources", "recall")}
             self.tools[item["name"]] = item
 
     def validate(self, name, arguments):
         if name not in self.tools:
             raise ValueError("Unknown tool; select a documented action")
         check(self.tools[name]["input_schema"], arguments)
+        if name == "project_state" and arguments.get("id") and not arguments.get("kind"):
+            raise ValueError("Record lookup requires kind with id")
         if name == "fetch_page" and bool(arguments.get("evidence_id")) == bool(arguments.get("source_id")):
             raise ValueError("Choose exactly one of evidence_id or source_id")
         return self.tools[name]

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0 — 2026-10-22
+
+- Add private versioned business records and product-specific browser/CLI/API paths.
+- Risk: event identity/revisions, exposure matching, local change alerts and operator feedback.
+- Entry: enterprise profile, comparable options, assumptions, stage dependencies/progress and decision records.
+- Add frozen project-state tools and typed finish updates, atomic recovery and conflict preservation.
+- Add attributed historical public-source replays and cross-platform regression coverage. Preserve existing reports, evidence, dashboard and private/public boundaries.
+
 ## 0.5.0
 
 - Explicit private project facts, corrections/expiry/removal and related-report recall; additive SQLite migration preserves old records.

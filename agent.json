@@ -1,7 +1,7 @@
 {
   "schema": "field-agent/v1",
   "id": "market-entry-agent",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "entrypoint": "market-entry-agent",
   "python_module": "market_entry_agent",
   "engines": {
@@ -20,7 +20,8 @@
     "fetch_feed",
     "finish",
     "load_skill",
-    "read_result"
+    "read_result",
+    "project_state"
   ],
   "evidence_schema": "schemas/evidence-v1.schema.json",
   "interfaces": [
@@ -42,6 +43,8 @@
       "resume"
     ],
     "usage_receipts": true,
-    "mcp": false
+    "mcp": false,
+    "private_business_projects": true,
+    "product_workflow": "profile_options_assumptions_roadmap"
   }
 }

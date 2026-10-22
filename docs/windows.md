@@ -31,10 +31,10 @@ Use the venv's Python directly. Activation and execution-policy changes are unne
 如果使用发行页的 wheel，可在建立环境后将安装命令替换为以下形式：
 
 ```powershell
-& ".\.venv\Scripts\python.exe" -m pip install ".\market_entry_agent-0.5.0-py3-none-any.whl"
+& ".\.venv\Scripts\python.exe" -m pip install ".\market_entry_agent-0.6.0-py3-none-any.whl"
 ```
 
-Download the matching wheel from this repository's [v0.5.0 release](https://github.com/workstonedai-collab/market-entry-agent/releases/tag/v0.5.0); it uses the same runtime as the source installation. Source-based checks below require the source checkout.
+Download the matching wheel from this repository's [v0.6.0 release](https://github.com/workstonedai-collab/market-entry-agent/releases/tag/v0.6.0); it uses the same runtime as the source installation. Source-based checks below require the source checkout.
 
 ## 3. 无需密钥，先跑演示 / Run the no-key demonstration
 
@@ -126,3 +126,5 @@ The last check exercises CLI and loopback HTTP, Unicode paths, report persistenc
 代码与公共数据的开放范围见 [PUBLIC_RELEASE_POLICY.md](../PUBLIC_RELEASE_POLICY.md) 和 [LICENSE-DATA.md](../LICENSE-DATA.md)。Windows 使用同样的独立工作空间、来源与隐私边界。
 
 Project memory, bounded context, document skills, run controls and usage receipts: [shared kernel guide](kernel.md).
+
+Private product workflow, versioned records and public-source replay: [guide](product-workflow.md).

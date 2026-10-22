@@ -1,0 +1,176 @@
+{
+  "schema": "public-project-case/v1",
+  "project_id": "historical-cbam-entry",
+  "case_type": "historical_public_source_replay",
+  "captured_at": "2026-10-22",
+  "sources": [
+    {
+      "title": "Council and Parliament CBAM provisional agreement, 18 June 2025",
+      "url": "https://www.consilium.europa.eu/en/press/press-releases/2025/06/18/carbon-border-adjustment-mechanism-cbam-council-and-parliament-strike-a-deal-on-its-simplification/",
+      "published_at": "2025-06-18T00:00:00Z",
+      "countries": [
+        "Germany",
+        "Netherlands"
+      ],
+      "topics": [
+        "cbam",
+        "trade"
+      ],
+      "body": "资料摘要：欧盟理事会2025年6月18日公告称就 CBAM 简化达成临时协议，包含按每进口商每年累计质量计算的50吨门槛；公告明确仍需理事会和议会认可后正式通过。这里记录的是临时协议阶段，不据此认定个别产品或进口商已获豁免。",
+      "status": "source_claim",
+      "retrieval_kind": "attributed_public_summary",
+      "observed_at": "2026-10-22T00:00:00Z",
+      "date_basis": "publication_date_only"
+    },
+    {
+      "title": "Council adopts CBAM simplification, 29 September 2025",
+      "url": "https://www.consilium.europa.eu/en/press/press-releases/2025/09/29/cbam-council-signs-off-simplification-to-the-eu-carbon-leakage-instrument/",
+      "published_at": "2025-09-29T00:00:00Z",
+      "countries": [
+        "Germany",
+        "Netherlands"
+      ],
+      "topics": [
+        "cbam",
+        "trade"
+      ],
+      "body": "资料摘要：欧盟理事会2025年9月29日通过 CBAM 简化法规，公告描述每进口商每年50吨的新质量门槛，并说明下一步在官方公报刊登后第三天生效。本例验证从临时协议到通过的阶段变化；不能把每个出口商的货量直接当作每进口商年度累计量，也不自动判断产品适用性。",
+      "status": "source_claim",
+      "retrieval_kind": "attributed_public_summary",
+      "observed_at": "2026-10-22T00:00:00Z",
+      "date_basis": "publication_date_only"
+    }
+  ],
+  "operator_commands": [
+    {
+      "kind": "profile",
+      "id": "main",
+      "data": {
+        "product": "虚构演示：计划出口工业用钢制零件，具体商品编码待核对",
+        "buyer": "虚构演示：欧盟工业买方",
+        "stage": "targeted",
+        "countries": [
+          "Germany",
+          "Netherlands"
+        ],
+        "capabilities": "虚构：可提供产品与生产资料，尚未确认进口商安排。",
+        "constraints": "虚构：优先小规模需求验证；不具备已核实的本地进口合规能力。",
+        "budget": "虚构：预算尚待确认，不作利润或税额估算。"
+      }
+    }
+  ],
+  "phases": [
+    {
+      "source": 0,
+      "commands": [
+        {
+          "kind": "option",
+          "id": "distributor",
+          "data": {
+            "name": "虚构进入选项：与独立进口商/经销商探索合作",
+            "countries": [
+              "Germany"
+            ],
+            "mode": "与独立进口商/经销商探索合作",
+            "status": "candidate",
+            "rationale": "拟议方案：先明确进口主体、产品适用范围和客户需求，再决定扩大投入。公开宏观信息不能证明此方案已有订单或合作方。",
+            "dimensions": {
+              "demand": "尚无实际采购证据，需买方访谈。",
+              "access": "核对具体商品范围、进口商及生效日期。",
+              "channel": "潜在伙伴只作为待查方向，不宣称已合作。",
+              "delivery": "交付与文件责任需要写入拟议安排。",
+              "economics": "缺少报价、物流和合规成本，不计算盈利。",
+              "risks": "临时协议仍有后续程序；确认后更新方案假设。"
+            },
+            "evidence_ids": [
+              "$source0"
+            ]
+          }
+        },
+        {
+          "kind": "option",
+          "id": "direct",
+          "data": {
+            "name": "虚构进入选项：直接对接买方并核查进口安排",
+            "countries": [
+              "Netherlands"
+            ],
+            "mode": "直接对接买方并核查进口安排",
+            "status": "candidate",
+            "rationale": "拟议方案：先明确进口主体、产品适用范围和客户需求，再决定扩大投入。公开宏观信息不能证明此方案已有订单或合作方。",
+            "dimensions": {
+              "demand": "尚无实际采购证据，需买方访谈。",
+              "access": "核对具体商品范围、进口商及生效日期。",
+              "channel": "潜在伙伴只作为待查方向，不宣称已合作。",
+              "delivery": "交付与文件责任需要写入拟议安排。",
+              "economics": "缺少报价、物流和合规成本，不计算盈利。",
+              "risks": "临时协议仍有后续程序；确认后更新方案假设。"
+            },
+            "evidence_ids": [
+              "$source0"
+            ]
+          }
+        },
+        {
+          "kind": "stage",
+          "id": "verify-importer",
+          "data": {
+            "goal": "虚构计划：确认进口主体及产品适用范围",
+            "option_id": "distributor",
+            "actions": [
+              "核对商品编码及适用文件",
+              "与潜在进口方确认年度累计进口口径"
+            ],
+            "deliverables": [
+              "适用范围与责任分工记录"
+            ],
+            "completion_signal": "操作者保存实际核对结果和依据",
+            "depends_on": [],
+            "status": "planned",
+            "note": "拟议工作，尚未执行。",
+            "evidence_ids": [
+              "$source0"
+            ]
+          }
+        },
+        {
+          "kind": "assumption",
+          "id": "cbam-status",
+          "data": {
+            "statement": "本方案在2025年6月仍以临时协议及后续正式程序待完成为前提；产品与进口主体适用性另行核对。",
+            "status": "unchecked",
+            "countries": [
+              "Germany",
+              "Netherlands"
+            ],
+            "topics": [
+              "cbam"
+            ],
+            "option_ids": [
+              "distributor",
+              "direct"
+            ],
+            "stage_ids": [
+              "verify-importer"
+            ],
+            "evidence_ids": [
+              "$source0"
+            ],
+            "note": "跟踪后续正式通过、生效及适用范围资料；不自动认定豁免。"
+          }
+        }
+      ]
+    },
+    {
+      "source": 1,
+      "commands": []
+    }
+  ],
+  "limits": [
+    "企业、产品条件、渠道安排和路线图均为虚构演示。",
+    "只回放公告阶段变化，不提供当前产品适用性或税费结论。",
+    "当前取回历史公告，不证明当时已获取；生效需另查正式公报。",
+    "公开数据仅提供线索与背景，不等于订单、伙伴或企业适配评分。",
+    "无付费模型；替身动作只验证运行和保存协议。"
+  ]
+}

@@ -19,3 +19,5 @@ Product-specific default instructions are intentionally generic. Optional operat
 `shared-core.json` records the common file hashes. Run `scripts/check_core.py --peer /path/to/peer` when changing them. Country observations retain source units and periods and are used in the published research-reference calculation with explicit weights and coverage boundaries. Report validation checks structure and read evidence IDs, not independent factual review.
 
 Project memory, bounded context, document skills, run controls and usage receipts: [shared kernel guide](kernel.md).
+
+Private product workflow, versioned records and public-source replay: [guide](product-workflow.md).

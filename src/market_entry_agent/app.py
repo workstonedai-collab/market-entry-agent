@@ -17,6 +17,7 @@ from .product import SPEC
 from .memory import ProjectMemory
 from .skills import snapshot, catalog as skill_catalog
 from .core import REGISTRY
+from .workflow import Workflow
 
 
 class AgentHTTPServer(ThreadingHTTPServer):
@@ -49,6 +50,7 @@ def serve(store, host, port):
     allowed = {"127.0.0.1", "localhost", "::1"}
     allowed.update(filter(None, os.environ.get("AGENT_UI_ALLOWED_HOSTS", "").split(",")))
     asset = Path(__file__).with_name("web.html").read_bytes()
+    project_asset = Path(__file__).with_name("workflow-ui.js").read_bytes()
     threads = threading.BoundedSemaphore(2)
     available_skills = skill_catalog(snapshot())
 
@@ -64,7 +66,7 @@ def serve(store, host, port):
             self.send_header("Cache-Control", "no-store")
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("X-Frame-Options", "DENY")
-            self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'")
+            self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'")
             self.end_headers()
             self.wfile.write(data)
 
@@ -94,8 +96,22 @@ def serve(store, host, port):
                 return
             if path == "/":
                 return self.reply(200, asset, "text/html; charset=utf-8")
+            if path == "/workflow-ui.js":
+                return self.reply(200, project_asset, "text/javascript; charset=utf-8")
             if path == "/health":
-                return self.reply(200, {"status": "ok", "product": SPEC["id"], "version": "0.5.0"})
+                return self.reply(200, {"status": "ok", "product": SPEC["id"], "version": "0.6.0"})
+            if path == "/api/project":
+                try:
+                    project = parse_qs(urlsplit(self.path).query).get("project_id", [""])[0]
+                    return self.reply(200, Workflow(store, SPEC["id"]).state(project))
+                except ValueError as exc:
+                    return self.reply(400, {"error": str(exc)})
+            if path == "/api/project/history":
+                try:
+                    query = parse_qs(urlsplit(self.path).query)
+                    return self.reply(200, {"history":Workflow(store,SPEC["id"]).history(query.get("project_id",[""])[0],query.get("kind",[""])[0],query.get("id",[""])[0])})
+                except ValueError as exc:
+                    return self.reply(400, {"error":str(exc)})
             if path == "/api/skills":
                 return self.reply(200, {"skills": available_skills})
             if path == "/api/memory":
@@ -143,6 +159,10 @@ def serve(store, host, port):
                 body = json.loads(self.rfile.read(length))
                 if not isinstance(body, dict):
                     raise ValueError("Request body must be an object")
+                if self.path == "/api/project":
+                    return self.reply(200, Workflow(store,SPEC["id"]).save_command(body["project_id"],body["command"]))
+                if self.path == "/api/project/check":
+                    return self.reply(200, Workflow(store,SPEC["id"]).check(body["project_id"]))
                 if self.path == "/api/memory":
                     memory = ProjectMemory(store, SPEC["id"])
                     if body.get("operation") == "forget":
@@ -219,6 +239,14 @@ def main(argv=None):
     demo.add_argument("--project", help="Explicit private project ID")
     for command in ("pause-run", "cancel", "usage"):
         sub.add_parser(command).add_argument("id")
+    project = sub.add_parser("project", help="Open a private business project")
+    project.add_argument("project")
+    setting = sub.add_parser("project-save", help="Apply a typed JSON business command with optimistic revision checks")
+    setting.add_argument("project"); setting.add_argument("file")
+    checking = sub.add_parser("project-check", help="Evaluate saved event/exposure or assumption changes; no network calls")
+    checking.add_argument("project")
+    history = sub.add_parser("project-history", help="Read up to 100 record revisions")
+    history.add_argument("project"); history.add_argument("kind"); history.add_argument("id")
     sub.add_parser("skills", help="List configured document skill metadata")
     sub.add_parser("tools", help="Show public tool schemas and execution policies")
     memory = sub.add_parser("memory", help="Read explicit private project facts")
@@ -279,7 +307,15 @@ def main(argv=None):
     package = Path(__file__).parent
     result = None
     try:
-        if args.command == "skills":
+        if args.command == "project":
+            result = Workflow(store,SPEC["id"]).state(args.project)
+        elif args.command == "project-save":
+            result = Workflow(store,SPEC["id"]).save_command(args.project,load_json(args.file))
+        elif args.command == "project-check":
+            result = Workflow(store,SPEC["id"]).check(args.project)
+        elif args.command == "project-history":
+            result = {"history":Workflow(store,SPEC["id"]).history(args.project,args.kind,args.id)}
+        elif args.command == "skills":
             result = {"skills": skill_catalog(snapshot())}
         elif args.command == "tools":
             result = {"tools": REGISTRY.describe()}

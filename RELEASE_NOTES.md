@@ -1,3 +1,17 @@
+# v0.6.0 · Product-specific private project workflows
+
+在“项目持续跟踪”中整理企业画像，按需求、准入、渠道、交付、经济性与风险比较进入选项。保存方案依赖的经营假设和行动阶段；出现新的匹配资料时，定位需要重新研究的选项和阶段。
+
+Reports save directly. Typed project updates use read source IDs and optimistic revisions; a concurrent operator edit retains the report without overwriting project state. Private business context is frozen per attempt history, while historical as_of reports exclude current business state and cannot mutate the live project. Existing evidence IDs and completed reports are preserved.
+
+The private project desk keeps enterprise profiles, comparable entry options, business premises and roadmap progress. Newly saved matching public sources identify the assumptions, options and stages that need renewed research.
+
+Use the [workflow guide](docs/product-workflow.md) for browser/CLI/PowerShell steps, constraints and the [attributed public replay](examples/public-project-case.json). The replay uses historical official-source summaries, fictional business conditions and a scripted substitute model; it is not a live-provider quality or current-advice evaluation. No external delivery or MCP is enabled.
+
+Code MIT; data retains its own attribution. Public formulas and generic research steps remain open. Specialized prompts, private knowledge and customer materials are not bundled; [contact the author](https://github.com/workstonedai-collab) for further discussion.
+
+---
+
 # v0.5.0 · Project continuity and a bounded research kernel
 
 本版完善两个产品共用的研究内核：同一项目可接续旧研究并管理私有资料，长资料分段读取，重复结果复用，文档技能按需加载。新增暂停/取消与显式恢复、模型请求用量记录及持续生效的调用上限。模型返回后重新计算时间，保留已经返回的有效报告并标出到期状态。

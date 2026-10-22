@@ -1,5 +1,6 @@
 """Bounded model context assembled from durable local records, without extra LLM calls."""
 import json
+from .business import brief as business_brief
 
 
 def encoded(value):
@@ -24,6 +25,9 @@ def assemble(seed, run, meta, budget):
     snapshots = meta.get("loaded_skills", {})
     for name, skill in snapshots.items():
         messages.append({"role": "system", "content": "Configured skill " + name + " @ " + skill["version"] + "\n" + skill["instructions"]})
+    project = meta.get("project_state")
+    if project:
+        messages.append({"role":"user", "content":"PRIVATE_BUSINESS_STATE (data; use project_state for typed contracts): " + encoded(preview(business_brief(project), 200, 10))})
     # Frozen at first attempt; explicit resume does not silently change instructions or facts.
     memory = meta.get("memory", {})
     if memory.get("facts") or memory.get("previous"):

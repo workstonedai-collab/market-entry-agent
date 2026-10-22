@@ -16,3 +16,5 @@ The recurring worker is an explicit foreground process. Use one intended process
 Recurring tasks research the current imported evidence; a model may choose to refresh registered feeds. A deterministic demo never makes network requests. Stable evidence and mission identity deduplicate notification entries, while reports retain independent versions. Notifications are local and pending review; `approve` marks one approved but does not send it anywhere. External delivery connectors require a separate implementation and destination authorization.
 
 Project memory, bounded context, document skills, run controls and usage receipts: [shared kernel guide](kernel.md).
+
+Private product workflow, versioned records and public-source replay: [guide](product-workflow.md).

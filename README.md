@@ -33,6 +33,12 @@ New to deployment? Give this repository to your own coding agent. Ask it to run 
 
 **Open scope and contact.** The country-reference formula, component weights, contributions and general research steps are public. Some additional research methods, specialized prompts and associated knowledge resources are not open source at this time. For further discussion, [contact the author](https://github.com/workstonedai-collab) or open a [project issue](https://github.com/workstonedai-collab/market-entry-agent/issues/new) without posting private material.
 
+## Continue the business project
+
+The private project desk keeps enterprise profiles, comparable entry options, business premises and roadmap progress. Newly saved matching public sources identify the assumptions, options and stages that need renewed research.
+
+[Workflow guide, boundaries and public replay](docs/product-workflow.md) · [Public case](examples/public-project-case.json)
+
 ## Questions to bring to the agent
 
 | Example question | Useful context | Research output to look for |
@@ -245,17 +251,17 @@ The public package includes generic role instructions, the published research ou
 
 ## What the agent can do
 
-| Capability | v0.4 behavior |
+| Capability | Current behavior |
 |---|---|
-| Model-directed research | One JSON action per turn; the model selects among ten bounded tools |
+| Model-directed research | One JSON action per turn; the model selects documented, bounded tools |
 | Evidence | Content-addressed revisions, original links, claim status and two timestamps |
-| Memory | Recall previous completed reports for the exact same mission in this private workspace |
+| Memory | Explicit project facts, frozen business state and related private reports; legacy same-mission recall without a project ID |
 | Recovery | Save steps and model context; retry a failed run without repeating saved steps |
 | Monitoring | Persist recurring missions; a separate worker executes them |
 | Delivery | Save reports immediately; export Markdown/JSON; local pending-review notification inbox |
 | Interfaces | CLI, browser workspace, loopback HTTP API and container recipe |
 
-Available tools: `country_baseline`, `research_plan`, `search_evidence`, `read_evidence`, `recall`, `list_sources`, `fetch_feed`, `web_search`, `fetch_page`, `finish`. There is no model-generated shell execution. Finding citations must reference records the agent actually read. This validates provenance, not the truth of every model statement.
+Available tools: `country_baseline`, `research_plan`, `search_evidence`, `read_evidence`, `recall`, `list_sources`, `fetch_feed`, `web_search`, `fetch_page`, `finish`, `load_skill`, `read_result`, `project_state`. There is no model-generated shell execution. Finding citations must reference records the agent actually read. This validates provenance, not the truth of every model statement.
 
 ## Keep a mission running
 

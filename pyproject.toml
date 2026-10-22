@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "market-entry-agent"
-version = "0.5.0"
+version = "0.6.0"
 description = "A self-hosted market-entry research agent combining company context, country evidence, operating changes and commercial opportunities."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -24,4 +24,4 @@ Issues = "https://github.com/workstonedai-collab/market-entry-agent/issues"
 where = ["src"]
 
 [tool.setuptools.package-data]
-market_entry_agent = ["web.html", "data/*.json"]
+market_entry_agent = ["web.html", "workflow-ui.js", "data/*.json"]

@@ -30,6 +30,8 @@ jobs:
         run: python scripts/verify_portability.py
       - name: Installed shared kernel synthetic case
         run: python scripts/verify_kernel.py
+      - name: Historical public-source product path
+        run: python scripts/verify_public_case.py
       - name: Build universal wheel
         run: python -m pip wheel --no-deps . -w dist
   windows-install:
@@ -53,6 +55,8 @@ jobs:
           & "$python" scripts/verify_portability.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           & "$python" scripts/verify_kernel.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & "$python" scripts/verify_public_case.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
   container:
     runs-on: ubuntu-latest

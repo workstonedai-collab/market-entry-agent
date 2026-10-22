@@ -6,6 +6,8 @@ from pathlib import Path
 import re
 
 BUILTINS = [
+    {"name":"project-continuity", "description":"Continue an event-monitoring or enterprise-entry project with typed state.",
+     "instructions":"Read project_state when project_id is present. Treat profile/exposure as private operator data. Link source-backed proposals to read evidence and stable business IDs, preserving revisions. Risk: group normalized subject/place/day, explain impact and next checks; a new URL is not independent corroboration. Entry: compare demand/access/channel/delivery/economics/risks under current constraints, preserve unknown values, propose stages and assumptions without asserting completion. Save the research report directly; project-update conflicts must not discard it."},
     {"name": "country-comparison", "description": "Compare the source periods and coverage of public country observations.",
      "instructions": "Use country_baseline for mission countries. Read the returned evidence before citing. Compare source periods, component units and coverage. Keep annual structural background separate from current events. Use research_plan for the product's public outline; preserve missing values and different comparison bases."},
     {"name": "evidence-brief", "description": "Organize a sourced research brief and explain gaps and proposed follow-up.",

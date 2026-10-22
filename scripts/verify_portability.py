@@ -14,6 +14,7 @@ import sys
 import tempfile
 import time
 from urllib.request import Request, ProxyHandler, build_opener
+from urllib.error import HTTPError
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -72,6 +73,14 @@ def verify():
         cli("memory-forget", "cli-project", "产品")
         assert cli("memory", "cli-project")["facts"] == []
         checks.append("project_memory_skills_and_usage_cli")
+        business = json.loads((ROOT / "examples/public-project-case.json").read_text(encoding="utf-8"))["operator_commands"][0]
+        command_file = Path(temporary) / "项目记录.json"
+        command_file.write_text(json.dumps(business,ensure_ascii=False),encoding="utf-8")
+        created = cli("project-save","cli-business",str(command_file))
+        assert cli("project","cli-business")[business["kind"]][0]["id"] == created["id"]
+        assert len(cli("project-history","cli-business",business["kind"],created["id"])["history"]) == 1
+        cli("project-check","cli-business")
+        checks.append("typed_business_cli_save_reopen_history_check")
 
         schedule = cli("schedule", str(ROOT / "examples/mission.json"), "--engine", "demo", "--interval", "60")
         due = cli("worker", "--once")
@@ -107,6 +116,7 @@ def verify():
             assert health["version"] == metadata["version"]
             with http.open(base + "/", timeout=5) as response:
                 assert b"RESEARCH BRIEF" in response.read()
+                assert "script-src 'self' 'unsafe-inline'" in response.headers["Content-Security-Policy"]
             headers = {"Authorization": "Bearer " + token, "Content-Type": "application/json"}
             with http.open(Request(base + "/api/country?code=VNM", headers=headers), timeout=5) as response:
                 assert json.load(response)["baseline"]["code"] == "VNM"
@@ -131,6 +141,21 @@ def verify():
                 with http.open(Request(base + path, data=data, headers=headers), timeout=5) as response:
                     return json.load(response)
 
+            created = post("/api/project", {"project_id":"http-business","command":business})
+            with http.open(Request(base+"/api/project?project_id=http-business",headers=headers),timeout=5) as response:
+                assert json.load(response)[business["kind"]][0]["id"] == created["id"]
+            with http.open(Request(base+"/api/project/history?project_id=http-business&kind="+business["kind"]+"&id="+created["id"],headers=headers),timeout=5) as response:
+                assert len(json.load(response)["history"]) == 1
+            post("/api/project/check", {"project_id":"http-business"})
+            with http.open(base+"/workflow-ui.js",timeout=5) as response:
+                assert b"renderProject" in response.read()
+            for unsafe in [Request(base+"/api/project?project_id=http-business"),Request(base+"/api/project?project_id=http-business",headers=dict(headers,Origin="https://example.org"))]:
+                try:
+                    http.open(unsafe,timeout=5)
+                    raise AssertionError("Private business endpoint accepted unauthorised request")
+                except HTTPError as exc:
+                    assert exc.code in (401,403)
+            checks.append("typed_business_http_auth_origin_save_reopen_and_local_check")
             post("/api/memory", {"project_id": "http-project", "key": "产品", "value": "虚构 HTTP 资料"})
             with http.open(Request(base + "/api/memory?project_id=http-project", headers=headers), timeout=5) as response:
                 assert json.load(response)["facts"][0]["value"] == "虚构 HTTP 资料"
