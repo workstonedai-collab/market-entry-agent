@@ -1,4 +1,4 @@
-"""Field Agent Core 0.6.0: bounded research, evidence and durable runs.
+"""Field Agent Core: bounded research, evidence and durable runs.
 
 Vendored identically by both projects; no production data or private integrations.
 """
@@ -23,7 +23,8 @@ from urllib.parse import urlsplit, urljoin
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
 
-CORE_VERSION = "0.6.0"
+from . import __version__
+CORE_VERSION = __version__
 from .runtime import RuntimeStore
 from .memory import ProjectMemory, project_id
 
@@ -726,7 +727,10 @@ class Agent:
             "Synthetic evidence must be labeled. Priority is a qualitative judgment, not an objective probability. "
             "For a fully synthetic dataset deliver a fictional scenario analysis. Avoid repeated searches returning the same evidence. "
             "Do not claim monitoring beyond registered feeds or guaranteed coverage. "
-            "Answer in the language of the mission question. Never send messages, modify external systems or execute code. "
+            "Answer in the language of the mission question. Write the report for the person making the decision: lead with the answer and its basis, then explain implications and next steps. "
+            "Use concrete, natural language; avoid slogans, process narration and repetitive caveats. Preserve source attribution, dates, uncertainty and material limitations. "
+            "Do not invent detail for vividness or claim proposed work is completed. Apply this while drafting the report, without adding a separate rewrite or review loop. "
+            "Never send messages, modify external systems or execute code. "
             "Finish within the remaining step budget. Max steps: " + str(mission.get("max_steps", 12)))
 
     def execute(self, name, args, run, remaining):
@@ -912,7 +916,7 @@ def markdown(report):
         lines.extend(["> 历史案例回放 / HISTORICAL REPLAY · as of " + report["as_of"] + " · 不是当前形势判断。", ""])
     if report.get("synthetic"):
         lines.extend(["> SYNTHETIC DEMONSTRATION / 虚构示例，不代表真实国区事件。", ""])
-    lines.extend(["## Source claims / 来源陈述", ""])
+    lines.extend(["## Source claims / 来源怎么说", ""])
     for finding in report["findings"]:
         lines.append("- " + finding["claim"] + " [" + ", ".join(finding["evidence_ids"]) + "]")
     lines.extend(["", "## Assessment / 分析", "", report["assessment"]])

@@ -78,6 +78,7 @@
     "tests/test_kernel.py",
     "tests/test_network.py",
     "tests/test_portability.py",
-    "tests/test_projects.py"
+    "tests/test_projects.py",
+    "tests/test_ui.py"
   ]
 }

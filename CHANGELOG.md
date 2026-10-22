@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.1 — 2026-10-22
+
+- Reworked Chinese project guidance, form labels and report-writing guidance while preserving sources, uncertainty and the open-source scope.
+- Differentiated the two products’ starter questions and report focus.
+- Project history now shows readable fields; original JSON remains available. Record-ID guidance follows the selected record type.
+- Existing storage, commands and Windows/macOS/Linux support are unchanged.
+
 ## 0.6.0 — 2026-10-22
 
 - Add private versioned business records and product-specific browser/CLI/API paths.

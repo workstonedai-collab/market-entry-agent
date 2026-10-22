@@ -1,7 +1,7 @@
 {
   "schema": "field-agent/v1",
   "id": "market-entry-agent",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "entrypoint": "market-entry-agent",
   "python_module": "market_entry_agent",
   "engines": {

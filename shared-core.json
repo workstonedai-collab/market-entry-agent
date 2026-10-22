@@ -1,21 +1,21 @@
 {
-  "version": "0.6.0",
+  "version": "0.6.1",
   "module": "market_entry_agent",
   "files": {
-    "core.py": "6213296246e2c0b9bfe392a8de57e4f343f5416249d834067a7802e04f985e93",
-    "app.py": "26ac38ef080ff78a25adde9b2a0d37d957967a6ac0cddd21430f042783e3eb1c",
-    "web.html": "2abda357d159d378ad11ff368732c3112be44a1f90ac00a1acfde82f29464d12",
+    "core.py": "af83bf7cb2cb496d6916f741efc9b7e10d3dd5e943899eef28e542b5518da316",
+    "app.py": "3059b4c43b30233b669b67a03142a7143109d00d7467f9a36c15d3315ee0b040",
+    "web.html": "7599f62c6ff7a4d24acd9da47611d52d1df8d9da170119881175692c28641638",
     "net.py": "e531453c3db5cc178fb6af774b3866cc2a223dbe3f7dd00ff6cdd76f8fd50fbd",
     "transport.py": "20ac65c23e3811c5dd42bbbc854160f6273e02f143482aa924109e727774e807",
     "countries.py": "ec89352f5001aeb416845499c7d8c0ddbd31daa37d859b07155339ad27329238",
-    "research.py": "0a1a72cd7ead27bf5efb493cd3e76ded0908ec29d1014cc39180a332911c56ad",
+    "research.py": "c7d86834a502521f97fb15487c2def4d1f7f5032047c494db01ec3ba08bc7d03",
     "data/country-baselines.json": "9a7f1e21946d6a8d1c92cf11ca55ea775e72765b2576c1f847f2adde13f7702e",
     "memory.py": "d866e622188ec547727691be4c1c831cf027dd42500d6d1ae8b575d32bb733cf",
     "context.py": "d4eb0d5ee857028d28aa6f06273a5a0425896e1fd37b089f6326aee2fd8a11c3",
     "contracts.py": "fe85a78dcb64ad833d62248c84157867acb015d534f9a6eb93bf202685b37920",
-    "skills.py": "442f85523fa50afdad2b0ea6c787d843882690e47af8d2804afb3affaf17d6c0",
+    "skills.py": "0961a619d90d6f64ed0baa9a3f3b9ba2515f7572d73d57a589c38e40f778f6cb",
     "runtime.py": "37807e34715faacedb2da689f4aaea4f15256161b40118856c29297730705a49",
     "business.py": "41b96518596c52dfd924f5cf045bc1048c5c0b25b81d992248995c78db258e38",
-    "workflow-ui.js": "2851d2de7e46fd4004fa1dc92fffc48fee527247f91f115955fdbc0a6e6ae04e"
+    "workflow-ui.js": "b39632f3b1eaf86b947fc7cc55b15745e3aa3d96d139beb0e859cf55854e108a"
   }
 }

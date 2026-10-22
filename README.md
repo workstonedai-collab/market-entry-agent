@@ -35,9 +35,11 @@ New to deployment? Give this repository to your own coding agent. Ask it to run 
 
 ## Continue the business project
 
-The private project desk keeps enterprise profiles, comparable entry options, business premises and roadmap progress. Newly saved matching public sources identify the assumptions, options and stages that need renewed research.
+Keep the product, buyers, capabilities and constraints alongside the markets and entry routes under consideration. Compare options across demand, access, channels, delivery, economics and risk, then record the assumptions and work each option depends on. Changed enterprise conditions flag older options for another look while preserving the original reasoning.
 
-[Workflow guide, boundaries and public replay](docs/product-workflow.md) · [Public case](examples/public-project-case.json)
+New matching public material prompts you to revisit a premise and shows the linked options and stages. The agent can propose a plan; you record decisions, actual progress and results. Local comparison checks saved material, so collecting new information still requires research, source refresh or a configured worker.
+
+[Workflow guide and public replay](docs/product-workflow.md) · [Case sources](examples/public-project-case.json)
 
 ## Questions to bring to the agent
 

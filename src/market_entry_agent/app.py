@@ -12,6 +12,7 @@ from pathlib import Path
 from socketserver import TCPServer
 from urllib.parse import urlsplit, parse_qs
 
+from . import __version__
 from .core import Agent, Store, atomic_json, fetch_feed, load_json, markdown, validate_mission
 from .product import SPEC
 from .memory import ProjectMemory
@@ -99,7 +100,7 @@ def serve(store, host, port):
             if path == "/workflow-ui.js":
                 return self.reply(200, project_asset, "text/javascript; charset=utf-8")
             if path == "/health":
-                return self.reply(200, {"status": "ok", "product": SPEC["id"], "version": "0.6.0"})
+                return self.reply(200, {"status": "ok", "product": SPEC["id"], "version": __version__})
             if path == "/api/project":
                 try:
                     project = parse_qs(urlsplit(self.path).query).get("project_id", [""])[0]

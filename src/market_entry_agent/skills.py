@@ -6,11 +6,11 @@ from pathlib import Path
 import re
 
 BUILTINS = [
-    {"name":"project-continuity", "description":"Continue an event-monitoring or enterprise-entry project with typed state.",
+    {"name":"project-continuity", "description":"回看项目已有情况、记录和报告，接着研究本次问题。",
      "instructions":"Read project_state when project_id is present. Treat profile/exposure as private operator data. Link source-backed proposals to read evidence and stable business IDs, preserving revisions. Risk: group normalized subject/place/day, explain impact and next checks; a new URL is not independent corroboration. Entry: compare demand/access/channel/delivery/economics/risks under current constraints, preserve unknown values, propose stages and assumptions without asserting completion. Save the research report directly; project-update conflicts must not discard it."},
-    {"name": "country-comparison", "description": "Compare the source periods and coverage of public country observations.",
+    {"name": "country-comparison", "description": "比较国区指标，同时说明数据期次、覆盖范围和缺失项。",
      "instructions": "Use country_baseline for mission countries. Read the returned evidence before citing. Compare source periods, component units and coverage. Keep annual structural background separate from current events. Use research_plan for the product's public outline; preserve missing values and different comparison bases."},
-    {"name": "evidence-brief", "description": "Organize a sourced research brief and explain gaps and proposed follow-up.",
+    {"name": "evidence-brief", "description": "围绕具体问题整理来源、分析影响，说明缺口和下一步。",
      "instructions": "Use only the current task's permitted queries and sources. Read selected evidence excerpts, preserving dates and source identity. Distinguish source claims, analysis, uncertainty and proposed actions. Current user input takes precedence over project memory. Form and save the requested report directly; technical citation checks do not imply independent factual review."},
 ]
 

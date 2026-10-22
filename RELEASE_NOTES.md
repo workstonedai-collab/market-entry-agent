@@ -1,3 +1,10 @@
+# v0.6.1 · Clearer language and readable project history
+
+- Reworked Chinese project guidance, form labels and report-writing guidance while preserving sources, uncertainty and the open-source scope.
+- Differentiated the two products’ starter questions and report focus.
+- Project history now shows readable fields; original JSON remains available. Record-ID guidance follows the selected record type.
+- Existing storage, commands and Windows/macOS/Linux support are unchanged.
+
 # v0.6.0 · Product-specific private project workflows
 
 在“项目持续跟踪”中整理企业画像，按需求、准入、渠道、交付、经济性与风险比较进入选项。保存方案依赖的经营假设和行动阶段；出现新的匹配资料时，定位需要重新研究的选项和阶段。

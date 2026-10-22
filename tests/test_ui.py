@@ -1,0 +1,41 @@
+"""Execute the shipped browser helpers with Node when available; no npm packages."""
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import unittest
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+@unittest.skipUnless(shutil.which("node"), "Optional browser-script check requires Node.js")
+class ProjectBrowser(unittest.TestCase):
+    def test_forms_history_and_untrusted_values(self):
+        script = r"""
+const fs=require('node:fs'), vm=require('node:vm'), assert=require('node:assert/strict');
+const elements=new Map();
+const element=id=>{if(!elements.has(id))elements.set(id,{value:'',textContent:'',innerHTML:'',disabled:false,classList:{remove(){},add(){}},addEventListener(){}});return elements.get(id)};
+const context=vm.createContext({assert,$:element,document:{querySelector:element,querySelectorAll:()=>[]},esc:v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))});
+vm.runInContext(fs.readFileSync(process.argv[1],'utf8'),context);
+vm.runInContext(`
+businessForm('event');assert.equal($('business-id').value,'auto');assert.ok($('business-id-hint').textContent.includes('auto'));
+businessForm('option');assert.equal($('business-id').value,'');assert.ok(!$('business-id-hint').textContent.includes('auto'));
+businessForm('profile');assert.equal($('business-id').value,'main');assert.equal($('business-id').disabled,true);
+businessForm('option',{id:'existing',revision:2,data:{name:'<img src=x onerror=alert(1)>',dimensions:{demand:'preserved'}}});
+assert.equal($('business-id').value,'existing');assert.equal($('business-id').disabled,true);
+assert.ok(!$('business-fields').innerHTML.includes('<img'));assert.ok($('business-fields').innerHTML.includes('preserved'));
+for(const kind of Object.keys(fieldSpec)){
+ const data={status:kind==='stage'?'done':'candidate',note:'<script>alert(1)</script>',unknown_field:'keep me',actions:['one','two'],active:false};
+ const html=historyHTML(kind,'<unsafe>',[{revision:2,updated:'2026-10-22',data}]);
+ assert.ok(html.includes('<dl>'));assert.ok(html.includes('<pre>'));
+ assert.ok(!html.includes('<script>'));assert.ok(!html.includes('<unsafe>'));assert.ok(html.includes('&lt;script&gt;'));
+ assert.ok(html.includes('keep me'));assert.ok(html.includes('one；two'));assert.ok(!html.includes('>false<'));
+}
+const dimensions=historyFields('option',{dimensions:{demand:'demand detail',economics:'cost detail'},status:'selected'});
+assert.ok(dimensions.includes('demand detail'));assert.ok(dimensions.includes('cost detail'));assert.ok(!dimensions.includes('>selected<'));
+assert.ok(!historyFields('stage',{status:'done'}).includes('>done<'));
+`,context);
+console.log('Shipped UI: all record types, typed hints, saved values, readable history and HTML escaping passed.');
+"""
+        result = subprocess.run([shutil.which("node"), "-e", script, str(ROOT / "src" / "market_entry_agent" / "workflow-ui.js")], capture_output=True, text=True, timeout=20)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
