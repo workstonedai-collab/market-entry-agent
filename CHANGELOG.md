@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0
+
+- Explicit private project facts, corrections/expiry/removal and related-report recall; additive SQLite migration preserves old records.
+- Bounded per-turn context, paged evidence/results, duplicate-result reuse and no-progress detection.
+- Unified input/output tool contracts, shared country identity and relevant keyword retrieval.
+- Frozen document-only skill catalog, operator-owned private skill directory and version receipts.
+- Recomputed time budgets, persisted model-call caps/usage, pause/cancel/resume and worker ownership checks.
+- 中文上手、PowerShell 使用与合成案例回归；保留完整介绍、国区看板、直接保存报告和开源边界。
+
 ## 0.4.1
 
 - Native Windows installation guide; existing macOS/Linux entrypoints and workspace defaults retained.

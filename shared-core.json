@@ -1,14 +1,19 @@
 {
-  "version": "0.4.1",
+  "version": "0.5.0",
   "module": "market_entry_agent",
   "files": {
-    "core.py": "ab7e4c6d5fbf7d39fbd5eb666ebc196dadf7c6bd46073d7c7bcb60809750f70e",
-    "app.py": "4e32963df187b333bc3c00087b2ac9a0b50e1b9307853fb717c85874d5fb3bb0",
-    "web.html": "543ca72f70c9f59534587e9d57b3ccd08c9b2c9e8e23292c71783355110e1c4c",
+    "core.py": "04ada142d2a5814d0965f4861f95e3e1557afbec00aada33e41fb4dcb878cbbe",
+    "app.py": "71fdfa86c46afbcbd75f52ed67e1e6bc9e7e04935151a66d4448732e839d0248",
+    "web.html": "456442aa55cd1e156bc21f3f258c7196e17592bb13a96c4ce2b0a34b4d3441a7",
     "net.py": "e531453c3db5cc178fb6af774b3866cc2a223dbe3f7dd00ff6cdd76f8fd50fbd",
-    "transport.py": "32e29ed147e0477d88b0b408774c33e54bdfa7d43fc77c4e5500fd979873ed8b",
-    "countries.py": "bd054e426378e774be49bad55ac1d565f70aebb690232c46021ba89afd071dcd",
+    "transport.py": "20ac65c23e3811c5dd42bbbc854160f6273e02f143482aa924109e727774e807",
+    "countries.py": "ec89352f5001aeb416845499c7d8c0ddbd31daa37d859b07155339ad27329238",
     "research.py": "0a1a72cd7ead27bf5efb493cd3e76ded0908ec29d1014cc39180a332911c56ad",
-    "data/country-baselines.json": "9a7f1e21946d6a8d1c92cf11ca55ea775e72765b2576c1f847f2adde13f7702e"
+    "data/country-baselines.json": "9a7f1e21946d6a8d1c92cf11ca55ea775e72765b2576c1f847f2adde13f7702e",
+    "memory.py": "d866e622188ec547727691be4c1c831cf027dd42500d6d1ae8b575d32bb733cf",
+    "context.py": "5191d272b6eb94ec48ad244fd48d04082efa1d32473f683d7770810d4d5a6484",
+    "contracts.py": "29c8830c9d93b683d31aee315f89cfb8d0575dda1d8ad7d38f69ebc0cbf167c4",
+    "skills.py": "dbec3e2c0233a3d752945d960e965689308da489771e6e75a66ea3b27d9849f5",
+    "runtime.py": "37807e34715faacedb2da689f4aaea4f15256161b40118856c29297730705a49"
   }
 }

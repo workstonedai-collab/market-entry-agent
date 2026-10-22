@@ -14,6 +14,9 @@ from urllib.parse import urlsplit, parse_qs
 
 from .core import Agent, Store, atomic_json, fetch_feed, load_json, markdown, validate_mission
 from .product import SPEC
+from .memory import ProjectMemory
+from .skills import snapshot, catalog as skill_catalog
+from .core import REGISTRY
 
 
 class AgentHTTPServer(ThreadingHTTPServer):
@@ -47,6 +50,7 @@ def serve(store, host, port):
     allowed.update(filter(None, os.environ.get("AGENT_UI_ALLOWED_HOSTS", "").split(",")))
     asset = Path(__file__).with_name("web.html").read_bytes()
     threads = threading.BoundedSemaphore(2)
+    available_skills = skill_catalog(snapshot())
 
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *_):
@@ -91,7 +95,15 @@ def serve(store, host, port):
             if path == "/":
                 return self.reply(200, asset, "text/html; charset=utf-8")
             if path == "/health":
-                return self.reply(200, {"status": "ok", "product": SPEC["id"], "version": "0.4.1"})
+                return self.reply(200, {"status": "ok", "product": SPEC["id"], "version": "0.5.0"})
+            if path == "/api/skills":
+                return self.reply(200, {"skills": available_skills})
+            if path == "/api/memory":
+                try:
+                    project = parse_qs(urlsplit(self.path).query).get("project_id", [""])[0]
+                    return self.reply(200, {"project_id": project, "facts": ProjectMemory(store, SPEC["id"]).facts(project)})
+                except ValueError as exc:
+                    return self.reply(400, {"error": str(exc)})
             if path == "/api/countries":
                 from .countries import catalog
                 return self.reply(200, catalog())
@@ -131,6 +143,18 @@ def serve(store, host, port):
                 body = json.loads(self.rfile.read(length))
                 if not isinstance(body, dict):
                     raise ValueError("Request body must be an object")
+                if self.path == "/api/memory":
+                    memory = ProjectMemory(store, SPEC["id"])
+                    if body.get("operation") == "forget":
+                        return self.reply(200, memory.forget(body["project_id"], body["key"]))
+                    if body.get("operation", "set") != "set":
+                        raise ValueError("Unknown memory operation")
+                    return self.reply(200, memory.set(body["project_id"], body["key"], body["value"], body.get("expires_at")))
+                if self.path == "/api/control":
+                    run = store.get_run(body["id"])
+                    if run["product"] != SPEC["id"]:
+                        raise ValueError("Run belongs to another product")
+                    return self.reply(200, store.control(body["id"], body["state"]))
                 if self.path in ("/api/runs", "/api/resume"):
                     if self.path == "/api/runs":
                         mission = validate_mission(body.get("mission"))
@@ -143,15 +167,16 @@ def serve(store, host, port):
                         run = store.get_run(rid)
                         if run["product"] != SPEC["id"]:
                             raise ValueError("Run belongs to another product")
-                        if run["state"] == "completed":
+                        if run["state"] in ("completed", "cancelled"):
                             return self.reply(200, {"id": rid})
                         mission, engine = run["mission"], run["engine"]
                     if not threads.acquire(blocking=False):
                         return self.reply(429, {"error": "Two workers are active; try again shortly"})
                     rid = rid or store.create_run(SPEC["id"], mission, engine)
+                    allow_paused = self.path == "/api/resume"
                     def work():
                         try:
-                            Agent(store, SPEC).run(resume=rid)
+                            Agent(store, SPEC).run(resume=rid, allow_paused=allow_paused)
                         except Exception:
                             pass  # Lease conflicts do not overwrite the owner's state.
                         finally:
@@ -190,7 +215,20 @@ def main(argv=None):
     parser.add_argument("--workspace", default=f"~/.field-agents/{SPEC['id']}", help="Private state directory; use a separate one for each customer")
     parser.add_argument("--evidence-db", default=None, help="Optional shared public evidence database")
     sub = parser.add_subparsers(dest="command", required=True)
-    sub.add_parser("demo", help="Import synthetic fixtures and execute a deterministic demonstration")
+    demo = sub.add_parser("demo", help="Import synthetic fixtures and execute a deterministic demonstration")
+    demo.add_argument("--project", help="Explicit private project ID")
+    for command in ("pause-run", "cancel", "usage"):
+        sub.add_parser(command).add_argument("id")
+    sub.add_parser("skills", help="List configured document skill metadata")
+    sub.add_parser("tools", help="Show public tool schemas and execution policies")
+    memory = sub.add_parser("memory", help="Read explicit private project facts")
+    memory.add_argument("project")
+    memory.add_argument("--as-of")
+    setting = sub.add_parser("memory-set", help="Save or correct one operator-owned project fact")
+    setting.add_argument("project"); setting.add_argument("key"); setting.add_argument("value")
+    setting.add_argument("--expires-at")
+    forgetting = sub.add_parser("memory-forget", help="Remove all revisions of a project fact; saved runs are separate")
+    forgetting.add_argument("project"); forgetting.add_argument("key")
     ingest = sub.add_parser("import", help="Import a field-evidence/v1 JSON bundle")
     ingest.add_argument("file")
     sources = sub.add_parser("sources", help="Register operator-managed RSS feeds")
@@ -201,6 +239,8 @@ def main(argv=None):
     page.add_argument("id")
     run = sub.add_parser("run", help="Run a mission")
     run.add_argument("mission")
+    run.add_argument("--project")
+    run.add_argument("--skill", action="append", default=[])
     run.add_argument("--engine", choices=("demo", "model"), default="model")
     resume = sub.add_parser("resume", help="Resume a failed or expired run without repeating saved steps")
     resume.add_argument("id")
@@ -239,7 +279,24 @@ def main(argv=None):
     package = Path(__file__).parent
     result = None
     try:
-        if args.command == "country-list":
+        if args.command == "skills":
+            result = {"skills": skill_catalog(snapshot())}
+        elif args.command == "tools":
+            result = {"tools": REGISTRY.describe()}
+        elif args.command == "memory":
+            result = {"project_id": args.project, "facts": ProjectMemory(store, SPEC["id"]).facts(args.project, args.as_of)}
+        elif args.command == "memory-set":
+            result = ProjectMemory(store, SPEC["id"]).set(args.project, args.key, args.value, args.expires_at)
+        elif args.command == "memory-forget":
+            result = ProjectMemory(store, SPEC["id"]).forget(args.project, args.key)
+        elif args.command in ("pause-run", "cancel"):
+            existing = store.get_run(args.id)
+            if existing["product"] != SPEC["id"]:
+                raise ValueError("Run belongs to another product")
+            result = store.control(args.id, "paused" if args.command == "pause-run" else "cancelled")
+        elif args.command == "usage":
+            result = {"id": args.id, "summary": store.get_run(args.id)["runtime"], "calls": store.call_receipts(args.id)}
+        elif args.command == "country-list":
             from .countries import catalog
             result = catalog()
         elif args.command == "country":
@@ -253,7 +310,10 @@ def main(argv=None):
             result = plan(SPEC["id"], validate_mission(load_json(args.mission)))
         elif args.command == "demo":
             store.import_evidence(load_json(package / "data" / "demo-evidence.json"))
-            result = public_run(Agent(store, SPEC).run(SPEC["starter"], "demo"))
+            mission = dict(SPEC["starter"])
+            if args.project:
+                mission["project_id"] = args.project
+            result = public_run(Agent(store, SPEC).run(mission, "demo"))
         elif args.command == "import":
             result = store.import_evidence(load_json(args.file))
         elif args.command == "sources":
@@ -264,7 +324,12 @@ def main(argv=None):
         elif args.command == "fetch":
             result = fetch_feed(store, args.id)
         elif args.command == "run":
-            result = public_run(Agent(store, SPEC).run(load_json(args.mission), args.engine))
+            mission = load_json(args.mission)
+            if args.project:
+                mission["project_id"] = args.project
+            if args.skill:
+                mission["skill_ids"] = args.skill
+            result = public_run(Agent(store, SPEC).run(mission, args.engine))
         elif args.command == "resume":
             result = public_run(Agent(store, SPEC).run(resume=args.id))
         elif args.command == "show":

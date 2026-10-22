@@ -33,7 +33,7 @@ def completion(base,key,body,timeout,idle_seconds=120,request_id=None):
                 if time.monotonic()>end:
                     raise RuntimeError('run_deadline_exceeded')
                 return json.loads(raw)
-            pieces=[]; size=0; finish=None; done=False
+            pieces=[]; size=0; finish=None; done=False; usage={}
             while True:
                 remaining=end-time.monotonic()
                 if remaining<=0:
@@ -64,6 +64,8 @@ def completion(base,key,body,timeout,idle_seconds=120,request_id=None):
                     raise RuntimeError('model_content_filtered')
                 if event.get('base_resp',{}).get('status_code',0):
                     raise RuntimeError('model_provider_error')
+                if isinstance(event.get('usage'),dict):
+                    usage={k:v for k,v in event['usage'].items() if k in ('prompt_tokens','completion_tokens','total_tokens') and type(v) is int and v>=0}
                 for choice in event.get('choices',[]):
                     if choice.get('index',0)!=0:
                         continue
@@ -77,7 +79,7 @@ def completion(base,key,body,timeout,idle_seconds=120,request_id=None):
                 raise RuntimeError('model_stream_incomplete')
             if finish not in ('stop','length'):
                 raise RuntimeError('model_stream_finish_'+str(finish)[:30])
-            return {'choices':[{'message':{'content':''.join(pieces)},'finish_reason':finish}]}
+            return {'choices':[{'message':{'content':''.join(pieces)},'finish_reason':finish}], 'usage':usage}
     except HTTPError as exc:
         raise RuntimeError(f'model_http_{exc.code}') from None
     except (URLError,TimeoutError,OSError):

@@ -10,7 +10,7 @@
 
 **开放范围与交流：** 国区评分配方、分项权重、贡献计算与通用研究步骤已公开。部分进一步的研究方法、专用提示词和相关知识内容暂未开源。如有需要或希望进一步交流，欢迎[联系作者](https://github.com/workstonedai-collab)或提交[项目 Issue](https://github.com/workstonedai-collab/market-entry-agent/issues/new)；私人资料请勿直接发布在公开 Issue。
 
-[English](README.md) · [公开示例](examples/README.md) · [联网使用](docs/live-research.md) · [Hermes 接入](docs/hermes.md) · [Windows 安装](docs/windows.md) · [部署](docs/deployment.md)
+[English](README.md) · [公开示例](examples/README.md) · [联网使用](docs/live-research.md) · [Hermes 接入](docs/hermes.md) · [项目记忆与技能](docs/kernel.md) · [Windows 安装](docs/windows.md) · [部署](docs/deployment.md)
 
 ## 国区看板：从背景到行动
 
@@ -150,6 +150,19 @@ market-entry-agent serve
 ```
 
 浏览器访问 http://127.0.0.1:8712 。先查看已保存报告、证据和工具记录，再输入自己的研究任务。示例无需密钥，不调用大模型；资料和分析均清楚标为虚构情景或规则演示。
+
+## 接着同一个项目继续研究
+
+给相关任务填写同一个项目 ID，可以在换个问法后召回旧报告，并保留你录入的项目资料。本次输入优先于旧资料，企业资料与历史分析有明确区分；来源仍须在本次运行读取后才能引用。
+
+```bash
+market-entry-agent memory-set fictional-research product "虚构演示：设备出口"
+market-entry-agent demo --project fictional-research
+market-entry-agent run examples/project-mission.json --engine demo
+market-entry-agent skills
+```
+
+网页新增项目资料、技能选择和研究暂停/取消入口。长资料分段读取，旧工具结果保存在本地；模型请求有上下文字符预算，并保留调用、耗时和服务已报告用量。操作、隐私与恢复边界见[共用内核使用说明](docs/kernel.md)。Windows 在独立环境中通过相同模块入口使用。
 
 ## 接入真实研究
 

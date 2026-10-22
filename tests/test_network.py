@@ -75,3 +75,10 @@ class NetworkTests(unittest.TestCase):
   start=time.monotonic()
   with self.assertRaises(RuntimeError):transport.completion(base,'',{},.10,.05)
   self.assertLess(time.monotonic()-start,.5)
+
+ def test_stream_usage_is_recorded_without_reasoning(self):
+  events=[{'choices':[{'delta':{'reasoning_content':'discard private reasoning'}}]}, {'choices':[{'delta':{'content':'{}'},'finish_reason':'stop'}]}, {'choices':[], 'usage':{'prompt_tokens':12,'completion_tokens':8,'total_tokens':20}}, '[DONE]']
+  base=self.stream(events)
+  result=transport.completion(base,'',{'stream':True},5)
+  self.assertEqual(result['usage']['total_tokens'],20)
+  self.assertNotIn('private reasoning',json.dumps(result))

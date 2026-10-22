@@ -5,6 +5,7 @@ Uses synthetic fixtures, an isolated Unicode workspace, and no model credentials
 from pathlib import Path
 import argparse
 import json
+import importlib
 import os
 import platform
 import socket
@@ -60,6 +61,18 @@ def verify():
             assert run["report"]["title"] in text
         checks.append("utf8_markdown_and_json_exports")
 
+        assert len(cli("skills")["skills"]) >= 2
+        assert any(tool["name"] == "read_result" for tool in cli("tools")["tools"])
+        cli("memory-set", "cli-project", "产品", "虚构设备")
+        assert cli("memory", "cli-project")["facts"][0]["value"] == "虚构设备"
+        project_run = cli("run", str(ROOT / "examples/project-mission.json"), "--engine", "demo", "--project", "cli-project")
+        assert project_run["state"] == "completed" and project_run["report"]["project_id"] == "cli-project"
+        receipt = cli("usage", project_run["id"])
+        assert receipt["summary"]["tracking_available"] and receipt["summary"]["model_calls"] == 0
+        cli("memory-forget", "cli-project", "产品")
+        assert cli("memory", "cli-project")["facts"] == []
+        checks.append("project_memory_skills_and_usage_cli")
+
         schedule = cli("schedule", str(ROOT / "examples/mission.json"), "--engine", "demo", "--interval", "60")
         due = cli("worker", "--once")
         assert len(due) == 1 and due[0]["state"] == "completed"
@@ -113,6 +126,30 @@ def verify():
             assert saved["state"] == "completed" and saved["report"]["synthetic"]
             assert cli("show", run_id)["report"] == saved["report"]
             checks.append("http_task_country_query_and_saved_result")
+            def post(path, value):
+                data = json.dumps(value, ensure_ascii=False).encode("utf-8")
+                with http.open(Request(base + path, data=data, headers=headers), timeout=5) as response:
+                    return json.load(response)
+
+            post("/api/memory", {"project_id": "http-project", "key": "产品", "value": "虚构 HTTP 资料"})
+            with http.open(Request(base + "/api/memory?project_id=http-project", headers=headers), timeout=5) as response:
+                assert json.load(response)["facts"][0]["value"] == "虚构 HTTP 资料"
+            post("/api/memory", {"operation": "forget", "project_id": "http-project", "key": "产品"})
+            private = importlib.import_module(module + ".core").Store(workspace)
+            waiting = private.create_run(metadata["id"], mission, "demo")
+            assert post("/api/control", {"id": waiting, "state": "paused"})["state"] == "paused"
+            post("/api/resume", {"id": waiting})
+            until = time.monotonic() + 15
+            while private.get_run(waiting)["state"] not in ("completed", "failed"):
+                if time.monotonic() >= until:
+                    raise RuntimeError("Paused HTTP task did not resume")
+                time.sleep(.1)
+            assert private.get_run(waiting)["state"] == "completed"
+            cancelled = private.create_run(metadata["id"], mission, "demo")
+            assert post("/api/control", {"id": cancelled, "state": "cancelled"})["state"] == "cancelled"
+            assert cli("resume", cancelled)["state"] == "cancelled"
+            checks.append("http_project_memory_pause_resume_and_cancel")
+
         finally:
             server.terminate()
             try:

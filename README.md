@@ -21,7 +21,7 @@
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB)](pyproject.toml)
 [![Status: Alpha](https://img.shields.io/badge/status-alpha-orange.svg)](docs/roadmap.md)
 
-[简体中文](README.zh-CN.md) · [Quickstart](#try-it-in-two-minutes) · [Architecture](docs/architecture.md) · [Windows setup](docs/windows.md) · [Deployment](docs/deployment.md) · [Peer project](https://github.com/workstonedai-collab/georisk-agent)
+[简体中文](README.zh-CN.md) · [Quickstart](#try-it-in-two-minutes) · [Architecture](docs/architecture.md) · [Project memory and skills](docs/kernel.md) · [Windows setup](docs/windows.md) · [Deployment](docs/deployment.md) · [Peer project](https://github.com/workstonedai-collab/georisk-agent)
 
 A research agent for businesses evaluating overseas markets and following changes after entry. Give it your product, target markets, entry stage and operating constraints. It searches explicit public queries, reads relevant materials and saves an assessment of entry options, operating requirements, opportunities to test and questions that still need answers.
 
@@ -198,6 +198,19 @@ py -3.11 -m venv .venv
 ```
 
 See the [Windows installation, model configuration and troubleshooting guide](docs/windows.md). CI exercises Python 3.11–3.13 on Windows, macOS and Linux, plus a clean PowerShell installation. The package is installed from this repository or its release wheel; no PyPI publication is claimed.
+
+## Continue a project across research tasks
+
+Give related missions an explicit `project_id`. Save operator-owned facts, recall related reports, load document skills on demand and inspect model-call receipts. Current task input takes precedence; private context stays in the workspace and goes only to the configured model. Public search still receives only explicit public queries.
+
+```bash
+market-entry-agent memory-set fictional-research product "Synthetic equipment export case"
+market-entry-agent demo --project fictional-research
+market-entry-agent run examples/project-mission.json --engine demo
+market-entry-agent skills
+```
+
+Model context uses a configurable character budget and saved-result references. Pause/cancel controls settle at safe boundaries; failed attempts retain completed steps and a model-call limit across resume. [Full guide: memory, context, tools, skills and recovery](docs/kernel.md). Windows uses the same commands through its venv Python.
 
 ## Use a model and your evidence
 

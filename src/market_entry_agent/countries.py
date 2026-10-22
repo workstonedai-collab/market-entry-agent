@@ -34,6 +34,18 @@ def lookup(value):
             return row
     raise ValueError('Unknown country. Use an economy code or name from country-list.')
 
+@lru_cache(maxsize=2048)
+def scope_key(value):
+    try:
+        return lookup(value)['code']
+    except ValueError:
+        return key(value)
+
+
+def scope_keys(values):
+    return {scope_key(value) for value in values}
+
+
 def matches(values, code):
     for value in values:
         try:

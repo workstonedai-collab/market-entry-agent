@@ -1,7 +1,7 @@
 {
   "schema": "field-agent/v1",
   "id": "market-entry-agent",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "entrypoint": "market-entry-agent",
   "python_module": "market_entry_agent",
   "engines": {
@@ -18,7 +18,9 @@
     "recall",
     "list_sources",
     "fetch_feed",
-    "finish"
+    "finish",
+    "load_skill",
+    "read_result"
   ],
   "evidence_schema": "schemas/evidence-v1.schema.json",
   "interfaces": [
@@ -29,5 +31,17 @@
   "external_sending": false,
   "shared_core": "shared-core.json",
   "license": "MIT",
-  "name_zh": "企业出海咨询/国区营商环境监测智能体"
+  "name_zh": "企业出海咨询/国区营商环境监测智能体",
+  "capabilities": {
+    "project_memory": true,
+    "bounded_context": "characters",
+    "document_skills": true,
+    "run_controls": [
+      "pause",
+      "cancel",
+      "resume"
+    ],
+    "usage_receipts": true,
+    "mcp": false
+  }
 }

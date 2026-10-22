@@ -1,3 +1,15 @@
+# v0.5.0 · Project continuity and a bounded research kernel
+
+本版完善两个产品共用的研究内核：同一项目可接续旧研究并管理私有资料，长资料分段读取，重复结果复用，文档技能按需加载。新增暂停/取消与显式恢复、模型请求用量记录及持续生效的调用上限。模型返回后重新计算时间，保留已经返回的有效报告并标出到期状态。
+
+This alpha adds private project continuity, bounded context, shared tool contracts and document-only skills to the existing independently runnable packages. Additive private SQLite tables preserve previous tasks, evidence IDs and saved reports. Cross-platform tests exercise installed packages, synthetic substitute models and loopback HTTP; no paid model or external-search validation is implied.
+
+See [the shared kernel guide](docs/kernel.md) for CLI/browser use, PowerShell examples, migration and data boundaries. Current task input takes precedence over project history. Private skills and source instructions remain operator-owned; scripts are not executed. MCP and new product-specific monitoring workflows are outside this batch.
+
+Code MIT; public observations retain separate data terms. Public country formulas and general research steps remain available; specialized prompts and private knowledge are not bundled. Contact the author for further discussion.
+
+---
+
 # v0.4.1 · Native Windows support / Windows 原生适配
 
 Windows 可直接使用 Python 安装与运行，无需 WSL 或 Docker。新增 PowerShell 安装、模型配置、保存恢复、导出与周期任务说明；现有 Mac 命令和默认工作空间保留。

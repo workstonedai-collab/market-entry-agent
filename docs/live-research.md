@@ -19,3 +19,5 @@ Optionally set `AGENT_INSTRUCTIONS_FILE` to a UTF-8 file outside the repository,
 ## Data and exports
 
 The bundled World Bank observations work offline. For current events, explicitly register permitted sources or public queries. Imported evidence and exports are operator-managed; only share data you may redistribute. Runtime files should stay under the private workspace. No automatic GitHub upload or external messaging exists.
+
+Project memory, bounded context, document skills, run controls and usage receipts: [shared kernel guide](kernel.md).
