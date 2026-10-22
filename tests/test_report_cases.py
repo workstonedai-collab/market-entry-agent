@@ -3,6 +3,9 @@ import copy
 import importlib
 import importlib.util
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 import tempfile
 import unittest
@@ -57,6 +60,16 @@ class ReportCases(unittest.TestCase):
         store.register_sources({'sources': [{'id': 'public', 'url': 'https://example.org/rss', 'allowed_hosts': ['example.org'], 'countries': ['Vietnam'], 'topics': ['trade']}]})
         self.assertIn('list_sources', {t['name'] for t in agent.task_tools(mission)})
         self.assertNotIn('list_sources', {t['name'] for t in agent.task_tools(dict(mission, countries=['Germany']))})
+
+    def test_list_is_utf8_under_a_legacy_console_encoding_without_model_config(self):
+        env = dict(os.environ, PYTHONUTF8='0', PYTHONIOENCODING='cp1252:strict')
+        env.pop('AGENT_MODEL_BASE_URL', None)
+        env.pop('AGENT_MODEL_NAME', None)
+        result = subprocess.run([sys.executable, str(ROOT/'scripts/evaluate_cases.py'), '--list'], env=env, capture_output=True, timeout=20)
+        self.assertEqual(result.returncode, 0, result.stderr.decode('utf-8', errors='replace'))
+        rows = json.loads(result.stdout.decode('utf-8'))
+        self.assertEqual([r['id'] for r in rows], [c['id'] for c in self.cases])
+        self.assertEqual(rows[0]['question'], self.cases[0]['mission']['question'])
 
     def test_reject_search_enabled_undated_future_or_unbounded_cases(self):
         original = json.loads((ROOT/'examples/report-cases.json').read_text(encoding='utf-8'))

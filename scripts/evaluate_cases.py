@@ -4,6 +4,7 @@ import hashlib
 import importlib
 import json
 import os
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,6 +42,9 @@ def load_cases(path):
 
 
 def main(argv=None):
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, 'reconfigure'):
+            stream.reconfigure(encoding='utf-8')
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--suite', type=Path, default=ROOT/'examples/report-cases.json')
     mode = parser.add_mutually_exclusive_group(required=True)
