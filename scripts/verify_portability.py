@@ -118,6 +118,11 @@ def verify():
                 assert b"RESEARCH BRIEF" in response.read()
                 assert "script-src 'self' 'unsafe-inline'" in response.headers["Content-Security-Policy"]
             headers = {"Authorization": "Bearer " + token, "Content-Type": "application/json"}
+            with http.open(Request(base + "/api/source-health", headers=headers), timeout=5) as response:
+                source_health = json.load(response)
+                assert source_health["scope"] == "registered_sources_only"
+                assert source_health["internet_coverage_complete"] is False
+            checks.append("authenticated_source_refresh_receipts")
             with http.open(Request(base + "/api/country?code=VNM", headers=headers), timeout=5) as response:
                 assert json.load(response)["baseline"]["code"] == "VNM"
             body = json.dumps({"mission": mission, "engine": "demo"}, ensure_ascii=False).encode("utf-8")

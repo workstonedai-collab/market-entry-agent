@@ -99,6 +99,17 @@ def web_search(store, mission, index, timeout=30):
         'limitation':'Search snippets only. Fetch and read relevant pages before factual conclusions. Provider dates are not verified publication dates.'}
 
 def fetch_page(store, evidence_id=None, source_id=None, timeout=20):
+    from .source_health import retrieve
+    source=next((s for s in store.sources() if s["id"]==source_id),None) if source_id else None
+    if not source_id and evidence_id:
+        evidence=store.read(evidence_id)
+        source=next((s for s in store.sources() if s.get("kind")=="page" and s["url"]==evidence["url"]),None)
+    operation=lambda: _fetch_page(store,evidence_id,source_id,timeout)
+    if not source or source.get("kind")!="page":return operation()
+    return retrieve(store,source["id"],operation)
+
+
+def _fetch_page(store, evidence_id=None, source_id=None, timeout=20):
     from .core import digest,fetch_public_https
     if source_id:
         source=next((s for s in store.sources() if s['id']==source_id and s.get('kind')=='page'),None)

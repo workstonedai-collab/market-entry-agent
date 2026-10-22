@@ -1,3 +1,11 @@
+# v0.7.0 · Report writing, decision paths and source freshness
+
+- Default frozen report-writing skill with versioned receipts; no extra rewrite call.
+- Readable event assessment changes with source links and saved excerpts; project reports retain new alert snapshots.
+- Optional entry-route tradeoffs, requirements, decision comparisons and validation priorities in saved projects and report exports.
+- Registered-source success/failure/cache receipts and refresh status; task-specific tool advertising.
+- Opt-in bounded live case evaluation and manual review checklist, retaining standard-library runtime and existing storage.
+
 # v0.6.1 · Clearer language and readable project history
 
 - Reworked Chinese project guidance, form labels and report-writing guidance while preserving sources, uncertainty and the open-source scope.

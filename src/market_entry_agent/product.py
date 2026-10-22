@@ -22,6 +22,9 @@ SPEC = {'id': 'market-entry-agent',
  'demo_follow': ['下次运行时比较资料是否有更新。']}
 
 
+SPEC['system'] += ' Read the relevant saved sources before deciding a conclusion; a failed or unavailable tool is not evidence. When public search queries are absent, use local evidence instead of trying to search. Do not rank countries or declare a best entry route without a business-specific basis. Explain conditional choices and the evidence that would change them. For a market-entry comparison, include decision_options and validation_priorities when useful, while retaining the full narrative analysis.'
+
+
 def demo_report(mission, evidence, previous):
     ids = [e["id"] for e in evidence]
     return {

@@ -22,7 +22,9 @@ def preview(value, string_limit=800, list_limit=8):
 
 def assemble(seed, run, meta, budget):
     messages = [dict(m) for m in seed[:2]]
-    snapshots = meta.get("loaded_skills", {})
+    snapshots = dict(meta.get("loaded_skills", {}))
+    if meta.get("writing_skill"):
+        snapshots["report-writing"] = meta["writing_skill"]
     for name, skill in snapshots.items():
         messages.append({"role": "system", "content": "Configured skill " + name + " @ " + skill["version"] + "\n" + skill["instructions"]})
     project = meta.get("project_state")

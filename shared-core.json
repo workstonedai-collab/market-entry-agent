@@ -1,21 +1,23 @@
 {
-  "version": "0.6.1",
+  "version": "0.7.0",
   "module": "market_entry_agent",
   "files": {
-    "core.py": "af83bf7cb2cb496d6916f741efc9b7e10d3dd5e943899eef28e542b5518da316",
-    "app.py": "3059b4c43b30233b669b67a03142a7143109d00d7467f9a36c15d3315ee0b040",
-    "web.html": "7599f62c6ff7a4d24acd9da47611d52d1df8d9da170119881175692c28641638",
-    "net.py": "e531453c3db5cc178fb6af774b3866cc2a223dbe3f7dd00ff6cdd76f8fd50fbd",
+    "core.py": "55b7f78f825170c98545d5a6a0ba991f1eec63d26546137737135c3fcd0e2bf4",
+    "app.py": "5cb21bfeb32779c7abd418ee86523389f7aa9ea4074ae61a9cf109d90b57614b",
+    "web.html": "9eeb962dc3875952dbb358e78d86d04361c495e73c698eecbd5c208e2d7e1370",
+    "net.py": "6b182bf57d4d206eb7045c6627475ba805e9a83770a40d49f51f4326069d7e6b",
     "transport.py": "20ac65c23e3811c5dd42bbbc854160f6273e02f143482aa924109e727774e807",
     "countries.py": "ec89352f5001aeb416845499c7d8c0ddbd31daa37d859b07155339ad27329238",
-    "research.py": "c7d86834a502521f97fb15487c2def4d1f7f5032047c494db01ec3ba08bc7d03",
+    "research.py": "ba84d52a19f22745abedc6db0f6f8eb925b4bdd4ddfacd025defe8a2f403ad55",
     "data/country-baselines.json": "9a7f1e21946d6a8d1c92cf11ca55ea775e72765b2576c1f847f2adde13f7702e",
     "memory.py": "d866e622188ec547727691be4c1c831cf027dd42500d6d1ae8b575d32bb733cf",
-    "context.py": "d4eb0d5ee857028d28aa6f06273a5a0425896e1fd37b089f6326aee2fd8a11c3",
+    "context.py": "880ecbd517bfa4c0d846971c4fc8754dca4d5b9e428cacd96126d5e852299cae",
     "contracts.py": "fe85a78dcb64ad833d62248c84157867acb015d534f9a6eb93bf202685b37920",
-    "skills.py": "0961a619d90d6f64ed0baa9a3f3b9ba2515f7572d73d57a589c38e40f778f6cb",
-    "runtime.py": "37807e34715faacedb2da689f4aaea4f15256161b40118856c29297730705a49",
+    "skills.py": "e4831c334b24d5ccf949e3db78288448a2500bd4220b637615b647baea00f70a",
+    "runtime.py": "9e2403baa8f2fc38a3dc6f904d7e5d16bb0b651552d96248ff42e31d90e062da",
     "business.py": "41b96518596c52dfd924f5cf045bc1048c5c0b25b81d992248995c78db258e38",
-    "workflow-ui.js": "b39632f3b1eaf86b947fc7cc55b15745e3aa3d96d139beb0e859cf55854e108a"
+    "workflow-ui.js": "fe8759b8a95b988d4fe9c8c8d9930b4dbcf36f8efee487b3c48763c2fb920ba3",
+    "source_health.py": "fae5e1f0828e7a2f8d254b28daae92c7b975bc6ab183e24eb4e4baeac4893f50",
+    "decision.py": "c139b3d655cfc8fbc84ee27a1fe84cece1d347177fae4ed7ea7b35fff60b9048"
   }
 }

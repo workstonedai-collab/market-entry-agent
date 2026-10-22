@@ -34,6 +34,16 @@ for(const kind of Object.keys(fieldSpec)){
 const dimensions=historyFields('option',{dimensions:{demand:'demand detail',economics:'cost detail'},status:'selected'});
 assert.ok(dimensions.includes('demand detail'));assert.ok(dimensions.includes('cost detail'));assert.ok(!dimensions.includes('>selected<'));
 assert.ok(!historyFields('stage',{status:'done'}).includes('>done<'));
+const hostile='<img src=x onerror=alert(1)>';
+const change=changeHTML({previous:{impact:'old'},assessment:{severity:'high',status:'escalated',confidence:'source_statement',impact:hostile,next_check:'check'},change_note:hostile,new_evidence_ids:[],source_details:[]});
+assert.ok(change.includes('old'));assert.ok(change.includes('&lt;img'));assert.ok(!change.includes('<img'));
+const aids=decisionHTML({decision_options:[{name:hostile,fit:'conditional',tradeoff:'control',requirements:'quote needed',next_check:'buyer interview'}],validation_priorities:[{question:'demand',why_first:'changes choice',next_step:'interview',if_supported:'continue',if_not:'pause'}]});
+assert.ok(aids.includes('quote needed'));assert.ok(aids.includes('pause'));assert.ok(!aids.includes('<img'));
+const health=sourceHealthHTML({registered:1,fresh:0,latest_failed:1,sources:[{title:hostile,freshness:'stale',refresh_hours:24,latest_attempt_failed:true,last_error:'retrieval_failed'}]});
+assert.ok(!health.includes('<img'));assert.ok(health.includes('retrieval_failed'));
+const paragraphs=reportProse('first paragraph\\n\\n<script>second</script>');
+assert.equal((paragraphs.match(/<p>/g)||[]).length,2);assert.ok(!paragraphs.includes('<script>'));assert.ok(paragraphs.includes('&lt;script&gt;'));
+
 `,context);
 console.log('Shipped UI: all record types, typed hints, saved values, readable history and HTML escaping passed.');
 """

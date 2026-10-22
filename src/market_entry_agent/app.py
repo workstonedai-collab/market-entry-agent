@@ -19,6 +19,7 @@ from .memory import ProjectMemory
 from .skills import snapshot, catalog as skill_catalog
 from .core import REGISTRY
 from .workflow import Workflow
+from .source_health import overview as source_overview
 
 
 class AgentHTTPServer(ThreadingHTTPServer):
@@ -101,6 +102,8 @@ def serve(store, host, port):
                 return self.reply(200, project_asset, "text/javascript; charset=utf-8")
             if path == "/health":
                 return self.reply(200, {"status": "ok", "product": SPEC["id"], "version": __version__})
+            if path == "/api/source-health":
+                return self.reply(200,source_overview(store))
             if path == "/api/project":
                 try:
                     project = parse_qs(urlsplit(self.path).query).get("project_id", [""])[0]
@@ -142,6 +145,7 @@ def serve(store, host, port):
                 return self.reply(200, {"product": {k: SPEC[k] for k in ("id", "name", "tagline", "accent", "starter")},
                     "runs": [public_run(r) for r in store.list_runs()], "evidence": store.export_evidence()["records"],
                     "outbox": store.outbox(), "schedules": store.schedules(), "sources": store.sources(),
+                    "source_health": source_overview(store),
                     "model_configured": bool(os.environ.get("AGENT_MODEL_BASE_URL") and os.environ.get("AGENT_MODEL_NAME"))})
             if path.startswith("/api/runs/"):
                 try:

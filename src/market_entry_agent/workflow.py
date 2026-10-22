@@ -21,7 +21,7 @@ class Workflow(Records):
                 'stage':choice(data.get('stage'),('exploring','targeted','operating')),'countries':strings(data.get('countries',[])),
                 **{k:text(data.get(k,''),optional=True) for k in ('capabilities','constraints','budget')}}
         if kind == 'option':
-            fields(data,['name','countries','mode','rationale','dimensions','status','evidence_ids','profile_revision'])
+            fields(data,['name','countries','mode','rationale','dimensions','status','evidence_ids','profile_revision','tradeoff','requirements','next_validation'])
             dimensions = data.get('dimensions')
             fields(dimensions,DIMENSIONS)
             out = {'name':text(data.get('name'),200),'countries':strings(data.get('countries')),'mode':text(data.get('mode'),200),
@@ -29,6 +29,8 @@ class Workflow(Records):
                 'status':choice(data.get('status','candidate'),('researching','candidate','selected','deferred','blocked'))}
             if not out['countries']:
                 raise ValueError('Entry option needs a target country')
+            for key in ('tradeoff','requirements','next_validation'):
+                if key in data:out[key]=text(data[key],optional=True)
             out['evidence_ids'] = self.references(data.get('evidence_ids',[]),out['countries'],as_of=as_of)
             if 'profile_revision' in data:
                 if type(data['profile_revision']) is not int or data['profile_revision'] < 1:
@@ -183,6 +185,7 @@ class Workflow(Records):
         return {'product':self.product,'agent_writable_kinds':list(self.agent_kinds), 'dimensions':list(DIMENSIONS),
           'contracts':{
           'option':{'name':'entry option','countries':['mission country'],'mode':'entry channel','rationale':'conditional recommendation',
+                    'tradeoff':'what is gained and given up','requirements':'resources and conditions needed; preserve unknown costs','next_validation':'what to verify first and why',
                     'dimensions':{k:'analysis, source basis or unknown' for k in DIMENSIONS},'status':'candidate','evidence_ids':['read ID']},
           'stage':{'goal':'proposed goal','option_id':'existing or earlier new option ID','actions':['work'],'deliverables':['output'],
                    'completion_signal':'observable criterion','depends_on':[],'status':'planned','note':'proposed','evidence_ids':[]},

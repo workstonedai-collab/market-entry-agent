@@ -16,9 +16,12 @@ def plan(product, mission):
             'lenses':MARKET_LENSES if product=='market-entry-agent' else RISK_LENSES,
             'boundaries':['当前任务输入优先，不补企业未知能力或把行业分类当产品。','区分来源陈述、商业推断、拟议方案和待验证问题。','缺失数值为null；进口额不等于直接需求，平均关税不等于具体产品税率。','没有三个可比较时期不编趋势，没有可靠份额不画占比。'],
             'roadmap_contract':{'stages':[{'id':'research','goal':'阶段目标','actions':['计划工作'],'deliverables':['交付物'],'depends_on':[],'completion_signal':'可观察完成条件','evidence_ids':[]}],'note':'路线图为拟议计划，不代表已有合作方、项目完成或服务成交。'},
+            'decision_guidance':{'options':'Compare fit, tradeoff, requirements and the first check for each feasible option. Unknown prices stay unknown; distinguish quoted costs from assumptions.', 'validation_order':'Explain why a premise matters first and how supported/unsupported outcomes would change the choice. Avoid arbitrary country-fit scores.'},
             'watchpoint_contract':{'condition':'可观察触发条件','exposure':'影响的经营对象','next_check':'接下来核查的来源/事项','evidence_ids':[]}}
 
 def validate_extensions(report, read_ids):
+    from .decision import validate
+    validate(report, read_ids)
     stages=report.get('roadmap',[]); watch=report.get('watchpoints',[])
     if not isinstance(stages,list) or len(stages)>12 or not isinstance(watch,list) or len(watch)>20: raise ValueError('Bounded roadmap/watchpoints lists required')
     seen=set()
