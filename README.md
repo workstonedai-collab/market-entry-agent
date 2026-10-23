@@ -1,5 +1,60 @@
 # 企业出海咨询/国区营商环境监测智能体
 
+给企业海外业务团队、咨询人员和国区研究者使用。输入产品、目标市场和经营约束，得到带来源的进入路径分析、待核实问题和后续行动建议。
+
+[中文说明与上手](README.zh-CN.md) · [Quickstart](#try-it-in-two-minutes) · [Public examples](examples/README.md) · [Live research](docs/live-research.md)
+
+# Market Entry Agent
+
+[![CI](https://github.com/workstonedai-collab/market-entry-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/workstonedai-collab/market-entry-agent/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB)](pyproject.toml)
+[![Status: Alpha](https://img.shields.io/badge/status-alpha-orange.svg)](docs/roadmap.md)
+
+For overseas business teams, advisers and country researchers. Describe your product, target markets and operating constraints to build a sourced assessment of entry options, open questions and next checks.
+
+**Self-hosted alpha.** The offline demo uses fictional evidence and needs no model key. Live research requires a configured model and sources.
+
+## See the workspace
+
+![Country dashboard in the project workspace](docs/assets/country-dashboard.png)
+
+This is the country dashboard, not a completed assessment for an arbitrary business. Use the demo below to inspect saved results; [public examples](examples/README.md) explain which inputs are fictional or attributed public data.
+
+## Try it in two minutes
+
+Python 3.11+ required. No model key, external service or paid account is needed for the offline demonstration.
+
+```bash
+git clone https://github.com/workstonedai-collab/market-entry-agent.git
+cd market-entry-agent
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
+market-entry-agent demo
+market-entry-agent serve
+```
+
+Open **http://127.0.0.1:8712**. Inspect the saved brief, source records and tool trace. Choose a mission, run it again, or export the result as Markdown/JSON.
+
+The demo uses **fictional scenarios and a deterministic policy**. Its interface and exports are labeled accordingly. It demonstrates the execution and storage path, not the quality of an LLM or real-time intelligence.
+
+For native Windows, use PowerShell without activation:
+
+```powershell
+py -3.11 -m venv .venv
+& ".\.venv\Scripts\python.exe" -m pip install .
+& ".\.venv\Scripts\python.exe" -m market_entry_agent demo
+& ".\.venv\Scripts\python.exe" -m market_entry_agent serve
+```
+
+See the [Windows installation, model configuration and troubleshooting guide](docs/windows.md). CI exercises Python 3.11–3.13 on Windows, macOS and Linux, plus a clean PowerShell installation. The package is installed from this repository or its release wheel; no PyPI publication is claimed.
+
+## Background and open scope
+
+<details>
+<summary>Research use cases, ongoing work and contact</summary>
+
 一个围绕企业实际情况做出海研究、并持续跟踪目标市场变化的智能体。告诉它你卖什么、打算去哪里、目前处在哪个阶段，以及预算、渠道和交付有哪些约束，它会检索公开信息，阅读相关材料，梳理市场进入路径、经营条件、值得验证的机会和需要补充的信息。
 
 出海前要回答的问题很多：先做哪个市场，找经销商还是自建团队，产品能否进入，售后怎么安排，政策变化会不会改变原来的成本和计划。通用国别报告往往很难回答一家企业的具体问题。这个项目把企业背景放进研究任务，让报告尽量落到准入、渠道、订单、成本和执行条件上；材料不足时，直接列出下一步需要验证的问题。
@@ -9,19 +64,6 @@
 如果你不熟悉编程，可以把这个仓库交给自己的 Agent，让它按说明部署，先用演示熟悉操作，再接入模型、公开搜索和信息源。可以独立使用，也可以与[地缘政治风险监测预警智能体](https://github.com/workstonedai-collab/georisk-agent)共享公共证据。企业画像、任务和咨询报告保存在各自的私有工作空间。
 
 **开放范围与交流：** 国区评分配方、分项权重、贡献计算与通用研究步骤已公开。部分进一步的研究方法、专用提示词和相关知识内容暂未开源。如有需要或希望进一步交流，欢迎[联系作者](https://github.com/workstonedai-collab)或提交[项目 Issue](https://github.com/workstonedai-collab/market-entry-agent/issues/new)；私人资料请勿直接发布在公开 Issue。
-
-[中文上手与详细说明](README.zh-CN.md) · [工作流程与技术路线](#workflow-and-technical-route) · [Public examples](examples/README.md) · [Live research](docs/live-research.md)
-
-# Market Entry Agent
-
-**Choose a market. Build an entry plan. Keep it current.**
-
-[![CI](https://github.com/workstonedai-collab/market-entry-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/workstonedai-collab/market-entry-agent/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB)](pyproject.toml)
-[![Status: Alpha](https://img.shields.io/badge/status-alpha-orange.svg)](docs/roadmap.md)
-
-[简体中文](README.zh-CN.md) · [Quickstart](#try-it-in-two-minutes) · [Architecture](docs/architecture.md) · [Project memory and skills](docs/kernel.md) · [Windows setup](docs/windows.md) · [Deployment](docs/deployment.md) · [Peer project](https://github.com/workstonedai-collab/georisk-agent)
 
 A research agent for businesses evaluating overseas markets and following changes after entry. Give it your product, target markets, entry stage and operating constraints. It searches explicit public queries, reads relevant materials and saves an assessment of entry options, operating requirements, opportunities to test and questions that still need answers.
 
@@ -36,6 +78,12 @@ New to deployment? Give this repository to your own coding agent. Ask it to run 
 Reports now use a versioned writing skill during initial drafting. Compare event assessments, record entry-route tradeoffs and next checks, and inspect source retrieval status. See [report writing and case evaluation](docs/report-quality.md).
 
 Three additional historical cases can be run individually to inspect the agent’s direct output: `cbam-importer`, `cptpp-origin`, `eudr-furniture`. Inputs, returned JSON actions and raw reports are retained privately for comparison. [Case instructions](docs/report-quality.md#用几组真实事件检查直接生成的原稿).
+
+[中文上手与详细说明](README.zh-CN.md) · [工作流程与技术路线](#workflow-and-technical-route) · [Public examples](examples/README.md) · [Live research](docs/live-research.md)
+
+[简体中文](README.zh-CN.md) · [Quickstart](#try-it-in-two-minutes) · [Architecture](docs/architecture.md) · [Project memory and skills](docs/kernel.md) · [Windows setup](docs/windows.md) · [Deployment](docs/deployment.md) · [Peer project](https://github.com/workstonedai-collab/georisk-agent)
+
+</details>
 
 ## Continue the business project
 
@@ -181,35 +229,6 @@ flowchart TB
 The shared foundation denotes code distributed inside each package. Private missions, company context, reports and notification state stay in separate workspaces; selected material is transmitted to the configured model endpoint.
 
 </details>
-
-## Try it in two minutes
-
-Python 3.11+ required. No model key, external service or paid account is needed for the offline demonstration.
-
-```bash
-git clone https://github.com/workstonedai-collab/market-entry-agent.git
-cd market-entry-agent
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -e .
-market-entry-agent demo
-market-entry-agent serve
-```
-
-Open **http://127.0.0.1:8712**. Inspect the saved brief, source records and tool trace. Choose a mission, run it again, or export the result as Markdown/JSON.
-
-The demo uses **fictional scenarios and a deterministic policy**. Its interface and exports are labeled accordingly. It demonstrates the execution and storage path, not the quality of an LLM or real-time intelligence.
-
-For native Windows, use PowerShell without activation:
-
-```powershell
-py -3.11 -m venv .venv
-& ".\.venv\Scripts\python.exe" -m pip install .
-& ".\.venv\Scripts\python.exe" -m market_entry_agent demo
-& ".\.venv\Scripts\python.exe" -m market_entry_agent serve
-```
-
-See the [Windows installation, model configuration and troubleshooting guide](docs/windows.md). CI exercises Python 3.11–3.13 on Windows, macOS and Linux, plus a clean PowerShell installation. The package is installed from this repository or its release wheel; no PyPI publication is claimed.
 
 ## Continue a project across research tasks
 
