@@ -1,3 +1,11 @@
+# v0.12.1 · 等待任务结束后清理测试工作空间
+
+HTTP 任务创建验收先确认后台任务已完成并释放数据库，再清理临时工作空间，避免 Windows 的文件占用错误。保留 v0.12.0 的办公适配与六类任务能力。
+
+The HTTP task regression waits for the actual worker to finish before removing its temporary workspace. The Office adapters and product task contracts introduced in v0.12.0 remain supported.
+
+---
+
 # v0.12.0 · 办公资料与按任务研究
 
 可选本地 MarkItDown 适配器导入 DOCX/XLSX/PPTX；iOfficeAI/OfficeCLI 将完整已保存报告导出为可编辑 Word，不额外调用模型。六类产品任务契约接入网页、CLI、HTTP 与原有 MCP 运行接口，首次保存后恢复沿用原内容。

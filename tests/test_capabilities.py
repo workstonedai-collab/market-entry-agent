@@ -100,10 +100,14 @@ class CapabilityTests(unittest.TestCase):
   import json
   from urllib.request import Request,build_opener,ProxyHandler
   app=importlib.import_module(MODULE+'.app')
-  ready=threading.Event();servers=[];original=app.AgentHTTPServer;http=build_opener(ProxyHandler({}))
+  ready=threading.Event();completed=threading.Event();servers=[];original=app.AgentHTTPServer;http=build_opener(ProxyHandler({}))
+  class TrackedAgent(core.Agent):
+   def run(self,*args,**kwargs):
+    try:return super().run(*args,**kwargs)
+    finally:completed.set()
   def server(*args,**kwargs):
    result=original(*args,**kwargs);servers.append(result);ready.set();return result
-  with tempfile.TemporaryDirectory() as d, patch('sys.stdout',io.TextIOWrapper(io.BytesIO(),encoding='cp1252')), patch.dict(os.environ,{'AGENT_UI_TOKEN':''}), patch.object(app,'AgentHTTPServer',side_effect=server):
+  with tempfile.TemporaryDirectory() as d, patch('sys.stdout',io.TextIOWrapper(io.BytesIO(),encoding='cp1252')), patch.dict(os.environ,{'AGENT_UI_TOKEN':''}), patch.object(app,'AgentHTTPServer',side_effect=server), patch.object(app,'Agent',TrackedAgent):
    store=core.Store(d);thread=threading.Thread(target=app.serve,args=(store,'127.0.0.1',0),daemon=True);thread.start()
    try:
     self.assertTrue(ready.wait(5));base='http://127.0.0.1:'+str(servers[0].server_port)
@@ -113,8 +117,11 @@ class CapabilityTests(unittest.TestCase):
     mission=dict(product.SPEC['starter'],context='',task_mode=data['task_modes'][0]['id'])
     request=Request(base+'/api/runs',data=json.dumps(dict(mission=mission,engine='demo')).encode(),headers={'Content-Type':'application/json'})
     with http.open(request,timeout=5) as response:created=json.load(response)
+    self.assertTrue(completed.wait(15),'Background task must release SQLite before cleanup')
+    self.assertEqual(store.get_run(created['id'])['state'],'completed')
     self.assertEqual(store.get_run(created['id'])['mission']['task_mode'],mission['task_mode'])
    finally:
+    if "created" in locals():completed.wait(15)
     if servers and thread.is_alive():servers[0].shutdown()
     if servers:servers[0].server_close()
     thread.join(5)

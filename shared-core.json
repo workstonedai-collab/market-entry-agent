@@ -1,5 +1,5 @@
 {
-  "version": "0.12.0",
+  "version": "0.12.1",
   "module": "market_entry_agent",
   "files": {
     "core.py": "5166c1e28e21da366bfa49b06c843129b039da0ea76137bc52ebdd9e93234e43",
