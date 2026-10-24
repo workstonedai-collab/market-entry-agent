@@ -54,6 +54,11 @@ def web_search(store, mission, index, timeout=30):
     if type(index) is not int or not 0<=index<len(queries):
         raise ValueError('Select query_index from the mission public search_queries list (zero based)')
     query=queries[index].strip()
+    return search_query(store,mission,query,timeout)
+
+
+def search_query(store,mission,query,timeout=30):
+    from .core import digest
     domains=mission.get('search_domains',[])
     provider=os.environ.get('AGENT_SEARCH_PROVIDER','minimax')
     if provider!='minimax':
@@ -127,11 +132,20 @@ def _fetch_page(store, evidence_id=None, source_id=None, timeout=20):
     identity=digest({'url':url,'hosts':hosts,'countries':source['countries'],'topics':source['topics'],'published_at':source.get('published_at')})
     previous=cached(store,'page:'+identity,3600)
     if previous:
-        return {'id':previous['id'],'cached':True,'retrieval_kind':'page_text'}
-    if urlsplit(url).path.lower().endswith('.pdf'):
-        raise ValueError('PDF extraction is not supported; register an HTML source or import licensed extracted text')
+        return dict(previous,cached=True,retrieval_kind=previous.get('retrieval_kind','page_text'))
+    retrieval_deadline=time.monotonic()+timeout
     raw=fetch_public_https(url,hosts,timeout=min(timeout,25))
-    if b'%PDF'==raw[:4] or b'<' not in raw[:1000]:
+    if b'%PDF'==raw[:4]:
+        from .documents import ingest
+        from tempfile import TemporaryDirectory
+        from pathlib import Path
+        with TemporaryDirectory() as folder:
+            target=Path(folder)/'source.pdf';target.write_bytes(raw)
+            imported=ingest(store,target,{'title':source.get('title',url),'url':url,'countries':source['countries'],'topics':source['topics'],'published_at':source.get('published_at'),'public':True},timeout=max(.01,retrieval_deadline-time.monotonic()))
+        payload={'id':imported['evidence_ids'][0],'evidence_ids':imported['evidence_ids'],'retrieval_kind':'document_text'}
+        cache(store,'page:'+identity,payload)
+        return dict(payload,cached=False)
+    if b'<' not in raw[:1000]:
         raise ValueError('Expected a readable HTML page')
     parser=TextPage(); parser.feed(raw.decode('utf-8',errors='replace'))
     body=parser.text()

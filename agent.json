@@ -1,7 +1,7 @@
 {
   "schema": "field-agent/v1",
   "id": "market-entry-agent",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "entrypoint": "market-entry-agent",
   "python_module": "market_entry_agent",
   "engines": {
@@ -21,7 +21,10 @@
     "finish",
     "load_skill",
     "read_result",
-    "project_state"
+    "project_state",
+    "research_state",
+    "update_research",
+    "adaptive_search"
   ],
   "evidence_schema": "schemas/evidence-v1.schema.json",
   "interfaces": [
@@ -45,6 +48,15 @@
     "usage_receipts": true,
     "mcp": false,
     "private_business_projects": true,
-    "product_workflow": "profile_options_assumptions_roadmap"
+    "product_workflow": "profile_options_assumptions_roadmap",
+    "research_notebook": true,
+    "adaptive_public_search": "explicit_term_scope",
+    "document_import": [
+      "pdf_optional",
+      "csv",
+      "tsv",
+      "txt",
+      "md"
+    ]
   }
 }

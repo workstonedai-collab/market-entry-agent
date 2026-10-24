@@ -31,6 +31,7 @@
     "docs/live-research.md",
     "docs/product-workflow.md",
     "docs/report-quality.md",
+    "docs/research-state.md",
     "docs/roadmap.md",
     "docs/runtime.md",
     "docs/shared-core.md",
@@ -59,6 +60,7 @@
     "skills/market-entry-agent/SKILL.md",
     "src/market_entry_agent/__init__.py",
     "src/market_entry_agent/__main__.py",
+    "src/market_entry_agent/adaptive.py",
     "src/market_entry_agent/app.py",
     "src/market_entry_agent/business.py",
     "src/market_entry_agent/context.py",
@@ -68,8 +70,10 @@
     "src/market_entry_agent/data/country-baselines.json",
     "src/market_entry_agent/data/demo-evidence.json",
     "src/market_entry_agent/decision.py",
+    "src/market_entry_agent/documents.py",
     "src/market_entry_agent/memory.py",
     "src/market_entry_agent/net.py",
+    "src/market_entry_agent/notebook.py",
     "src/market_entry_agent/product.py",
     "src/market_entry_agent/research.py",
     "src/market_entry_agent/runtime.py",
@@ -87,6 +91,7 @@
     "tests/test_portability.py",
     "tests/test_projects.py",
     "tests/test_report_cases.py",
+    "tests/test_research_state.py",
     "tests/test_ui.py"
   ]
 }

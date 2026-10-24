@@ -141,6 +141,14 @@ def verify():
             assert saved["state"] == "completed" and saved["report"]["synthetic"]
             assert cli("show", run_id)["report"] == saved["report"]
             checks.append("http_task_country_query_and_saved_result")
+            with http.open(Request(base+"/api/research?run_id="+run_id,headers=headers),timeout=5) as response:
+                assert json.load(response)["revision"] == 0
+            for request in [Request(base+"/api/research?run_id="+run_id),Request(base+"/api/research?run_id="+run_id,headers=dict(headers,Origin="https://example.org"))]:
+                try:
+                    http.open(request,timeout=5)
+                    raise AssertionError("Research state endpoint accepted unauthorised request")
+                except HTTPError as exc:assert exc.code in (401,403)
+            checks.append("research_state_http_auth_origin_and_legacy_run")
             def post(path, value):
                 data = json.dumps(value, ensure_ascii=False).encode("utf-8")
                 with http.open(Request(base + path, data=data, headers=headers), timeout=5) as response:

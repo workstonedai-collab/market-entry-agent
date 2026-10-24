@@ -8,6 +8,9 @@ def field(kind, **kwargs):
 
 TEXT = field("string", minLength=1, maxLength=128)
 SCHEMAS = {
+    "research_state": ({}, []),
+    "update_research": ({"expected_revision":field("integer",minimum=0),"questions":field("array",maxItems=20),"notes":field("array",maxItems=20),"next_step":field("string",maxLength=2000),"stop_reason":field("string",maxLength=2000)}, ["expected_revision"]),
+    "adaptive_search": ({"term_ids":field("array",maxItems=5,items=field("integer",minimum=0,maximum=39)),"facet_id":field("integer",minimum=0,maximum=19),"reason":field("string",minLength=1,maxLength=1000)}, ["term_ids","facet_id","reason"]),
     "project_state": ({"kind":TEXT,"id":TEXT}, []),
     "country_baseline": ({"countries": field("array", maxItems=5, items=TEXT)}, []),
     "research_plan": ({}, []),
@@ -54,6 +57,9 @@ def check(schema, value, label="arguments"):
 
 
 OUTPUTS = {
+    "research_state": {"revision":field("integer"),"questions":field("array"),"notes":field("array")},
+    "update_research": {"revision":field("integer"),"questions":field("array"),"notes":field("array")},
+    "adaptive_search": {"query":field("string"),"results":field("array"),"query_budget":field("object")},
     "project_state": {"project":field("object"),"guide":field("object")},
     "country_baseline": {"evidence_ids": field("array", items=TEXT), "comparison": field("object")},
     "research_plan": {"schema": TEXT, "lenses": field("array")},
@@ -79,11 +85,11 @@ class ToolRegistry:
             item["input_schema"] = field("object", properties=properties, required=required, additionalProperties=False)
             output = OUTPUTS[item["name"]]
             item["output_schema"] = field("object", properties=output, required=list(output))
-            item["policy"] = {"read_only": item["name"] != "finish",
+            item["policy"] = {"read_only": item["name"] not in ("finish","update_research","adaptive_search"),
                               "external_writes": False,
-                              "workspace_writes": item["name"] in ("country_baseline", "web_search", "fetch_page", "fetch_feed", "load_skill", "finish"),
-                              "network": item["name"] in ("web_search", "fetch_page", "fetch_feed"),
-                              "timeout_seconds": {"web_search": 40, "fetch_page": 25, "fetch_feed": 12}.get(item["name"]),
+                              "workspace_writes": item["name"] in ("country_baseline", "web_search", "fetch_page", "fetch_feed", "load_skill", "finish", "update_research", "adaptive_search"),
+                              "network": item["name"] in ("web_search", "fetch_page", "fetch_feed", "adaptive_search"),
+                              "timeout_seconds": {"web_search": 40, "fetch_page": 25, "fetch_feed": 12, "adaptive_search":40}.get(item["name"]),
                               "reuse": item["name"] in ("project_state", "read_evidence", "research_plan", "load_skill", "country_baseline", "search_evidence", "list_sources", "recall")}
             self.tools[item["name"]] = item
 

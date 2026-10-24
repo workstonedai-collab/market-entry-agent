@@ -149,6 +149,23 @@ class KernelTests(unittest.TestCase):
         self.assertEqual(len(run["messages"]), 2)
         self.assertEqual(self.store.read(eid)["body"], "A"*28000)
 
+    def test_cached_read_context_restores_the_actual_source_excerpt(self):
+        eid = self.seed('Cookie banner. '*100 + 'MATERIAL RULE AFTER THE BANNER')
+        seen = []
+        class Repeater:
+            n = 0
+            def next(self, messages, timeout):
+                self.n += 1
+                seen.append(messages)
+                if self.n <= 3:
+                    return {'action':'read_evidence','arguments':{'id':eid,'limit':6000}}
+                return {'action':'finish','arguments':{'report':report(eid)}}
+        run = core.Agent(self.store, product.SPEC, Repeater).run(self.mission, 'model')
+        self.assertEqual(run['state'], 'completed')
+        context = '\n'.join(m['content'] for m in seen[-1])
+        self.assertIn('MATERIAL RULE AFTER THE BANNER', context)
+        self.assertIn('HOST EXECUTION NOTICE', context)
+
     def test_no_progress_stops_and_saved_data_is_resumable(self):
         eid = self.seed()
         class Repeater:

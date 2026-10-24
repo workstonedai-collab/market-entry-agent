@@ -102,6 +102,12 @@ def serve(store, host, port):
                 return self.reply(200, project_asset, "text/javascript; charset=utf-8")
             if path == "/health":
                 return self.reply(200, {"status": "ok", "product": SPEC["id"], "version": __version__})
+            if path == "/api/research":
+                try:
+                    from .notebook import snapshot
+                    rid=parse_qs(urlsplit(self.path).query).get("run_id",[""])[0]
+                    return self.reply(200,snapshot(store,rid))
+                except ValueError as exc:return self.reply(400,{"error":str(exc)})
             if path == "/api/source-health":
                 return self.reply(200,source_overview(store))
             if path == "/api/project":
@@ -279,6 +285,10 @@ def main(argv=None):
     resume.add_argument("id")
     show = sub.add_parser("show")
     show.add_argument("id")
+    research=sub.add_parser("research-state",help="Read saved questions and evidence fragments for one run")
+    research.add_argument("id")
+    document=sub.add_parser("import-document",help="Import an operator-selected PDF/CSV/TSV/TXT/MD with provenance")
+    document.add_argument("file");document.add_argument("metadata",help="JSON metadata; public defaults to false")
     sub.add_parser("list")
     sub.add_parser("country-list", help="List bundled country coverage and scores")
     country = sub.add_parser("country", help="Country dashboard: baseline, public evidence and saved tasks")
@@ -375,6 +385,12 @@ def main(argv=None):
             result = public_run(Agent(store, SPEC).run(resume=args.id))
         elif args.command == "show":
             result = public_run(store.get_run(args.id))
+        elif args.command == "research-state":
+            from .notebook import snapshot as notebook_snapshot
+            result=notebook_snapshot(store,args.id)
+        elif args.command == "import-document":
+            from .documents import ingest
+            result=ingest(store,args.file,load_json(args.metadata))
         elif args.command == "list":
             result = [{k: r[k] for k in ("id", "state", "engine", "created", "error")} for r in store.list_runs()]
         elif args.command == "export":

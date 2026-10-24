@@ -81,6 +81,8 @@ def validate_mission(mission):
         raise ValueError("skill_ids must contain at most 3 skill names")
     from .net import public_queries
     public_queries(mission)
+    from .adaptive import validate as validate_search
+    validate_search(mission)
     if mission.get("as_of"):
         if not isinstance(mission["as_of"], str):
             raise ValueError("as_of must be an ISO date/time string")
@@ -313,6 +315,10 @@ class Store(RuntimeStore):
         run = self.get_run(rid)
         report.pop("project_changes",None)
         report.pop("writing_skill",None)
+        report.pop("research_state",None)
+        from .notebook import snapshot as research_snapshot
+        research=research_snapshot(self,rid)
+        if research["revision"]:report["research_state"]=research
         selected = [self.read(eid) for eid in report.get("evidence_ids", [])]
         report["synthetic"] = any(e["synthetic"] for e in selected)
         report["generated_at"] = now()
@@ -327,7 +333,7 @@ class Store(RuntimeStore):
             report["writing_skill"] = {"name":"report-writing", "version":writing["version"]}
         if run["mission"].get("project_id"):
             report["project_id"] = run["mission"]["project_id"]
-        report["sources"] = [{k: row.get(k) for k in ("id", "title", "url", "status", "published_at", "observed_at", "event_key", "retrieval_kind", "text_truncated", "date_basis", "data_period", "method_version", "upstream_sources")} for row in selected]
+        report["sources"] = [{k: row.get(k) for k in ("id", "title", "url", "status", "published_at", "observed_at", "event_key", "retrieval_kind", "text_truncated", "date_basis", "data_period", "method_version", "upstream_sources", "document_location", "content_sha256", "visibility")} for row in selected]
         # Atomic durable result + local notification outbox. No network delivery.
         with self.tasks() as db:
             db.execute("BEGIN IMMEDIATE")
@@ -502,7 +508,7 @@ TOOLS = [
     {"name":"country_baseline","arguments":{"countries":["Vietnam","Indonesia"]},"description":"Read public country data and the published research-reference calculation for up to five mission countries. Preserve source periods and coverage, and read returned evidence IDs before citing."},
     {"name":"research_plan","arguments":{},"description":"Get the public research outline and proposed-action output schemas. The outline is not factual evidence."},
     {"name":"web_search", "arguments":{"query_index":0}, "description":"Search one explicit PUBLIC search_queries entry from the mission, zero-based. Never send company context. Returns discovery snippets, not page text."},
-    {"name":"fetch_page", "arguments":{"evidence_id":"optional search result ID", "source_id":"optional registered page ID; choose exactly one field"}, "description":"Fetch readable HTML from a discovered result or registered page. Returns ID; then read_evidence. Does not support PDF or JS-only pages."},
+    {"name":"fetch_page", "arguments":{"evidence_id":"optional search result ID", "source_id":"optional registered page ID; choose exactly one field"}, "description":"Fetch readable HTML from a discovered result or registered page. Returns ID; then read_evidence. PDF requires an operator-configured optional adapter and returns page evidence_ids. Does not support JS-only pages."},
     {"name": "search_evidence", "arguments": {"query": "short query"}, "description": "Search evidence within mission countries/topics; returns short excerpts and IDs, not verified truth."},
     {"name": "read_evidence", "arguments": {"id": "evidence ID"}, "description": "Read a bounded excerpt of the source claim and metadata. offset/limit select more text; read before citing."},
     {"name": "recall", "arguments": {}, "description": "Recall private operator facts and completed reports for this explicit project, or the same legacy mission. History is analysis, not independent evidence."},
@@ -513,6 +519,9 @@ TOOLS = [
 
 
 TOOLS.extend([
+    {"name":"research_state","arguments":{},"description":"Read durable questions, source fragments, hypotheses, judgments, next steps and stop reason for this run. No verification or approval implied."},
+    {"name":"update_research","arguments":{"expected_revision":0,"questions":[{"id":"q1","text":"Decision-relevant question","status":"open","why":"Why this matters"}],"notes":[{"id":"n1","kind":"hypothesis","text":"Conditional explanation","evidence_ids":[],"fragments":[],"relation":"context","question_id":"q1","change_reason":"Initial note"}],"next_step":"Next useful retrieval","stop_reason":""},"description":"Upsert durable working notes. kind: source_fact/hypothesis/judgment/decision_proposal; source_fact needs fragments [{evidence_id,offset,quote}] exactly matching a successfully read span. status: open/investigating/answered/unresolved. relation: supports/opposes/context. All model decisions remain proposals. Read research_state for revision conflicts."},
+    {"name":"adaptive_search","arguments":{"term_ids":[0],"facet_id":0,"reason":"How the result may change a decision"},"description":"Compose a new query ONLY from indexed public_search.terms and public_search.facets explicitly provided in the mission. Never send question, context, private notes or reason to search. Cumulative unique-query budget survives resume. Fetch and read discovered pages before citing."},
     {"name": "load_skill", "arguments": {"name": "evidence-brief"}, "description": "Load one configured document skill by name. No scripts or new permissions. Versions are frozen in this run."},
     {"name": "read_result", "arguments": {"step": 0, "offset": 0, "limit": 3000}, "description": "Read a bounded text excerpt of a saved tool result in this run. Source citations still require read_evidence."},
 ])
@@ -650,6 +659,8 @@ class Agent:
                 if model:
                     if current["runtime"]["model_calls"] >= mission.get("max_model_calls", max_steps * 2):
                         raise RuntimeError("model_call_budget_exhausted")
+                    from .notebook import snapshot as research_snapshot
+                    meta["research_state"]=research_snapshot(self.store,rid)
                     messages, stats = assemble(seed, current, meta, meta["context_budget_chars"])
                     messages.append({"role": "user", "content": "Execution budget: " + str(max_steps-seq) + " actions remain; " + str(round(remaining, 2)) + " seconds in this attempt. Reuse saved data. Reserve an action for finish; if sources are exhausted, save a scoped assessment and gaps."})
                     stats["context_characters"] = sum(len(m["content"]) for m in messages)
@@ -734,8 +745,9 @@ class Agent:
         sources=[s for s in sources if scope_keys(s["countries"]).intersection(scope_keys(mission["countries"])) and set(s["topics"]).intersection(mission["topics"])]
         queries=bool(mission.get("search_queries"))
         excluded=set()
+        if not mission.get("public_search"):excluded.add("adaptive_search")
         if not queries:excluded.add("web_search")
-        if not queries and not any(s.get("kind")=="page" for s in sources):excluded.add("fetch_page")
+        if not queries and not mission.get("public_search") and not any(s.get("kind")=="page" for s in sources):excluded.add("fetch_page")
         if not any(s.get("kind","feed")=="feed" for s in sources):excluded.add("fetch_feed")
         if not mission.get("project_id"):excluded.add("project_state")
         if not sources:excluded.add("list_sources")
@@ -761,6 +773,8 @@ class Agent:
             "Optionally include roadmap (list of stages: id, goal, actions[], deliverables[], depends_on[], completion_signal, evidence_ids[]) and watchpoints (condition, exposure, next_check, evidence_ids[]). Stage dependencies must point backward. These are optional proposed plans, not accomplished work. Include extensions only when requested or needed; do not repeat the same action list across report sections. "
             "Use web_search only for explicit mission search_queries; fetch_page and read relevant body evidence. Search snippets are discovery, never full-page reading. "
             "For historical replay as_of, use only material published on/before as_of; exclude unknown publication dates and current feed content. Never call a replay a current warning. "
+            "For multi-part research, use research_state/update_research to retain decision questions, exact read source fragments, supporting/opposing evidence and why the next retrieval helps. They are working notes, never approved decisions. Small tasks can finish without a notebook. "
+            "Use adaptive_search only when public_search is configured; select public term/facet indices, never generate private query prose. Treat failures, exhausted sources or repeated information as reasons to stop retrieval and save a conditional assessment, not to invent evidence. "
             "Stay within mission scope. Search then read relevant evidence before finishing. "
             "No unsupported factual claims or invented sources. Identify evidence gaps and conflicting accounts. "
             "Synthetic evidence must be labeled. Priority is a qualitative judgment, not an objective probability. "
@@ -779,6 +793,12 @@ class Agent:
     def _execute(self, name, args, run, remaining):
         from .countries import scope_keys
         mission = run["mission"]
+        if name in ("research_state","update_research"):
+            from .notebook import snapshot, update
+            return snapshot(self.store,run['id']) if name=="research_state" else update(self.store,run,args)
+        if name == "adaptive_search":
+            from .adaptive import search
+            return search(self.store,run,args,min(40,remaining))
         if name == "project_state":
             from .workflow import Workflow
             workflow = Workflow(self.store, self.spec["id"])
@@ -844,7 +864,7 @@ class Agent:
                 raise ValueError("Choose exactly one of evidence_id or source_id")
             evidence_id = args.get("evidence_id")
             if evidence_id:
-                discovered = {r["id"] for step in run["steps"] if step["action"]=="web_search" for r in step["observation"].get("results", [])}
+                discovered = {r["id"] for step in run["steps"] if step["action"] in ("web_search","adaptive_search") for r in step["observation"].get("results", [])}
                 if evidence_id not in discovered:
                     raise ValueError("evidence_id must be a search result ID. For a registered source call fetch_page with source_id only.")
             source_id=args.get("source_id")
@@ -882,6 +902,8 @@ class Agent:
             ids = report["evidence_ids"]
             if not all(isinstance(eid, str) and eid in read_ids for eid in ids):
                 raise ValueError("Citations must reference evidence read in this run")
+            if any(self.store.read(eid).get("retrieval_kind")=="search_snippet" for eid in ids):
+                raise ValueError("Search snippets are discovery; fetch and read body evidence before citing")
             for finding in report["findings"]:
                 if not isinstance(finding, dict) or not isinstance(finding.get("claim"), str) or not finding.get("evidence_ids"):
                     raise ValueError("Each finding requires claim and evidence_ids")
@@ -965,6 +987,8 @@ def markdown(report):
     lines.extend(extension_markdown(report))
     from .decision import markdown as decision_markdown
     lines.extend(decision_markdown(report))
+    from .notebook import markdown as notebook_markdown
+    lines.extend(notebook_markdown(report.get("research_state")))
     lines.extend(["", "## Sources / 来源", ""])
     for source in report["sources"]:
         lines.append(f"- [{source['id']}] {source['title']} — {source['url']} ({source['status']}; published: {source.get('published_at') or 'unknown'})")

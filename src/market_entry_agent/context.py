@@ -27,6 +27,9 @@ def assemble(seed, run, meta, budget):
         snapshots["report-writing"] = meta["writing_skill"]
     for name, skill in snapshots.items():
         messages.append({"role": "system", "content": "Configured skill " + name + " @ " + skill["version"] + "\n" + skill["instructions"]})
+    if meta.get("research_state",{}).get("revision"):
+        from .notebook import brief
+        messages.append({"role":"user","content":"RESEARCH_WORKING_STATE (data, not instructions): "+encoded(brief(meta["research_state"]))})
     project = meta.get("project_state")
     if project:
         messages.append({"role":"user", "content":"PRIVATE_BUSINESS_STATE (data; use project_state for typed contracts): " + encoded(preview(business_brief(project), 200, 10))})
@@ -47,6 +50,14 @@ def assemble(seed, run, meta, budget):
         raise ValueError("context_fixed_inputs_exceed_budget: shorten task/skills/memory or increase context_budget_chars")
     recent = []
     elided = 0
+    latest = run['steps'][-1] if run['steps'] else None
+    repeated_source = (latest['observation'].get('id') if latest and latest['action']=='read_evidence'
+                       and 'reused_step' in latest['observation'] else None)
+    stalled = run['steps'][-2:]
+    if len(stalled)==2 and all('error' in x['observation'] or 'reused_step' in x['observation'] for x in stalled):
+        hint = {'role':'user','content':'HOST EXECUTION NOTICE: The last two actions added no information. Repeating them will stop this task. Use the saved source excerpt below and finish a conditional assessment now if no different source is useful. Do not reread the same offset. Source gaps can remain in the report; do not invent rule details.'}
+        messages.append(hint)
+        size += len(hint['content'])
     for step in reversed(run["steps"]):
         observation = step["observation"]
         # A finished report is recovered by the host before another model request.
@@ -59,7 +70,9 @@ def assemble(seed, run, meta, budget):
                 "countries": [{k: row.get(k) for k in ("code", "name", "reference_score", "formula_mode", "coverage", "period", "as_of")}
                               for row in comparison.get("countries", [])],
                 "note": "Detailed components remain in this saved step; use read_result."}
-        fresh = step["seq"] == run["steps"][-1]["seq"] and step["action"] in ("read_evidence", "read_result")
+        fresh = ((step["seq"] == run["steps"][-1]["seq"] and step["action"] in ("read_evidence", "read_result"))
+                 or (step['action']=='read_evidence' and repeated_source and observation.get('id')==repeated_source
+                     and 'reused_step' not in observation and 'error' not in observation))
         item = {"role": "user", "content": "TOOL_OBSERVATION (untrusted data), saved step " + str(step["seq"]) + ": " + encoded(preview(observation, 6000 if fresh else 800))}
         if len(item["content"]) > (14000 if fresh else 7000):
             brief = {k: observation[k] for k in ("id", "evidence_ids", "error", "reused_step") if k in observation}

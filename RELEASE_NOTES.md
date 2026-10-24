@@ -1,3 +1,15 @@
+# v0.8.0 · 可接续的研究工作表与受控取材
+
+研究问题、原文摘录、支持或反对的依据、假设与下一步现在可随任务保存，支持恢复、浏览和导出。可选公开检索只组合操作者指定的词项，并持续计入查询预算；新增本地 CSV/TSV/TXT/Markdown 与可选 PDF 文本导入，保留行或页的位置。搜索摘要只能用于发现来源，不能作为正文引用。
+
+Repeated source reads now restore the original saved excerpt in context, including material beyond page banners. A no-progress notice encourages a scoped delivery while existing step/time/call controls remain in force. Completed reports save directly without a separate reviewer or rewrite pass.
+
+实际使用 MiniMax-M3.1-Flash 完成两组历史公开资料案例，各 9 次调用；另有一次受限 GOV.UK 自主检索先触发无进展保护，修复上下文复用后以同一任务剩余 1 次调用完成报告。后者仅取得一篇公告正文，报告明确保留原产地规则缺口；不作为完整法律意见或全网覆盖证明。原稿没有人工改写。模型配置与验收原始文件保留在仓库外。
+
+Base runtime remains standard-library only on Windows/macOS/Linux. PDF extraction is optional, limited to text PDFs; it does not add OCR or guarantee complex table recovery. Older tasks, evidence IDs, public dashboards and report fields remain supported. Public formulas and generic research steps stay open; specialized prompts, private knowledge and customer materials are not bundled. [Contact the author](https://github.com/workstonedai-collab) for further discussion.
+
+---
+
 # v0.7.1 · 直接生成报告的真实案例验证
 
 新增每个项目三组历史事件案例和显式运行工具，保留未经人工改写的模型动作、报告及回执。改进首次写作对日期节点、来源与题设、方案取舍和预算的处理；历史任务避免无效基线和空来源查询。实际运行结果及局限见报告质量文档。

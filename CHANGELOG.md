@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0 — 2026-10-24
+
+- Durable revisioned research questions, source fragments, hypotheses, judgments, next steps and stop reasons; direct report snapshots and exports.
+- Explicitly scoped public-term query composition with cumulative budgets and no private-context query generation.
+- Operator-selected local documents and optional isolated PDF extraction, preserving page/row provenance and private/shared-store boundaries.
+- CLI, authenticated HTTP and browser research-state access; legacy missions and standard-library base runtime retained.
+
 ## 0.7.1 — 2026-10-22
 
 - Three explicit fixed-corpus historical decision cases per product; preserve direct JSON actions, reports and reproducible receipts in a private directory.
