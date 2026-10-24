@@ -1,3 +1,11 @@
+# v0.9.0 · 研究记忆与问题相关的上下文
+
+同一项目可以接续来源陈述、假设、判断与拟议方案，保留原来源与修改原因。操作者决定只能由操作者记录。浏览器、CLI 和 HTTP 支持查看、修订、版本历史及移出记忆；任务恢复沿用原快照。确定性的相关性选择兼顾支持/反对依据和关键约束，不增加独立模型审稿流程。
+
+Existing reports, public dashboards, operator facts and Mac/Windows/Linux interfaces remain supported. Source statements are not certified facts; removal affects future memory recall, while saved runs and reports remain separate records. Public formulas and generic research steps remain available; specialized prompts, private knowledge and customer materials are not bundled. [Contact the author](https://github.com/workstonedai-collab) for further discussion.
+
+---
+
 # v0.8.0 · 可接续的研究工作表与受控取材
 
 研究问题、原文摘录、支持或反对的依据、假设与下一步现在可随任务保存，支持恢复、浏览和导出。可选公开检索只组合操作者指定的词项，并持续计入查询预算；新增本地 CSV/TSV/TXT/Markdown 与可选 PDF 文本导入，保留行或页的位置。搜索摘要只能用于发现来源，不能作为正文引用。

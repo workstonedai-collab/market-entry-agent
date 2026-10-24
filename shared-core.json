@@ -1,17 +1,17 @@
 {
-  "version": "0.8.0",
+  "version": "0.9.0",
   "module": "market_entry_agent",
   "files": {
-    "core.py": "8418a3ee3634c9268bc67d8eee725fc093a624787e20f1b38b08b6002b66115a",
-    "app.py": "e012667592461ad638ecb6044c61803b4eed0b4624ed93b24ef3bec0167ca0c8",
-    "web.html": "82c153e888916353c590d2ad777f8babbe03130ce15634da9095e21e07264424",
+    "core.py": "c3494a76a359a546ff6dc9889e44c757b1c255cab4652ac8db6956891d10a06e",
+    "app.py": "eb73cc6e432b1833bfc32465f99407ddff0d3c535d36ccb2206673ff65382e9b",
+    "web.html": "7c0d19da507fc4b470e102144ae1ac7db495e23aa8fb8b20c17feb8c0d57a744",
     "net.py": "1db5245ec15bf639cb9f29c15cc690f50d287dd0de6b2c213c1bc8f4cb8fb776",
     "transport.py": "20ac65c23e3811c5dd42bbbc854160f6273e02f143482aa924109e727774e807",
     "countries.py": "dfb98ff70c71a1ae88b60ec9a82d81859ad45ba006bfdbea344fcce41497fcb0",
     "research.py": "ba84d52a19f22745abedc6db0f6f8eb925b4bdd4ddfacd025defe8a2f403ad55",
     "data/country-baselines.json": "9a7f1e21946d6a8d1c92cf11ca55ea775e72765b2576c1f847f2adde13f7702e",
-    "memory.py": "d866e622188ec547727691be4c1c831cf027dd42500d6d1ae8b575d32bb733cf",
-    "context.py": "b4c2cc7266b014b41f5a906f3fd6c6dd8cb1b4f17a8bc9a101766cdb26f9677c",
+    "memory.py": "35873a8bdf4a0e8341b89024d956b355afd17e42395343f8733164ebfccfea13",
+    "context.py": "aa625363ecd49d6c06983e5657c2bc7ab0bdd2b12515e12d5307b32599166645",
     "contracts.py": "56ea770bcee6851e79daf77d05474cbac0d1cc25b8e73fe93a2b38c4b3b03fb9",
     "skills.py": "d5a81631c3f68b8ba6537c94bc1b45748f35143c2b055250ff78dbf56a443614",
     "runtime.py": "9e2403baa8f2fc38a3dc6f904d7e5d16bb0b651552d96248ff42e31d90e062da",
@@ -19,8 +19,9 @@
     "workflow-ui.js": "fe8759b8a95b988d4fe9c8c8d9930b4dbcf36f8efee487b3c48763c2fb920ba3",
     "source_health.py": "fae5e1f0828e7a2f8d254b28daae92c7b975bc6ab183e24eb4e4baeac4893f50",
     "decision.py": "c139b3d655cfc8fbc84ee27a1fe84cece1d347177fae4ed7ea7b35fff60b9048",
-    "notebook.py": "f1ace964eb98fbefd78075111aec02cfe4848ebb30b0d5ba27637616f9321401",
+    "notebook.py": "695fcf2d87a3869be45ac284e9ae01c81ea247bd2df6a3169eaf7ef5dec18094",
     "adaptive.py": "eab616e8eabcfb45cd9ae6d706bd0533ffc33d65f6a07b7a23999ff050e8eb67",
-    "documents.py": "0971909e5ab0c2030e58fb6202bfb38f0651d5101cc08ec359aee01347dd8cc2"
+    "documents.py": "0971909e5ab0c2030e58fb6202bfb38f0651d5101cc08ec359aee01347dd8cc2",
+    "continuity.py": "d83baec5fb007b0ab596a555655d738947901e5be354af50c99d1ac79dc504a5"
   }
 }

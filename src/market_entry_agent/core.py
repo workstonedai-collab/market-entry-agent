@@ -121,6 +121,8 @@ class Store(RuntimeStore):
         from .business import initialize as initialize_business
         with self.tasks() as db:
             initialize_business(db)
+            from .continuity import initialize as initialize_continuity
+            initialize_continuity(db)
         with self.evidence() as db:
             from .source_health import initialize as initialize_source_health
             initialize_source_health(db)
@@ -358,6 +360,16 @@ class Store(RuntimeStore):
                         report["project_check"] = {"state":"failed", "error":str(exc)[:160], "note":"Report retained; evaluate project again after resolving the condition."}
                     finally:
                         db.execute("RELEASE project_check")
+            if run['mission'].get('project_id'):
+                from .continuity import ResearchMemory
+                db.execute('SAVEPOINT capture_memory')
+                try:
+                    report['memory_result']={'captured_keys':ResearchMemory(self,run['product']).capture(db,run,research)}
+                except ValueError as exc:
+                    db.execute('ROLLBACK TO capture_memory')
+                    report['memory_result']={'state':'not_captured','reason':str(exc)[:160]}
+                finally:
+                    db.execute('RELEASE capture_memory')
             db.execute("UPDATE runs SET state='completed',report=?,lease_until=0,updated=? WHERE id=?", (json.dumps(report, ensure_ascii=False), now(), rid))
             key = digest({"product": run["product"], "mission": run["mission"], "evidence": sorted(report["evidence_ids"])})[:24]
             db.execute("INSERT OR IGNORE INTO outbox VALUES(?,?,?,?,?)", (key, rid, "pending_review", json.dumps(report, ensure_ascii=False), now()))

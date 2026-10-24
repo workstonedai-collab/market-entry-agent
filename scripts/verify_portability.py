@@ -154,6 +154,22 @@ def verify():
                 with http.open(Request(base + path, data=data, headers=headers), timeout=5) as response:
                     return json.load(response)
 
+            note=post('/api/memory/notes',{'project_id':'http-project','key':'route','expected_revision':0,'data':{'kind':'judgment','text':'Synthetic trade choice','change_reason':'HTTP acceptance'}})
+            assert note['revision']==1
+            with http.open(Request(base+'/api/memory/notes?project_id=http-project',headers=headers),timeout=5) as response:
+                assert json.load(response)['notes'][0]['kind']=='judgment'
+            with http.open(Request(base+'/api/memory/notes/history?project_id=http-project&key=route',headers=headers),timeout=5) as response:
+                assert len(json.load(response)['history'])==1
+            for endpoint in ['/api/memory/notes?project_id=http-project','/api/memory/notes/history?project_id=http-project&key=route']:
+                for unsafe in [Request(base+endpoint),Request(base+endpoint,headers=dict(headers,Origin='https://example.org'))]:
+                    try:
+                        http.open(unsafe,timeout=5)
+                        raise AssertionError('Research memory accepted unauthorized request')
+                    except HTTPError as exc:assert exc.code in (401,403)
+            assert post('/api/memory/notes',{'operation':'forget','project_id':'http-project','key':'route'})['removed_revisions']==1
+            with http.open(Request(base+'/api/memory/notes?project_id=http-project',headers=headers),timeout=5) as response:
+                assert json.load(response)['notes']==[]
+            checks.append('typed_research_memory_http_save_history_delete_auth_origin')
             created = post("/api/project", {"project_id":"http-business","command":business})
             with http.open(Request(base+"/api/project?project_id=http-business",headers=headers),timeout=5) as response:
                 assert json.load(response)[business["kind"]][0]["id"] == created["id"]

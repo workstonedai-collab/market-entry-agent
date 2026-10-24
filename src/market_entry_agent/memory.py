@@ -125,7 +125,9 @@ class ProjectMemory:
                              "synthetic": report.get("synthetic", False), "kind": "previous_analysis"})
             if len(previous) == 5:
                 break
+        from .continuity import ResearchMemory
         return {"project_id": project, "previous": previous,
+                "research_memory": ResearchMemory(self.store,self.product).recall(mission),
                 "facts": self.facts(project, mission.get("as_of")) if project else [],
                 "boundary": "Current mission input takes precedence. Operator facts and previous analysis are not independent source evidence."}
 

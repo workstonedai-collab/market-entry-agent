@@ -124,6 +124,14 @@ def serve(store, host, port):
                     return self.reply(400, {"error":str(exc)})
             if path == "/api/skills":
                 return self.reply(200, {"skills": available_skills})
+            if path in ('/api/memory/notes','/api/memory/notes/history'):
+                try:
+                    from .continuity import ResearchMemory
+                    query=parse_qs(urlsplit(self.path).query);project=query.get('project_id',[''])[0]
+                    memory=ResearchMemory(store,SPEC['id'])
+                    if path.endswith('/history'):return self.reply(200,{'history':memory.history(project,query.get('key',[''])[0])})
+                    return self.reply(200,{'notes':memory.list(project,query.get('as_of',[None])[0])})
+                except ValueError as exc:return self.reply(400,{'error':str(exc)})
             if path == "/api/memory":
                 try:
                     project = parse_qs(urlsplit(self.path).query).get("project_id", [""])[0]
@@ -174,6 +182,12 @@ def serve(store, host, port):
                     return self.reply(200, Workflow(store,SPEC["id"]).save_command(body["project_id"],body["command"]))
                 if self.path == "/api/project/check":
                     return self.reply(200, Workflow(store,SPEC["id"]).check(body["project_id"]))
+                if self.path == '/api/memory/notes':
+                    from .continuity import ResearchMemory
+                    memory=ResearchMemory(store,SPEC['id'])
+                    if body.get('operation')=='forget':return self.reply(200,memory.forget(body['project_id'],body['key']))
+                    if body.get('operation','save')!='save':raise ValueError('Unknown typed memory operation')
+                    return self.reply(200,memory.save(body['project_id'],body['key'],body['data'],body['expected_revision']))
                 if self.path == "/api/memory":
                     memory = ProjectMemory(store, SPEC["id"])
                     if body.get("operation") == "forget":
@@ -258,6 +272,12 @@ def main(argv=None):
     checking.add_argument("project")
     history = sub.add_parser("project-history", help="Read up to 100 record revisions")
     history.add_argument("project"); history.add_argument("kind"); history.add_argument("id")
+    typed=sub.add_parser('memory-notes',help='Read typed research memory for an explicit project')
+    typed.add_argument('project');typed.add_argument('--as-of')
+    typed=sub.add_parser('memory-note-save',help='Save/correct a typed operator record from a JSON command')
+    typed.add_argument('project');typed.add_argument('file')
+    typed=sub.add_parser('memory-note-history');typed.add_argument('project');typed.add_argument('key')
+    typed=sub.add_parser('memory-note-forget');typed.add_argument('project');typed.add_argument('key')
     sub.add_parser("skills", help="List configured document skill metadata")
     sub.add_parser("tools", help="Show public tool schemas and execution policies")
     memory = sub.add_parser("memory", help="Read explicit private project facts")
@@ -322,7 +342,15 @@ def main(argv=None):
     package = Path(__file__).parent
     result = None
     try:
-        if args.command == "project":
+        if args.command in ('memory-notes','memory-note-save','memory-note-history','memory-note-forget'):
+            from .continuity import ResearchMemory
+            memory=ResearchMemory(store,SPEC['id'])
+            if args.command=='memory-notes':result={'notes':memory.list(args.project,args.as_of)}
+            elif args.command=='memory-note-save':
+                command=load_json(args.file);result=memory.save(args.project,command['key'],command['data'],command['expected_revision'])
+            elif args.command=='memory-note-history':result={'history':memory.history(args.project,args.key)}
+            else:result=memory.forget(args.project,args.key)
+        elif args.command == "project":
             result = Workflow(store,SPEC["id"]).state(args.project)
         elif args.command == "project-save":
             result = Workflow(store,SPEC["id"]).save_command(args.project,load_json(args.file))

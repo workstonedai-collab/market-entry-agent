@@ -38,7 +38,7 @@ def fragments(store, run, values):
         eid=item.get('evidence_id');offset=item.get('offset',0);quote=text(item.get('quote'),2000)
         if type(offset) is not int or offset<0:raise ValueError('Fragment offset must be nonnegative')
         end=offset+len(quote)
-        spans=[s['observation'] for s in run['steps'] if s['action']=='read_evidence' and 'error' not in s['observation'] and s['observation'].get('id')==eid]
+        spans=[s['observation'] for s in run['steps'] if s['action']=='read_evidence' and 'error' not in s['observation'] and 'body' in s['observation'] and s['observation'].get('id')==eid]
         if not any(s.get('body_offset',0)<=offset and end<=s.get('body_offset',0)+len(s['body']) for s in spans):
             raise ValueError('Fragment must be inside a successfully read evidence span')
         source=store.read(eid)
@@ -106,9 +106,10 @@ def update(store, run, args):
     return result
 
 
-def brief(state):
-    questions=[dict(q,text=q['text'][:500],why=q['why'][:200]) for q in state['questions'][:12]]
-    notes=[{k:n[k] for k in ('id','kind','text','evidence_ids','relation','question_id','change_reason')} for n in state['notes'][:12]]
+def brief(state, question=""):
+    from .continuity import ranked
+    questions=[dict(q,text=q['text'][:500],why=q['why'][:200]) for q in ranked(state['questions'],question,12)]
+    notes=[{k:n[k] for k in ('id','kind','text','evidence_ids','relation','question_id','change_reason')} for n in ranked(state['notes'],question,12)]
     for n in notes:n['text']=n['text'][:600];n['change_reason']=n['change_reason'][:200]
     return {'revision':state['revision'],'questions':questions,'notes':notes,
             'next_step':state['next_step'][:1000],'stop_reason':state['stop_reason'][:1000],

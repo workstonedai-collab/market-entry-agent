@@ -1,3 +1,9 @@
+# v0.9.0
+
+- Typed private research memory with provenance, operator-only decisions, revision reasons and removal.
+- Question-focused context retains critical constraints and relevant support/opposition; resumed runs keep frozen inputs.
+- Browser, CLI and authenticated HTTP access; no additional model review call.
+
 # Changelog
 
 ## 0.8.0 — 2026-10-24
