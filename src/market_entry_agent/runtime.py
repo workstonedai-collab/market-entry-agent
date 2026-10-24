@@ -98,6 +98,9 @@ class RuntimeStore:
                 "peak_context_characters": max((row["input_characters"] for row in rows), default=0),
                 "context_budget_chars": meta.get("context_budget_chars"),
                 "skill_versions": {**{k: v["version"] for k, v in meta.get("loaded_skills", {}).items()}, **({"report-writing":meta["writing_skill"]["version"]} if meta.get("writing_skill") else {})},
+                "model_format_repairs": meta.get("model_format_repairs",[]),
+                "output_recovery": meta.get("output_recovery"),
+                "integration_versions": ({meta['mcp_profile']['name']:meta['mcp_profile']['version']} if meta.get('mcp_profile') else {}),
                 "budget_status": meta.get("budget_status", "within_attempt_budget")}
 
     def call_receipts(self, rid):

@@ -332,3 +332,7 @@ Source statements, hypotheses, judgments and proposed decisions stay distinct ac
 ### Compare responsibility and scenario economics
 
 Record manufacturer, seller, importer and buyer separately. Explicit quotes or assumptions drive deterministic single-currency arithmetic; missing inputs stay unknown. Quote changes retain before/after results, while ranked premise checks and source changes point to affected options and decisions. See [entry decision paths](docs/decision-paths.md).
+
+### Connect tools and choose research depth
+
+Expose saved tasks, reports and project state through an opt-in [MCP stdio adapter](docs/mcp.md), read-only by default. Explicit startup permission enables bounded task execution. Operator-configured outbound MCP search receives public queries only. [Optional research branches](docs/research-depth.md) retain separate question paths inside the same run and budgets; document skills describe inputs, outputs and tool needs without granting permissions.

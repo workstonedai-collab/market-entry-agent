@@ -186,7 +186,11 @@ class Workflow(Records):
     def snapshot(self, project):
         value=super().snapshot(project)
         from .economics import calculate
-        for row in value['records'].get('economics',[]):row['data']['calculation']=calculate(row['data'])
+        from .economics import compare
+        scenarios=value['records'].get('economics',[])
+        for row in scenarios:
+            row['data']['calculation']=calculate(row['data'])
+            row['data']['compared_with']=[{'scenario_id':other['id'],'name':other['data']['name'],**compare(row['data'],other['data'])} for other in scenarios if other['id']!=row['id']][:5]
         pending=[r for r in value['records'].get('assumption',[]) if r['data']['status'] in ('unchecked','challenged','needs_review')]
         importance={'low':0,'medium':1,'high':2}
         pending.sort(key=lambda r:(-int(r['data'].get('blocking',False)),-importance[r['data'].get('decision_impact','medium')],importance[r['data'].get('effort','medium')],r['id']))
@@ -232,7 +236,7 @@ class Workflow(Records):
         return {**value,'checked_at':saved['updated']}
 
     def guide(self):
-        return {'product':self.product,'transaction_and_economics':'Read frozen transaction/economics records via project_state kind and id. Economics include deterministic single-currency calculations with null gaps; quote/role inputs are operator-only. Read assumption validation_priority and conditional next checks. Never infer origin from transit or replace missing prices with zero.','agent_writable_kinds':list(self.agent_kinds), 'dimensions':list(DIMENSIONS),
+        return {'product':self.product,'transaction_and_economics':'Read frozen transaction/economics records via project_state kind and id. Economics include deterministic single-currency calculations, compared_with this-minus-reference deltas and null gaps; use the operating_cost delta when describing combined cost differences, not the revenue delta; quote/role inputs are operator-only. Read assumption validation_priority and conditional next checks. Never infer origin from transit or replace missing prices with zero.','agent_writable_kinds':list(self.agent_kinds), 'dimensions':list(DIMENSIONS),
           'contracts':{
           'option':{'name':'entry option','countries':['mission country'],'mode':'entry channel','rationale':'conditional recommendation',
                     'tradeoff':'what is gained and given up','requirements':'resources and conditions needed; preserve unknown costs','next_validation':'what to verify first and why',

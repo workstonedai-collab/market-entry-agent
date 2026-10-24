@@ -35,6 +35,8 @@ businessForm('economics',{id:'quote',revision:2,data:{name:'Synthetic',values:{f
 assert.ok($('business-fields').innerHTML.includes('value="0"'));assert.ok($('business-fields').innerHTML.includes('&lt;unsafe quote&gt;'));assert.ok(!$('business-fields').innerHTML.includes('<unsafe quote>'));
 assert.ok(historyFields('economics',{contribution_before_other_costs:'680'}).includes('贡献额'));
 assert.ok(attentionReason('Operator deadline within seven days').includes('7天'));
+const calculation={metrics:{revenue:'2000',contribution_before_other_costs:'680',contribution_margin:'0.34'},missing:['freight'],assumptions:['unit_price']};
+const economics=economicsHTML([{name:'<unsafe>',currency:'USD',calculation}]);assert.ok(economics.includes('680.00'));assert.ok(economics.includes('34.00%'));assert.ok(economics.includes('未填写'));assert.ok(!economics.includes('<unsafe>'));assert.ok(economics.includes('单位售价'));
 const dimensions=historyFields('option',{dimensions:{demand:'demand detail',economics:'cost detail'},status:'selected'});
 assert.ok(dimensions.includes('demand detail'));assert.ok(dimensions.includes('cost detail'));assert.ok(!dimensions.includes('>selected<'));
 assert.ok(!historyFields('stage',{status:'done'}).includes('>done<'));

@@ -83,6 +83,10 @@ def validate_mission(mission):
     public_queries(mission)
     from .adaptive import validate as validate_search
     validate_search(mission)
+    from .depth import validate as validate_depth
+    validate_depth(mission)
+    if 'mcp_search' in mission:
+        if not isinstance(mission['mcp_search'],str) or not re.fullmatch(r'[a-z0-9_-]{1,64}',mission['mcp_search']):raise ValueError('mcp_search must be an explicitly configured profile name')
     if mission.get("as_of"):
         if not isinstance(mission["as_of"], str):
             raise ValueError("as_of must be an ISO date/time string")
@@ -318,6 +322,10 @@ class Store(RuntimeStore):
         report.pop("project_changes",None)
         report.pop("writing_skill",None)
         report.pop("research_state",None)
+        report.pop('research_branches',None)
+        from .depth import snapshot as branch_snapshot
+        branches=branch_snapshot(self,rid)
+        if branches:report['research_branches']=branches
         from .notebook import snapshot as research_snapshot
         research=research_snapshot(self,rid)
         if research["revision"]:report["research_state"]=research
@@ -526,11 +534,13 @@ TOOLS = [
     {"name": "recall", "arguments": {}, "description": "Recall private operator facts and completed reports for this explicit project, or the same legacy mission. History is analysis, not independent evidence."},
     {"name": "list_sources", "arguments": {}, "description": "List operator-registered RSS/Atom feeds. No arbitrary URL fetching."},
     {"name": "fetch_feed", "arguments": {"id": "registered source ID"}, "description": "Refresh one registered feed; bounded public HTTPS read. Choose only when current evidence is insufficient."},
-    {"name": "finish", "arguments": {"report": {"title": "text", "summary": "text", "findings": [{"claim": "source-backed text", "evidence_ids": ["ID already read"]}], "assessment": "analysis as a STRING, not an object", "actions": ["text"], "uncertainties": ["text"], "follow_up": ["text"], "evidence_ids": ["ID already read"], "priority": "watch"}}, "description": "Save a final report with title, summary, findings[], assessment, actions[], uncertainties[], follow_up[], evidence_ids[], priority (routine/watch/urgent). Each finding has claim and evidence_ids. Report covers mission; distinguish evidence, judgment and scenarios. Optional decision_options entries require name, fit, tradeoff, requirements, next_check (all nonempty strings) and evidence_ids[]. Optional validation_priorities entries require question, why_first, next_step, if_supported, if_not (all nonempty strings) and evidence_ids[]. Omit unused extensions."},
+    {"name": "finish", "arguments": {"report": {"title": "text", "summary": "text", "findings": [{"claim": "source-backed text", "evidence_ids": ["ID already read"]}], "assessment": "analysis as a STRING, not an object", "actions": ["text"], "uncertainties": ["text"], "follow_up": ["text"], "evidence_ids": ["ID already read"], "priority": "watch"}}, "description": "Save a final report with title, summary, findings[], assessment, actions[], uncertainties[], follow_up[], evidence_ids[], priority (routine/watch/urgent). Each finding has claim and evidence_ids. Report covers mission; distinguish evidence, judgment and scenarios. Keep project inputs/calculations and uncited reasoning in assessment rather than source findings. Optional decision_options entries require name, fit, tradeoff, requirements, next_check (all nonempty strings) and evidence_ids[]. Optional validation_priorities entries require question, why_first, next_step, if_supported, if_not (all nonempty strings) and evidence_ids[]. Omit unused extensions."},
 ]
 
 
 TOOLS.extend([
+    {"name":"research_branch","arguments":{"id":"origin","question":"Which rule changes this choice?","term_ids":[0],"facet_id":0,"reason":"Find original guidance"},"description":"Optional bounded research_depth branch: persist a decision question locally and search only indexed public terms. Branches are sequential paths inside the same run, never child agents or extra model budgets. Failed/empty searches remain recorded. Fetch/read sources, then close_branch with a concise conditional conclusion and stopping reason."},
+    {"name":"close_branch","arguments":{"id":"origin","expected_revision":2,"conclusion":"Conditional branch conclusion","evidence_ids":[],"stop_reason":"Public sources exhausted"},"description":"Save a branch conclusion. Cite only original evidence read in this run. Closing is optional; unfinished branches remain visibly unfinished and never block a direct final report."},
     {"name":"research_state","arguments":{},"description":"Read durable questions, source fragments, hypotheses, judgments, next steps and stop reason for this run. No verification or approval implied."},
     {"name":"update_research","arguments":{"expected_revision":0,"questions":[{"id":"q1","text":"Decision-relevant question","status":"open","why":"Why this matters"}],"notes":[{"id":"n1","kind":"hypothesis","text":"Conditional explanation","evidence_ids":[],"fragments":[],"relation":"context","question_id":"q1","change_reason":"Initial note"}],"next_step":"Next useful retrieval","stop_reason":""},"description":"Upsert durable working notes. kind: source_fact/hypothesis/judgment/decision_proposal; source_fact needs fragments [{evidence_id,offset,quote}] exactly matching a successfully read span. status: open/investigating/answered/unresolved. relation: supports/opposes/context. All model decisions remain proposals. Read research_state for revision conflicts."},
     {"name":"adaptive_search","arguments":{"term_ids":[0],"facet_id":0,"reason":"How the result may change a decision"},"description":"Compose a new query ONLY from indexed public_search.terms and public_search.facets explicitly provided in the mission. Never send question, context, private notes or reason to search. Cumulative unique-query budget survives resume. Fetch and read discovered pages before citing."},
@@ -569,6 +579,7 @@ class Model:
 
     def next(self, messages, timeout):
         self.last_usage = {}
+        self.last_format_repair = None
         request_body = {"model": self.name, "messages": messages, "stream": self.stream, "temperature": 0.2, "max_tokens": self.max_tokens}
         if self.effort:
             request_body["reasoning_effort"] = self.effort
@@ -594,7 +605,21 @@ class Model:
         content = re.sub(r"^```(?:json)?\s*|\s*```$", "", content.strip(), flags=re.IGNORECASE)
         try:
             return json.loads(content)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as exc:
+            # Some compatible providers end a complete report with only its outer envelope
+            # brace missing. Restore this one delimiter only; never complete strings,
+            # fields, arrays, report content or truncated/incomplete provider streams.
+            repaired=None
+            if choices[0].get('finish_reason')=='stop' and content.startswith('{'):
+                try:repaired=json.loads(content+'}')
+                except json.JSONDecodeError:pass
+            if (isinstance(repaired,dict) and set(repaired)=={'action','arguments'} and repaired['action']=='finish'
+                    and isinstance(repaired['arguments'],dict) and isinstance(repaired['arguments'].get('report'),dict)):
+                self.last_format_repair={'kind':'one_missing_outer_envelope_brace','original_sha256':hashlib.sha256(content.encode()).hexdigest(),
+                    'normalized_sha256':hashlib.sha256((content+'}').encode()).hexdigest(),'content_changed':False}
+                return repaired
+            self.last_json_error={'message':exc.msg,'position':exc.pos,'line':exc.lineno,'column':exc.colno,'characters':len(content)}
+            self.last_action_text=content if content.startswith('{') else None
             raise ValueError("model_invalid_action_json") from None
 
 
@@ -622,6 +647,20 @@ class Agent:
             if run["steps"] and run["steps"][-1]["action"] == "finish" and "report" in run["steps"][-1]["observation"]:
                 self.store.finish(rid, run["steps"][-1]["observation"]["report"], owner)
                 return self.store.get_run(rid)
+            # Revalidate a returned finish after a host-format fix without another model request.
+            # Keep the original failed checkpoint; successful delivery records the recovery separately.
+            if run['steps'] and run['steps'][-1]['action']=='finish' and 'error' in run['steps'][-1]['observation']:
+                previous=run['steps'][-1]
+                if isinstance(previous.get('arguments',{}).get('report'),dict):
+                    try:
+                        recovered=self.execute('finish',previous['arguments'],dict(run,_owner=owner),max(.01,deadline-(time.monotonic()-start)))
+                    except (ValueError,KeyError,TypeError):pass
+                    else:
+                        metadata=self.store.meta(rid)
+                        metadata['output_recovery']={'from_step':previous['seq'],'core_version':CORE_VERSION,'new_model_calls':0,'reason':'Revalidated the saved returned finish under current host contracts; original checkpoint retained.'}
+                        self.store.save_meta(rid,metadata,owner)
+                        self.store.finish(rid,recovered['report'],owner)
+                        return self.store.get_run(rid)
             from .context import assemble
             from .skills import snapshot, catalog
             meta = self.store.meta(rid)
@@ -633,6 +672,9 @@ class Agent:
                         "writing_skill": available["report-writing"],
                         "loaded_skills": {}, "context_budget_chars": mission.get("context_budget_chars", 48000),
                         "memory": ProjectMemory(self.store, self.spec["id"]).recall(mission, rid)}
+                if mission.get('mcp_search'):
+                    from .mcp_client import profile
+                    meta['mcp_profile']=profile(mission['mcp_search'])
                 if mission.get("project_id"):
                     from .workflow import Workflow
                     workflow = Workflow(self.store, self.spec["id"])
@@ -673,6 +715,8 @@ class Agent:
                         raise RuntimeError("model_call_budget_exhausted")
                     from .notebook import snapshot as research_snapshot
                     meta["research_state"]=research_snapshot(self.store,rid)
+                    from .depth import snapshot as branch_snapshot
+                    meta['research_branches']=branch_snapshot(self.store,rid)
                     messages, stats = assemble(seed, current, meta, meta["context_budget_chars"])
                     messages.append({"role": "user", "content": "Execution budget: " + str(max_steps-seq) + " actions remain; " + str(round(remaining, 2)) + " seconds in this attempt. Reuse saved data. Reserve an action for finish; if sources are exhausted, save a scoped assessment and gaps."})
                     stats["context_characters"] = sum(len(m["content"]) for m in messages)
@@ -693,6 +737,10 @@ class Agent:
                         action = {"action": "invalid_model_response", "arguments": {}}
                     else:
                         self.store.end_call(cid, time.monotonic()-called_at, "success", getattr(model, "last_usage", {}))
+                        if getattr(model,'last_format_repair',None):
+                            metadata=self.store.meta(rid)
+                            metadata.setdefault('model_format_repairs',[]).append(dict(model.last_format_repair,step=seq))
+                            self.store.save_meta(rid,metadata,owner)
                 else:
                     action = self.demo_action(current)
                 if self.store.stopped(rid, owner):
@@ -731,7 +779,7 @@ class Agent:
                 if deadline - (time.monotonic()-start) <= 0:
                     raise RuntimeError("run_deadline_exceeded")
                 recent = self.store.get_run(rid)["steps"][-4:]
-                if seq + 1 < max_steps and len(recent) == 4 and all("error" in s["observation"] or "reused_step" in s["observation"] for s in recent):
+                if seq-len(run['steps'])+1>=2 and seq + 1 < max_steps and len(recent) == 4 and all("error" in s["observation"] or "reused_step" in s["observation"] for s in recent):
                     raise RuntimeError("no_progress_detected")
             raise RuntimeError("step_budget_exhausted")
         except Exception as exc:
@@ -758,6 +806,7 @@ class Agent:
         queries=bool(mission.get("search_queries"))
         excluded=set()
         if not mission.get("public_search"):excluded.add("adaptive_search")
+        if not mission.get('research_depth'):excluded.update(('research_branch','close_branch'))
         if not queries:excluded.add("web_search")
         if not queries and not mission.get("public_search") and not any(s.get("kind")=="page" for s in sources):excluded.add("fetch_page")
         if not any(s.get("kind","feed")=="feed" for s in sources):excluded.add("fetch_feed")
@@ -786,6 +835,7 @@ class Agent:
             "Use web_search only for explicit mission search_queries; fetch_page and read relevant body evidence. Search snippets are discovery, never full-page reading. "
             "For historical replay as_of, use only material published on/before as_of; exclude unknown publication dates and current feed content. Never call a replay a current warning. "
             "For multi-part research, use research_state/update_research to retain decision questions, exact read source fragments, supporting/opposing evidence and why the next retrieval helps. They are working notes, never approved decisions. Small tasks can finish without a notebook. "
+            "Optional research_depth allows distinct question branches with shared budgets. Use research_branch for alternative source paths, read useful originals, then close_branch with conclusions or gaps. Do not open branches just to fill a template. "
             "Use adaptive_search only when public_search is configured; select public term/facet indices, never generate private query prose. Treat failures, exhausted sources or repeated information as reasons to stop retrieval and save a conditional assessment, not to invent evidence. "
             "Stay within mission scope. Search then read relevant evidence before finishing. "
             "No unsupported factual claims or invented sources. Identify evidence gaps and conflicting accounts. "
@@ -805,9 +855,15 @@ class Agent:
     def _execute(self, name, args, run, remaining):
         from .countries import scope_keys
         mission = run["mission"]
+        if name in ('research_branch','close_branch'):
+            from .depth import search as branch_search, close as close_branch
+            return branch_search(self.store,run,args,min(40,remaining)) if name=='research_branch' else close_branch(self.store,run,args)
         if name in ("research_state","update_research"):
             from .notebook import snapshot, update
-            return snapshot(self.store,run['id']) if name=="research_state" else update(self.store,run,args)
+            if name=='research_state':
+                from .depth import snapshot as branch_snapshot
+                return dict(snapshot(self.store,run['id']),branches=branch_snapshot(self.store,run['id']))
+            return update(self.store,run,args)
         if name == "adaptive_search":
             from .adaptive import search
             return search(self.store,run,args,min(40,remaining))
@@ -827,7 +883,9 @@ class Agent:
                 raise ValueError("At most three document skills may be loaded in one run")
             loaded[args["name"]] = skill
             self.store.save_meta(run["id"], meta, run.get("_owner"))
-            return {"name": skill["name"], "version": skill["version"], "loaded": True, "scripts_executed": False}
+            return {"name": skill["name"], "version": skill["version"], "loaded": True, "scripts_executed": False,
+                    "contract":skill.get('contract',{}),"missing_tools":[t for t in skill.get('contract',{}).get('requires_tools',[]) if t not in {x['name'] for x in self.task_tools(mission)}],
+                    "notice":"Missing tool requirements do not grant permissions; use another permitted route or preserve the gap."}
         if name == "read_result":
             step = next((s for s in run["steps"] if s["seq"] == args["step"]), None)
             if not step:
@@ -869,14 +927,14 @@ class Agent:
                         next_offset=min(len(row["body"]),offset+limit))
         if name == "web_search":
             from .net import web_search
-            return web_search(self.store, mission, args.get("query_index"), min(40, remaining))
+            return web_search(self.store, mission, args.get("query_index"), min(40, remaining), profile=self.store.meta(run["id"]).get("mcp_profile"))
         if name == "fetch_page":
             from .net import fetch_page
             if bool(args.get("evidence_id")) == bool(args.get("source_id")):
                 raise ValueError("Choose exactly one of evidence_id or source_id")
             evidence_id = args.get("evidence_id")
             if evidence_id:
-                discovered = {r["id"] for step in run["steps"] if step["action"] in ("web_search","adaptive_search") for r in step["observation"].get("results", [])}
+                discovered = {r["id"] for step in run["steps"] if step["action"] in ("web_search","adaptive_search","research_branch") for r in step["observation"].get("results", [])}
                 if evidence_id not in discovered:
                     raise ValueError("evidence_id must be a search result ID. For a registered source call fetch_page with source_id only.")
             source_id=args.get("source_id")
@@ -916,6 +974,18 @@ class Agent:
                 raise ValueError("Citations must reference evidence read in this run")
             if any(self.store.read(eid).get("retrieval_kind")=="search_snippet" for eid in ids):
                 raise ValueError("Search snippets are discovery; fetch and read body evidence before citing")
+            report=json.loads(json.dumps(report,ensure_ascii=False))
+            report.pop('output_mapping',None)
+            if mission.get('project_id') and self.store.meta(run['id']).get('project_state',{}).get('records'):
+                # Uncited project calculations belong to reasoning, not the external-source column.
+                # This changes placement only, preserving the model's text and source attribution.
+                context=report.get('business_context',[])
+                if not isinstance(context,list) or any(not isinstance(x,str) or not x for x in context):raise ValueError('business_context requires nonempty text entries')
+                uncited=[f for f in report['findings'] if isinstance(f,dict) and isinstance(f.get('claim'),str) and f['claim'] and f.get('evidence_ids')==[]]
+                if uncited:
+                    report['business_context']=context+[f['claim'] for f in uncited]
+                    report['findings']=[f for f in report['findings'] if f not in uncited]
+                    report['output_mapping']={'uncited_findings_to_business_context':len(uncited),'notice':'Model text retained as business context/reasoning, without external-source attribution.'}
             for finding in report["findings"]:
                 if not isinstance(finding, dict) or not isinstance(finding.get("claim"), str) or not finding.get("evidence_ids"):
                     raise ValueError("Each finding requires claim and evidence_ids")
@@ -992,6 +1062,7 @@ def markdown(report):
     lines.extend(["## Source claims / 来源怎么说", ""])
     for finding in report["findings"]:
         lines.append("- " + finding["claim"] + " [" + ", ".join(finding["evidence_ids"]) + "]")
+    if report.get('business_context'):lines.extend(['','## Business context and reasoning / 业务背景与推断','']+['- '+x for x in report['business_context']])
     lines.extend(["", "## Assessment / 分析", "", report["assessment"]])
     for key, title in (("actions", "Actions / 建议"), ("uncertainties", "Uncertainties / 不确定性"), ("follow_up", "Follow-up / 后续观察")):
         lines.extend(["", "## " + title, ""] + ["- " + item_text(x) for x in report[key]])
@@ -1001,6 +1072,8 @@ def markdown(report):
     lines.extend(decision_markdown(report))
     from .notebook import markdown as notebook_markdown
     lines.extend(notebook_markdown(report.get("research_state")))
+    from .depth import markdown as branch_markdown
+    lines.extend(branch_markdown(report.get('research_branches')))
     lines.extend(["", "## Sources / 来源", ""])
     for source in report["sources"]:
         lines.append(f"- [{source['id']}] {source['title']} — {source['url']} ({source['status']}; published: {source.get('published_at') or 'unknown'})")

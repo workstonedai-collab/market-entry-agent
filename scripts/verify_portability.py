@@ -115,7 +115,9 @@ def verify():
                     time.sleep(.1)
             assert health["version"] == metadata["version"]
             with http.open(base + "/", timeout=5) as response:
-                assert b"RESEARCH BRIEF" in response.read()
+                page=response.read()
+                assert b"RESEARCH BRIEF" in page
+                assert ("v"+health["version"]).encode("utf-8") in page
                 assert "script-src 'self' 'unsafe-inline'" in response.headers["Content-Security-Policy"]
             headers = {"Authorization": "Bearer " + token, "Content-Type": "application/json"}
             with http.open(Request(base + "/api/source-health", headers=headers), timeout=5) as response:

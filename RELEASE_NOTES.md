@@ -1,3 +1,11 @@
+# v0.11.0 · 工具接入与可选研究深度
+
+本地 MCP 服务默认只读；显式开放后，客户端可以在原有范围和预算内创建、恢复、暂停或取消任务。外部 MCP 搜索只接收允许的公开关键词；可选研究分支将不同问题的进度与结论随任务保存。文档技能增加输入输出说明与依赖提示，仍不执行脚本或增加权限。
+
+See [MCP setup](docs/mcp.md) and [research depth](docs/research-depth.md). Base runtime remains standard-library only on Mac/Windows/Linux. Existing reports, country dashboards, product records and direct report saving remain supported. Public formulas and generic workflows stay open; specialized prompts, private knowledge and customer materials are not bundled. [Contact the author](https://github.com/workstonedai-collab) for further discussion.
+
+---
+
 # v0.10.0 · 业务关联与可追溯的选择
 
 出海项目新增交易各方责任、单一币种报价情景测算、验证顺序及新资料对既有决策的影响。原有报告和项目记录继续保留，操作者选择不会被自动改写。

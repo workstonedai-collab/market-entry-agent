@@ -39,8 +39,8 @@ def snapshot():
                 if not line.strip() or line.lstrip().startswith("#"):
                     continue
                 key, separator, value = line.partition(":")
-                if not separator or key not in ("name", "description"):
-                    raise ValueError("Minimal skill loader supports only one-line name and description")
+                if not separator or key not in ("name", "description", "inputs", "outputs", "requires_tools"):
+                    raise ValueError("Skill loader supports one-line name, description, inputs, outputs and requires_tools")
                 value = value.strip()
                 if value.startswith('"'):
                     try:
@@ -62,10 +62,19 @@ def snapshot():
             raise ValueError("Invalid or duplicate skill name")
         if not isinstance(description, str) or not 1 <= len(description) <= 500 or not entry["instructions"]:
             raise ValueError("Skill requires a description and nonempty instructions")
+        required=entry.get('requires_tools','')
+        if not isinstance(required,str) or len(required)>500:raise ValueError('Skill requires_tools must be bounded comma-separated names')
+        names=[x.strip() for x in required.split(',') if x.strip()]
+        if len(names)>12 or any(not re.fullmatch(r'[a-z_]{1,64}',x) for x in names):raise ValueError('Invalid skill required tool names')
+        for key in ('inputs','outputs'):
+            if key in entry and (not isinstance(entry[key],str) or len(entry[key])>1000):raise ValueError('Skill contract text must be bounded')
+        entry['contract']={'inputs':entry.get('inputs','Current mission and permitted source data'),
+                           'outputs':entry.get('outputs','Task-appropriate analysis with sources, uncertainty and next checks'),
+                           'requires_tools':names,'permission_note':'Documentation only; this does not enable tools, execute scripts or approve decisions.'}
         entry["version"] = hashlib.sha256(json.dumps(entry, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
         result[name] = entry
     return result
 
 
 def catalog(entries):
-    return [{k: entry[k] for k in ("name", "description", "version", "origin")} for entry in entries.values()]
+    return [{k: entry[k] for k in ("name", "description", "version", "origin", "contract")} for entry in entries.values()]

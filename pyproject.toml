@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "market-entry-agent"
-version = "0.10.0"
+version = "0.11.0"
 description = "A self-hosted market-entry research agent combining company context, country evidence, operating changes and commercial opportunities."
 readme = "README.md"
 requires-python = ">=3.11"

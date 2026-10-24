@@ -36,6 +36,15 @@ class Arithmetic(unittest.TestCase):
         for update in [{'basis':'verified_by_agent'},{'note':''}]:
             data=scenario();data['values']['freight'].update(update)
             with self.assertRaises(ValueError):economics.normalize(data)
+    def test_combined_cost_delta_is_calculated_separately_from_price_delta(self):
+        left=economics.normalize(scenario());right=economics.normalize(scenario())
+        right['values']['unit_price']['value']='22';right['values']['freight']['value']='300';right['values']['fixed_cost']['value']='200'
+        delta=economics.compare(right,left)
+        self.assertEqual(delta['deltas']['revenue'],'200')
+        self.assertEqual(delta['deltas']['operating_cost'],'300.00')
+        self.assertEqual(delta['deltas']['contribution_before_other_costs'],'-100.00')
+        right['currency']='EUR';self.assertFalse(economics.compare(right,left)['same_basis'])
+
     def test_decimal_arithmetic_does_not_use_binary_float_rounding(self):
         data=scenario();data['values']['unit_price']['value']='0.1';data['values']['quantity']['value']='3'
         self.assertEqual(economics.calculate(economics.normalize(data))['metrics']['revenue'],'0.3')

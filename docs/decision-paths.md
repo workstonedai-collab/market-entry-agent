@@ -25,7 +25,7 @@ contribution before other costs = revenue − operating cost
 cash outlay = operating cost + recoverable_tax
 ```
 
-可抵扣税款单列现金占用，不当作已确认费用重复扣除。贡献额还没有计入未列出的费用，不等于企业净利润。依赖项缺失时，相关结果保留 `null`；仍能计算的其他项目继续展示。使用十进制定点运算，避免二进制浮点累加误差；展示保留计算值，不自动四舍五入成税务申报金额。
+可抵扣税款单列现金占用，不当作已确认费用重复扣除。贡献额还没有计入未列出的费用，不等于企业净利润。依赖项缺失时，相关结果保留 `null`；仍能计算的其他项目继续展示。使用十进制定点运算，避免二进制浮点累加误差；页面按两位小数展示，导出保留计算原值；展示金额不能作为税务申报口径。
 
 `economics` JSON commands use the existing `project-save`/`POST /api/project` interface:
 

@@ -15,9 +15,10 @@ const fieldSpec={
  decision:[['title','本次决策'],['rationale','选择及暂缓的理由','area'],['option_ids','相关选项编号','list'],['evidence_ids','来源编号（可留空）','list']]
 };
 const businessLabels={event:'事件',event_alias:'事件别名',event_merge:'合并事件',transaction:'交易责任',economics:'报价与测算',exposure:'关注对象',feedback:'提醒反馈',profile:'企业情况',option:'进入方案',assumption:'关键假设',stage:'推进计划',decision:'决策记录'};
-const valueLabels={low:'低',moderate:'中',high:'高',critical:'严重',unconfirmed:'尚待确认',source_statement:'来源有说明，待交叉核实',corroborated:'多份资料相互支持',tracking:'跟踪中',escalated:'升级',easing:'缓和',closed:'结束',seen:'已阅',relevant:'有用',irrelevant:'与我无关',handled:'已处理',exploring:'寻找方向',targeted:'已有目标市场',operating:'已进入经营',researching:'研究中',candidate:'候选',selected:'已选择',deferred:'暂缓',blocked:'受阻',unchecked:'待验证',supported:'有支持依据',challenged:'有反向依据',needs_review:'有新资料，待判断',planned:'待开始（建议计划）',doing:'进行中',done:'已完成（由你记录）'};
+const valueLabels={medium:'中',other:'其他',route:'航线',port:'港口',supplier:'供应商',project:'项目',country:'国区',low:'低',moderate:'中',high:'高',critical:'严重',unconfirmed:'尚待确认',source_statement:'来源有说明，待交叉核实',corroborated:'多份资料相互支持',tracking:'跟踪中',escalated:'升级',easing:'缓和',closed:'结束',seen:'已阅',relevant:'有用',irrelevant:'与我无关',handled:'已处理',exploring:'寻找方向',targeted:'已有目标市场',operating:'已进入经营',researching:'研究中',candidate:'候选',selected:'已选择',deferred:'暂缓',blocked:'受阻',unchecked:'待验证',supported:'有支持依据',challenged:'有反向依据',needs_review:'有新资料，待判断',planned:'待开始（建议计划）',doing:'进行中',done:'已完成（由你记录）'};
 function attentionBand(value){return {urgent:'优先处理',watch:'持续关注',routine:'常规留意'}[value]||value||'待判断'}
 function attentionReason(value){return {'Operator deadline has passed':'已超过填写的关键日期','Operator deadline within seven days':'距关键日期不超过7天','Operator deadline more than seven days away':'距关键日期超过7天'}[value]||(value.startsWith('Event severity: ')?'事件严重程度：'+(valueLabels[value.slice(16)]||value.slice(16)):value.startsWith('Operator importance: ')?'业务重要程度：'+({low:'低',medium:'中',high:'高'}[value.slice(21)]||value.slice(21)):value)}
+function economicNames(keys){const labels=Object.fromEntries(fieldSpec.economics.map(([k,label])=>[k,label]));return keys.map(k=>labels[k]||k).join('、')}
 function businessKind(){return $('business-kind').value}
 function businessForm(kind,record=null){
  editingRecord=record;
@@ -28,7 +29,7 @@ function businessForm(kind,record=null){
  $('business-fields').innerHTML=fieldSpec[kind].map(([key,label,type])=>{
   let value=record?.data?.[key]??(type==='dimension'?record?.data?.dimensions?.[key]:undefined)??(type==='economic'?record?.data?.values?.[key]:undefined)??(type==='bool'?(key==='blocking'?false:true):'');
   let id='bf-'+key, control;
-  if(type==='economic'){let row=value&&typeof value==='object'?value:null;control='<input id="'+id+'" value="'+esc(row?.value??'')+'" placeholder="未知留空；为零需填 0"><select id="'+id+'-basis"><option value="assumption">测算假设</option><option value="operator_quote" '+(row?.basis==='operator_quote'?'selected':'')+'>已取得的报价</option></select><input id="'+id+'-note" value="'+esc(row?.note??'')+'" placeholder="报价来源或假设依据">'}
+  if(type==='economic'){let row=value&&typeof value==='object'?value:null;control='<input id="'+id+'" value="'+esc(row?.value??'')+'" placeholder="未知留空；为零需填 0"><select aria-label="'+esc(label+'的依据')+'" id="'+id+'-basis"><option value="assumption">测算假设</option><option value="operator_quote" '+(row?.basis==='operator_quote'?'selected':'')+'>已取得的报价</option></select><input aria-label="'+esc(label+'的依据说明')+'" id="'+id+'-note" value="'+esc(row?.note??'')+'" placeholder="报价来源或假设依据">'}
   else if(type==='bool')control='<select id="'+id+'"><option value="true" '+(value===true?'selected':'')+'>启用</option><option value="false" '+(value===false?'selected':'')+'>停用</option></select>';
   else if(type?.includes('|'))control='<select id="'+id+'">'+type.split('|').map(v=>'<option value="'+v+'" '+(v===value?'selected':'')+'>'+esc(valueLabels[v]||v)+'</option>').join('')+'</select>';
   else if(['area','dimension','lines'].includes(type))control='<textarea id="'+id+'">'+esc(Array.isArray(value)?value.join('\n'):value)+'</textarea>';
@@ -44,6 +45,7 @@ function historyFields(kind,data){
   if(typeof v==='boolean')return v?'启用':'停用';
   if(Array.isArray(v))return v.length?v.map(x=>value(key,x)).join('；'):'未填写';
   if(typeof v==='object')return Object.entries(v).map(([k,x])=>(labels[k]||k)+'：'+value(k,x)).join('；');
+  if(kind==='economics'&&['revenue','goods_cost','duty','operating_cost','contribution_before_other_costs','cash_outlay_including_recoverable_tax','contribution_margin'].includes(key)&&Number.isFinite(Number(v)))return key==='contribution_margin'?(Number(v)*100).toFixed(2)+'%':Number(v).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
   return ['status','stage','confidence','severity','min_severity','state'].includes(key)?valueLabels[v]||String(v):String(v);
  };
  return '<dl>'+Object.entries(data).map(([key,v])=>'<dt><b>'+esc(labels[key]||(key==='dimensions'?'方案比较':key))+'</b></dt><dd style="white-space:pre-wrap;margin:6px 0 14px">'+esc(value(key,v))+'</dd>').join('')+'</dl>';
@@ -64,8 +66,8 @@ function renderProject(){
  let groups=kinds.filter(k=>k!=='feedback').map(kind=>'<div class="card"><h2>'+businessLabels[kind]+'</h2>'+(projectDesk[kind].map(r=>'<div class="source"><b>'+esc(r.data.title||r.data.name||r.data.product||r.data.statement||r.data.goal||r.data.subject||r.data.source_id||r.id)+'</b> <span class="tag">'+esc(valueLabels[r.data.status]||valueLabels[r.data.stage]||'已保存')+'</span><p>'+esc(r.data.summary||r.data.rationale||r.data.note||r.data.constraints||'')+'</p><p class="small">编号 '+esc(r.id)+' · 版本 '+r.revision+' · '+esc(r.origin==='agent_proposal'?'智能体建议':r.origin==='runtime'?'运行记录':'你录入的资料')+'</p><div class="buttons"><button data-business-edit="'+kind+':'+r.id+'">查看与修改</button><button data-business-history="'+kind+':'+r.id+'">修改记录</button></div></div>').join('')||'<p class="hint">尚无记录。</p>')+'</div>').join('');
  let optionDetails=(!risk&&projectDesk.comparison?.length)?'<div class="card"><h2>方案取舍与下一步</h2>'+projectDesk.comparison.map(o=>'<div class="source"><b>'+esc(o.name)+'</b><p>主要取舍：'+esc(o.tradeoff||'待研究')+'</p><p>需要具备：'+esc(o.requirements||'待补充资源和条件')+'</p><p>先验证：'+esc(o.next_validation||'待确定验证顺序')+'</p></div>').join('')+'</div>':'';
  if(!risk&&projectDesk.comparison?.length)groups='<div class="card"><h2>进入方案比较</h2><p class="hint">从需求、准入、渠道、交付、成本和风险六方面比较方案。国区指数可作背景参考；企业条件改变后，需要重新判断方案是否合适。</p><div class="table-scroll"><table><tr><th>选项</th><th>需求</th><th>准入</th><th>渠道</th><th>交付</th><th>经济性</th><th>风险</th></tr>'+projectDesk.comparison.map(o=>'<tr><td>'+esc(o.name)+'<br>'+esc(o.countries.join(', ')+' · '+o.mode)+(o.profile_changed?'<br><span class="tag warn">企业条件已更新</span>':'')+'</td>'+['demand','access','channel','delivery','economics','risks'].map(k=>'<td>'+esc(o.dimensions[k]||'待补充')+'</td>').join('')+'</tr>').join('')+'</table></div></div>'+optionDetails+groups;
- if(!risk&&projectDesk.economic_scenarios?.length)groups+='<div class="card"><h2>报价情景测算</h2><p class="hint">只按录入的单一币种计算。未知保持为空，不自动选择方案；贡献额还没有扣除未列入的费用。</p>'+projectDesk.economic_scenarios.map(r=>'<div class="source"><b>'+esc(r.name)+' · '+esc(r.currency)+'</b>'+historyFields('economics',r.calculation.metrics)+'<p>未填项目：'+esc(r.calculation.missing.join('、')||'无')+'；采用假设：'+esc(r.calculation.assumptions.join('、')||'无')+'</p></div>').join('')+'</div>';
- if(!risk&&projectDesk.validation_queue?.length)groups+='<div class="card"><h2>先验证什么</h2>'+projectDesk.validation_queue.map(r=>'<div class="source"><b>'+r.rank+' · '+esc(r.statement)+'</b><p>'+esc(r.next_test||r.note||'待明确下一步')+'</p><p class="hint">阻断推进：'+(r.why_ranked.blocking?'是':'否')+'；对选择影响：'+esc(r.why_ranked.decision_impact)+'；验证投入：'+esc(r.why_ranked.effort)+'</p><p>得到支持：'+esc(r.if_supported||'待补充')+'；不成立：'+esc(r.if_not||'待补充')+'</p></div>').join('')+'</div>';
+ if(!risk&&projectDesk.economic_scenarios?.length)groups+=economicsHTML(projectDesk.economic_scenarios);
+ if(!risk&&projectDesk.validation_queue?.length)groups+='<div class="card"><h2>先验证什么</h2>'+projectDesk.validation_queue.map(r=>'<div class="source"><b>'+r.rank+' · '+esc(r.statement)+'</b><p>'+esc(r.next_test||r.note||'待明确下一步')+'</p><p class="hint">阻断推进：'+(r.why_ranked.blocking?'是':'否')+'；对选择影响：'+esc(valueLabels[r.why_ranked.decision_impact]||r.why_ranked.decision_impact)+'；验证投入：'+esc(valueLabels[r.why_ranked.effort]||r.why_ranked.effort)+'</p><p>得到支持：'+esc(r.if_supported||'待补充')+'；不成立：'+esc(r.if_not||'待补充')+'</p></div>').join('')+'</div>';
  if(risk&&projectDesk.attention_queue?.length)groups+='<div class="card"><h2>本地检查后的关注顺序</h2><p class="hint">按最近保存的严重程度、业务重要性和关键日期排序。历史提醒仍保留在下方，请结合资料日期使用。</p>'+projectDesk.attention_queue.map(r=>'<div class="source"><b>'+esc(r.data.title)+' · '+esc(r.data.exposure)+'</b><p>'+esc(attentionBand(r.data.priority?.band||'watch'))+' · '+esc((r.data.priority?.reasons||[]).map(attentionReason).join('；'))+'</p></div>').join('')+'</div>';
  let notices=risk?projectDesk.alerts:projectDesk.reviews;
  $('business-source-health').innerHTML=sourceHealthHTML(state.source_health);
@@ -107,14 +109,14 @@ function changeHTML(data){
  return '<h3>'+(data.previous?'与上次相比':'首次记录')+'</h3><div class="table-scroll"><table><tr><th>判断</th><th>上次</th><th>本次</th></tr>'+diffs.map(d=>'<tr><td>'+esc(labels[d.field]||d.field)+'</td><td>'+esc(valueLabels[d.before]||d.before||'首次记录')+'</td><td>'+esc(valueLabels[d.after]||d.after)+'</td></tr>').join('')+'</table></div>'+(data.change_note?'<p>变化说明：'+esc(data.change_note)+'</p>':'')+'<p class="small">本次新增来源 '+esc((data.new_evidence_ids||[]).join(', ')||'无新增编号；判断可能依据已有资料更新')+'</p>'+projectSourceLinks(data.source_details);
 }
 function decisionHTML(report){
- let html='';
+ let html=report.business_context?.length?'<h3>业务背景与推断</h3><ul>'+report.business_context.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul>':'';
  for(const row of report.project_changes||[])html+='<div class="card"><h3>本次变化与业务影响</h3><b>'+esc(row.data.title+' · '+row.data.exposure)+'</b>'+changeHTML(row.data)+'</div>';
  if(report.decision_options?.length)html+='<h3>方案取舍</h3><div class="table-scroll"><table><tr><th>方案</th><th>适合的条件</th><th>主要取舍</th><th>需要具备</th><th>先验证</th></tr>'+report.decision_options.map(o=>'<tr>'+['name','fit','tradeoff','requirements','next_check'].map(k=>'<td>'+esc(o[k])+'</td>').join('')+'</tr>').join('')+'</table></div>';
  if(report.validation_priorities?.length)html+='<h3>先验证什么</h3>'+report.validation_priorities.map(p=>'<div class="source"><b>'+esc(p.question)+'</b><p>为什么先做：'+esc(p.why_first)+'</p><p>下一步：'+esc(p.next_step)+'</p><p>若得到支持：'+esc(p.if_supported)+'</p><p>若不成立：'+esc(p.if_not)+'</p></div>').join('');
  return html;
 }
 function decisionText(report){
- let out='';
+ let out=report.business_context?.length?'\n\n## 业务背景与推断\n'+report.business_context.map(x=>'- '+x).join('\n'):'';
  for(const r of report.project_changes||[]){const d=r.data;out+='\n\n## 本次变化与业务影响\n'+d.title+' · '+d.exposure+'\n'+(d.changes||[]).map(x=>'- '+({severity:'严重程度',status:'事件状态',confidence:'信息依据',impact:'业务影响',next_check:'接下来关注'}[x.field]||x.field)+'：'+(valueLabels[x.before]||x.before||'首次记录')+' → '+(valueLabels[x.after]||x.after)).join('\n')+'\n变化说明：'+(d.change_note||'')+'\n'+(d.source_details||[]).map(s=>'- 来源：'+s.title+' '+s.url+' ['+s.id+']').join('\n');}
  if(report.decision_options?.length)out+='\n\n## 方案取舍\n'+report.decision_options.map(o=>'### '+o.name+'\n适合的条件：'+o.fit+'\n主要取舍：'+o.tradeoff+'\n需要具备：'+o.requirements+'\n先验证：'+o.next_check+'\n依据：'+(o.evidence_ids||[]).join(', ')).join('\n\n');
  if(report.validation_priorities?.length)out+='\n\n## 先验证什么\n'+report.validation_priorities.map(p=>'### '+p.question+'\n为什么先做：'+p.why_first+'\n下一步：'+p.next_step+'\n若得到支持：'+p.if_supported+'\n若不成立：'+p.if_not+'\n依据：'+(p.evidence_ids||[]).join(', ')).join('\n\n');
@@ -128,4 +130,10 @@ function sourceHealthHTML(health){
 
 function reportProse(value){
  return String(value||'').split(/\n\s*\n/).filter(p=>p.trim()).map(p=>'<p>'+esc(p).replace(/\n/g,'<br>')+'</p>').join('');
+}
+
+function economicsHTML(rows){
+ const metrics=[['revenue','销售收入'],['goods_cost','产品成本'],['duty','关税'],['operating_cost','已列费用合计'],['contribution_before_other_costs','扣除已列费用后的贡献额'],['cash_outlay_including_recoverable_tax','含可抵扣税款的现金支出'],['contribution_margin','贡献额占收入比例']];
+ const format=(k,v)=>v===null||v===undefined?'未填写':Number.isFinite(Number(v))?(k==='contribution_margin'?(Number(v)*100).toFixed(2)+'%':Number(v).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2})):String(v);
+ return '<div class="card"><h2>报价情景测算</h2><p class="hint">各情景使用表头所示币种；不同币种不直接比较。缺项保留为空，贡献额尚未扣除未列费用。页面保留两位小数，导出保留计算原值。</p><div class="table-scroll"><table><tr><th>测算项目</th>'+rows.map(r=>'<th>'+esc(r.name)+'<br>'+esc(r.currency)+'</th>').join('')+'</tr>'+metrics.map(([k,label])=>'<tr><td>'+esc(label)+'</td>'+rows.map(r=>'<td>'+esc(format(k,r.calculation.metrics[k]))+'</td>').join('')+'</tr>').join('')+'</table></div>'+rows.map(r=>'<details class="source"><summary>'+esc(r.name)+' · 输入依据</summary><p>未填项目：'+esc(economicNames(r.calculation.missing)||'无')+'</p><p>采用假设：'+esc(economicNames(r.calculation.assumptions)||'无')+'</p></details>').join('')+'</div>';
 }

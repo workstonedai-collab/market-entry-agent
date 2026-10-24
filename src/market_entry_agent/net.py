@@ -48,16 +48,19 @@ def cache(store,key,payload):
         db.execute('CREATE TABLE IF NOT EXISTS retrieval_cache(key TEXT PRIMARY KEY, at REAL, payload TEXT)')
         db.execute('INSERT OR REPLACE INTO retrieval_cache VALUES(?,?,?)',(key,time.time(),json.dumps(payload,ensure_ascii=False)))
 
-def web_search(store, mission, index, timeout=30):
+def web_search(store, mission, index, timeout=30, profile=None):
     from .core import digest
     queries=public_queries(mission)
     if type(index) is not int or not 0<=index<len(queries):
         raise ValueError('Select query_index from the mission public search_queries list (zero based)')
     query=queries[index].strip()
-    return search_query(store,mission,query,timeout)
+    return search_query(store,mission,query,timeout,profile)
 
 
-def search_query(store,mission,query,timeout=30):
+def search_query(store,mission,query,timeout=30,profile=None):
+    if mission.get('mcp_search'):
+        from .mcp_client import search as mcp_search, profile as load_profile
+        return mcp_search(store,mission,query,timeout,profile or load_profile(mission['mcp_search']))
     from .core import digest
     domains=mission.get('search_domains',[])
     provider=os.environ.get('AGENT_SEARCH_PROVIDER','minimax')

@@ -34,6 +34,6 @@ def search(store,run,args,timeout):
         count=db.execute('SELECT COUNT(*) FROM research_queries WHERE run_id=?',(run['id'],)).fetchone()[0]
         if not known and count>=config.get('max_queries',6):raise ValueError('Adaptive search query budget exhausted')
         db.execute('INSERT OR IGNORE INTO research_queries VALUES(?,?,?,?)',(run['id'],identity,query,reason))
-    result=search_query(store,run['mission'],query,timeout)
+    result=search_query(store,run['mission'],query,timeout,profile=store.meta(run['id']).get('mcp_profile'))
     result['query_budget']={'used':count+(not known),'limit':config.get('max_queries',6),'reason':reason,'private_context_sent':False}
     return result

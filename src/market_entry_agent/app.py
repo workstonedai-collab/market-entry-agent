@@ -51,7 +51,7 @@ def serve(store, host, port):
         raise ValueError("Non-loopback serving requires AGENT_UI_TOKEN with at least 24 characters")
     allowed = {"127.0.0.1", "localhost", "::1"}
     allowed.update(filter(None, os.environ.get("AGENT_UI_ALLOWED_HOSTS", "").split(",")))
-    asset = Path(__file__).with_name("web.html").read_bytes()
+    asset = Path(__file__).with_name("web.html").read_text(encoding="utf-8").replace("__AGENT_VERSION__",__version__).encode("utf-8")
     project_asset = Path(__file__).with_name("workflow-ui.js").read_bytes()
     threads = threading.BoundedSemaphore(2)
     available_skills = skill_catalog(snapshot())
@@ -106,7 +106,8 @@ def serve(store, host, port):
                 try:
                     from .notebook import snapshot
                     rid=parse_qs(urlsplit(self.path).query).get("run_id",[""])[0]
-                    return self.reply(200,snapshot(store,rid))
+                    from .depth import snapshot as branch_snapshot
+                    return self.reply(200,dict(snapshot(store,rid),branches=branch_snapshot(store,rid)))
                 except ValueError as exc:return self.reply(400,{"error":str(exc)})
             if path == "/api/source-health":
                 return self.reply(200,source_overview(store))
@@ -334,6 +335,9 @@ def main(argv=None):
     sub.add_parser("schedules")
     worker = sub.add_parser("worker", help="Run due missions; operator must start this process")
     worker.add_argument("--once", action="store_true")
+    mcp=sub.add_parser('mcp-serve',help='Opt-in MCP stdio adapter; read-only unless --allow-runs')
+    mcp.add_argument('--allow-runs',action='store_true',help='Permit explicit task create/resume/control; model mode may incur charges')
+    mcp.add_argument('--project',help='Restrict private project/task access to this explicit project ID')
     ui = sub.add_parser("serve")
     ui.add_argument("--host", default="127.0.0.1")
     ui.add_argument("--port", type=int, default=SPEC["port"])
@@ -342,7 +346,10 @@ def main(argv=None):
     package = Path(__file__).parent
     result = None
     try:
-        if args.command in ('memory-notes','memory-note-save','memory-note-history','memory-note-forget'):
+        if args.command=='mcp-serve':
+            from .mcp import serve as mcp_serve
+            mcp_serve(store,SPEC,args.allow_runs,args.project)
+        elif args.command in ('memory-notes','memory-note-save','memory-note-history','memory-note-forget'):
             from .continuity import ResearchMemory
             memory=ResearchMemory(store,SPEC['id'])
             if args.command=='memory-notes':result={'notes':memory.list(args.project,args.as_of)}
@@ -415,7 +422,8 @@ def main(argv=None):
             result = public_run(store.get_run(args.id))
         elif args.command == "research-state":
             from .notebook import snapshot as notebook_snapshot
-            result=notebook_snapshot(store,args.id)
+            from .depth import snapshot as branch_snapshot
+            result=dict(notebook_snapshot(store,args.id),branches=branch_snapshot(store,args.id))
         elif args.command == "import-document":
             from .documents import ingest
             result=ingest(store,args.file,load_json(args.metadata))

@@ -82,3 +82,25 @@ class NetworkTests(unittest.TestCase):
   result=transport.completion(base,'',{'stream':True},5)
   self.assertEqual(result['usage']['total_tokens'],20)
   self.assertNotIn('private reasoning',json.dumps(result))
+
+
+class ModelEnvelopeCompatibility(unittest.TestCase):
+    def test_only_one_outer_finish_brace_is_restored(self):
+        from unittest.mock import patch
+        import importlib
+        from pathlib import Path
+        import json
+        module=json.loads((Path(__file__).resolve().parents[1]/'agent.json').read_text(encoding='utf-8'))['python_module']
+        core=importlib.import_module(module+'.core');transport=importlib.import_module(module+'.transport')
+        model=core.Model({'AGENT_MODEL_BASE_URL':'https://example.org/v1','AGENT_MODEL_NAME':'synthetic'})
+        raw='{"action":"finish","arguments":{"report":{"title":"Synthetic report","assessment":"Keep this exact text"}}}'
+        raw=raw[:-1]
+        # The literal above closes all inner objects; append no invented semantic content.
+        payload={'choices':[{'finish_reason':'stop','message':{'content':raw}}]}
+        with patch.object(transport,'completion',return_value=payload):result=model.next([],5)
+        self.assertEqual(result['arguments']['report']['assessment'],'Keep this exact text')
+        self.assertFalse(model.last_format_repair['content_changed'])
+        for invalid,finish in [(raw[:-1],'stop'),(raw,'length'),('{"action":"fetch_page","arguments":{}','stop'),('{"action":"finish","arguments":{"report":{"title":"unfinished','stop')]:
+            payload={'choices':[{'finish_reason':finish,'message':{'content':invalid}}]}
+            with patch.object(transport,'completion',return_value=payload):
+                with self.assertRaises((ValueError,RuntimeError)):model.next([],5)

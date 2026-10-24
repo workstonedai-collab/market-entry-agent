@@ -96,3 +96,14 @@ The case runner is opt-in, preserves unchanged agent output, and keeps all run a
 本轮六个独立案例均由 MiniMax-M3.1-Flash 实际生成并保存，正文与保存的模型JSON动作逐字段对照，未手动润色后代替原稿。修订关注过境/抵港混淆、获客预算前后矛盾、中转地与销售目标混用，以及无关联事件不自动限制人员。巴拿马摘要和题设另做了歧义澄清，不能把该例改进全部归因于写作规则。
 
 仍可见长句、重复的谨慎表述、个别审批措辞和方案条件不够一致，故未将这些原稿作为标准答案发布，也不承诺每句正确。部分运行发生协议、步骤预算或TLS连接失败，失败回执保留，恢复结果单独记录；不以完成状态替代语义质量判断。运行原稿、内部评估和凭据留在仓库外。
+
+
+## v0.11.0 产品路径验收
+
+使用 MiniMax-M3.1-Flash 再跑 Rubymar 历史事件与 CBAM 两条虚构交易路径。风险任务累计 15 次模型请求，出海任务 18 次；两者首次运行都遇到格式或保存问题，之后从原始返回内容恢复，不是首轮无错误通过。恢复时没有人工润色正文：风险原稿只补完整外层 JSON 分隔符，出海原稿将无外部引文的项目计算移入业务分析栏目。原始失败、动作、返回文本和恢复回执保留在仓库外。
+
+风险原稿区分可能油膜、IMO后续声明与尚未证明的企业损失，并把明确关联航线与其他供应商分开。出海原稿使用系统的 680/580 USD 贡献额和 300 USD 现金占用差比较方案，保留未批准投入的决定。浏览器验证了报告重开及报价表修改、自动重算、版本记录和恢复原输入。
+
+原稿仍有局限：出海正文一处把运费与固定费用的合计差额写成 200 USD，系统逐项计算为 300 USD。运行时现已把同币种、同数量和单位下的确定性差额放入冻结的模型上下文，专项测试覆盖该差额；没有为这处文字另跑一轮模型，也没有修改原稿冒充首次生成。报价表和导出原值可用于核对。自然表达和分析深度不等于每句叙述或每个法律适用判断都已独立审核。
+
+External MCP is verified with an actual local protocol subprocess and synthetic results, not with a deployed third-party production search service. Deep research branches are verified through durable query limits, recovery, original-source citation controls and saved report/UI exports; they share the existing loop, not extra hidden model workers.

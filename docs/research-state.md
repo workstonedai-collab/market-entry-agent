@@ -88,3 +88,12 @@ PDF解析在操作者配置的独立子进程中执行，有时间和文本大�
 工作表帮助首次完整写作持续保留依据与问题，不是独立审稿门禁。没有新信息时可记录剩余缺口后直接交付条件判断；不要求反复搜索或循环修稿。专用研究提示词、私有方法和客户材料继续留在仓库外。
 
 Research state is durable and revisioned, while raw evidence remains separate. Query composition is restricted to explicitly public operator terms, not arbitrary model prose. PDF parsing is optional and isolated; base installation remains standard-library only. Existing missions, reports and exports remain readable.
+
+
+## 已返回报告的保存与格式兼容
+
+在有私有项目快照的任务中，智能体有时把项目测算或背景写入外部来源栏目，却没有附来源编号。运行时将这部分原文放入“业务背景与推断”，不替它添加引文，外部来源陈述继续保留各自编号。这是栏目对应，不增加独立审稿或改写模型。
+
+If a previously saved `finish` failed validation, explicit resume first revalidates that saved output under current host contracts. A successful recovery records `output_recovery` without another model request and preserves the original failed checkpoint. Other failures still follow the existing scope and budget controls.
+
+For a provider stream that has explicitly completed with `finish_reason: stop`, compatibility handling may restore exactly one missing outer brace of a `finish` action, only when the entire inner JSON report is already complete. No text, fields, arrays or quotation marks are invented. Truncated or incomplete provider streams remain errors. Hashes and the repair kind are recorded in `model_format_repairs`; report content is unchanged.

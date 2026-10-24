@@ -42,3 +42,14 @@ def calculate(data):
             'missing':[k for k,v in values.items() if v is None], 'assumptions':[k for k,v in values.items() if v and v['basis']=='assumption'],
             'formula':'revenue=quantity*unit_price; duty=operator customs_value*duty_rate; operating=quantity*unit_cost+freight+insurance+duty+channel_fee+fixed_cost; contribution=revenue-operating',
             'note':'Scenario arithmetic, not a verified quotation, customs valuation, tax opinion or net-profit forecast. All amounts use the one stated currency; recoverable tax is cash outlay, not deducted as an operating expense. Missing is null; zero requires an explicit value.'}
+
+
+def compare(left,right):
+    """Return this-minus-reference deltas only on an explicit common currency/unit/quantity basis."""
+    same=(left['currency']==right['currency'] and left['unit']==right['unit'] and left['values']['quantity'] is not None
+          and right['values']['quantity'] is not None and Decimal(left['values']['quantity']['value'])==Decimal(right['values']['quantity']['value']))
+    if not same:return {'same_basis':False,'deltas':{},'note':'Currency, quantity or unit differs/is unknown. No implied FX conversion or comparable ranking.'}
+    a,b=calculate(left)['metrics'],calculate(right)['metrics']
+    return {'same_basis':True,'direction':'this scenario minus reference scenario','currency':left['currency'],
+            'deltas':{k:str(Decimal(a[k])-Decimal(b[k])) if a[k] is not None and b[k] is not None else None for k in a},
+            'note':'Deterministic arithmetic from operator inputs; quote verification and unlisted costs remain outside this calculation.'}

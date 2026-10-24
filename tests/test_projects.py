@@ -46,6 +46,32 @@ class ProjectBase(unittest.TestCase):
 
 
 class CommonProjects(ProjectBase):
+    def test_saved_finish_can_recover_business_context_without_another_model_call(self):
+        result=finished(self.eid)
+        result['findings'].append({'claim':'Fictional project calculation: 680 USD contribution, not a source fact','evidence_ids':[]})
+        actions=[{'action':'project_state','arguments':{}},{'action':'read_evidence','arguments':{'id':self.eid}},
+                 {'action':'recall','arguments':{}},{'action':'finish','arguments':{'report':result}}]
+        class Model:
+            def next(self,messages,timeout):return actions.pop(0)
+        agent=core.Agent(self.store,SPEC,Model);original=agent.execute
+        def legacy(name,args,run,remaining):
+            if name=='finish':raise ValueError('Each finding requires claim and evidence_ids')
+            return original(name,args,run,remaining)
+        with patch.object(agent,'execute',side_effect=legacy):failed=agent.run(dict(self.mission,max_steps=4),'model')
+        self.assertEqual(failed['error'],'step_budget_exhausted')
+        class Forbidden:
+            def __init__(self):raise AssertionError('A saved valid report must not need another model')
+        done=core.Agent(self.store,SPEC,Forbidden).run(resume=failed['id'])
+        self.assertEqual(done['state'],'completed',done['error'])
+        self.assertEqual(done['steps'],failed['steps'])
+        self.assertEqual(done['runtime']['model_calls'],failed['runtime']['model_calls'])
+        self.assertEqual(done['runtime']['output_recovery']['new_model_calls'],0)
+        self.assertEqual(len(done['report']['findings']),1)
+        self.assertEqual(done['report']['business_context'],[result['findings'][-1]['claim']])
+        self.assertEqual(done['report']['evidence_ids'],[self.eid])
+        self.assertIn('Business context and reasoning',core.markdown(done['report']))
+        self.assertEqual(done['steps'][-1]['arguments']['report'],result)
+
     def test_version_history_idempotence_and_stale_revision(self):
         kind='exposure' if MODULE=='georisk_agent' else 'profile'
         old=self.flow.state(self.project)[kind][0];data=dict(old['data']);key='note' if kind=='exposure' else 'constraints';data[key]='Changed operator condition'

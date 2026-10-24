@@ -166,6 +166,18 @@ class KernelTests(unittest.TestCase):
         self.assertIn('MATERIAL RULE AFTER THE BANNER', context)
         self.assertIn('HOST EXECUTION NOTICE', context)
 
+    def test_resume_can_reread_cached_state_before_a_final_report(self):
+        eid=self.seed()
+        class Repeater:
+            def next(self,messages,timeout):return {'action':'read_evidence','arguments':{'id':eid}}
+        failed=core.Agent(self.store,product.SPEC,Repeater).run(self.mission,'model')
+        actions=[{'action':'read_evidence','arguments':{'id':eid}},{'action':'finish','arguments':{'report':report(eid)}}]
+        class Recovered:
+            def next(self,messages,timeout):return actions.pop(0)
+        done=core.Agent(self.store,product.SPEC,Recovered).run(resume=failed['id'])
+        self.assertEqual(done['state'],'completed',done['error'])
+        self.assertEqual(done['steps'][:len(failed['steps'])],failed['steps'])
+
     def test_no_progress_stops_and_saved_data_is_resumable(self):
         eid = self.seed()
         class Repeater:

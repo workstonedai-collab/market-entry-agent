@@ -1,3 +1,10 @@
+# v0.11.0
+
+- Opt-in MCP stdio adapter, read-only default, explicit bounded task execution and project scope.
+- Optional operator-owned MCP public search with frozen configuration, minimal environment and source filtering.
+- Durable sequential research branches sharing task/query/call budgets; saved/exported progress and stopping reasons.
+- Document skill input/output/tool-dependency contracts, without scripts or new permissions.
+
 # v0.10.0
 
 - Product-specific operational paths: see docs/decision-paths.md for fields, arithmetic, actor permissions and limits.
