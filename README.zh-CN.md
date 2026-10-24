@@ -1,5 +1,44 @@
 # 企业出海咨询/国区营商环境监测智能体
 
+给企业海外业务团队、咨询人员和国区研究者使用。输入产品、目标市场和经营约束，得到带来源的进入路径分析、待核实问题和后续行动建议。
+
+[English](README.md) · [先试演示](#先跑通一个示例) · [公开样例与来源](examples/README.md) · [联网研究](docs/live-research.md) · [Windows 安装](docs/windows.md)
+
+这是可自行部署的 **Alpha 项目**。离线演示无需模型密钥，使用虚构材料；真实研究需要另行配置模型和信息源。
+
+## 先看工作界面
+
+![项目实际国区看板界面](docs/assets/country-dashboard.png)
+
+上图展示国区看板。报告、来源和任务记录可在工作空间查看；它不代表对任意企业完成了研究。先用下面的演示查看保存的结果，样例数据范围见[公开示例](examples/README.md)。
+
+## 先跑通一个示例
+
+下面为 macOS / Linux 命令。Windows 可直接使用 Python，无需 WSL；请看 [PowerShell 安装与使用说明](docs/windows.md)，包括模型设置、中文路径、保存恢复、导出和常见问题。自动检查覆盖三个系统的 Python 3.11–3.13，并单独验证 Windows 独立环境安装。
+
+```bash
+git clone https://github.com/workstonedai-collab/market-entry-agent.git
+cd market-entry-agent
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -e .
+market-entry-agent demo
+market-entry-agent serve
+```
+
+浏览器访问 http://127.0.0.1:8712 。先查看已保存报告、证据和工具记录，再输入自己的研究任务。示例无需密钥，不调用大模型；资料和分析均清楚标为虚构情景或规则演示。
+
+报告已默认启用自然表达的写作要求。风险项目可对照前后判断，出海项目可展开方案取舍与验证顺序；来源页展示最近获取和失败情况。详见[报告写作与案例验证](docs/report-quality.md)。
+
+研究任务现在可保存子问题、原文摘录、假设和下一步，恢复后继续使用。可另行填写公开词范围，允许智能体在预算内组合后续检索；本机PDF与表格资料也可导入。基础安装仍无新增运行依赖，详见[研究进展与取材说明](docs/research-state.md)。
+
+新增三组真实历史事件案例：CBAM简化与两种进口责任安排、英国加入CPTPP与马来西亚经销验证、EUDR历史延期与木家具资料准备。每次明确选择一组，保留智能体直接生成的原稿和运行回执，按“读得顺、分析有依据、建议能执行”检查；企业条件为虚构，报告不作人工改写后冒充原稿。使用方法见[案例验证说明](docs/report-quality.md#用几组真实事件检查直接生成的原稿)。
+
+## 项目背景与开放范围
+
+<details>
+<summary>使用场景、长期跟踪与联系作者</summary>
+
 一个围绕企业实际情况做出海研究、并持续跟踪目标市场变化的智能体。告诉它你卖什么、打算去哪里、目前处在哪个阶段，以及预算、渠道和交付有哪些约束，它会检索公开信息，阅读相关材料，梳理市场进入路径、经营条件、值得验证的机会和需要补充的信息。
 
 出海前要回答的问题很多：先做哪个市场，找经销商还是自建团队，产品能否进入，售后怎么安排，政策变化会不会改变原来的成本和计划。通用国别报告往往很难回答一家企业的具体问题。这个项目把企业背景放进研究任务，让报告尽量落到准入、渠道、订单、成本和执行条件上；材料不足时，直接列出下一步需要验证的问题。
@@ -11,6 +50,9 @@
 **开放范围与交流：** 国区评分配方、分项权重、贡献计算与通用研究步骤已公开。部分进一步的研究方法、专用提示词和相关知识内容暂未开源。如有需要或希望进一步交流，欢迎[联系作者](https://github.com/workstonedai-collab)或提交[项目 Issue](https://github.com/workstonedai-collab/market-entry-agent/issues/new)；私人资料请勿直接发布在公开 Issue。
 
 [English](README.md) · [公开示例](examples/README.md) · [联网使用](docs/live-research.md) · [Hermes 接入](docs/hermes.md) · [项目记忆与技能](docs/kernel.md) · [Windows 安装](docs/windows.md) · [部署](docs/deployment.md)
+
+
+</details>
 
 ## 国区看板：从背景到行动
 
@@ -134,28 +176,6 @@ flowchart TB
 图中的共同基座是分别随两个项目发布的代码。企业背景、任务、报告和提醒仍保存在各自私有工作空间；资料会按用户配置发送给模型服务。
 
 </details>
-
-## 先跑通一个示例
-
-下面为 macOS / Linux 命令。Windows 可直接使用 Python，无需 WSL；请看 [PowerShell 安装与使用说明](docs/windows.md)，包括模型设置、中文路径、保存恢复、导出和常见问题。自动检查覆盖三个系统的 Python 3.11–3.13，并单独验证 Windows 独立环境安装。
-
-```bash
-git clone https://github.com/workstonedai-collab/market-entry-agent.git
-cd market-entry-agent
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -e .
-market-entry-agent demo
-market-entry-agent serve
-```
-
-浏览器访问 http://127.0.0.1:8712 。先查看已保存报告、证据和工具记录，再输入自己的研究任务。示例无需密钥，不调用大模型；资料和分析均清楚标为虚构情景或规则演示。
-
-报告已默认启用自然表达的写作要求。风险项目可对照前后判断，出海项目可展开方案取舍与验证顺序；来源页展示最近获取和失败情况。详见[报告写作与案例验证](docs/report-quality.md)。
-
-研究任务现在可保存子问题、原文摘录、假设和下一步，恢复后继续使用。可另行填写公开词范围，允许智能体在预算内组合后续检索；本机PDF与表格资料也可导入。基础安装仍无新增运行依赖，详见[研究进展与取材说明](docs/research-state.md)。
-
-新增三组真实历史事件案例：CBAM简化与两种进口责任安排、英国加入CPTPP与马来西亚经销验证、EUDR历史延期与木家具资料准备。每次明确选择一组，保留智能体直接生成的原稿和运行回执，按“读得顺、分析有依据、建议能执行”检查；企业条件为虚构，报告不作人工改写后冒充原稿。使用方法见[案例验证说明](docs/report-quality.md#用几组真实事件检查直接生成的原稿)。
 
 ## 项目持续跟踪
 
