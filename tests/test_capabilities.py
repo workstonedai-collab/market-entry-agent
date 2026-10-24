@@ -98,24 +98,25 @@ class CapabilityTests(unittest.TestCase):
  def test_browser_task_catalog_and_creation(self):
   import threading
   import json
-  from urllib.request import Request,urlopen
+  from urllib.request import Request,build_opener,ProxyHandler
   app=importlib.import_module(MODULE+'.app')
-  ready=threading.Event();servers=[];original=app.AgentHTTPServer
+  ready=threading.Event();servers=[];original=app.AgentHTTPServer;http=build_opener(ProxyHandler({}))
   def server(*args,**kwargs):
    result=original(*args,**kwargs);servers.append(result);ready.set();return result
-  with tempfile.TemporaryDirectory() as d, patch.dict(os.environ,{'AGENT_UI_TOKEN':''}), patch.object(app,'AgentHTTPServer',side_effect=server):
+  with tempfile.TemporaryDirectory() as d, patch('sys.stdout',io.TextIOWrapper(io.BytesIO(),encoding='cp1252')), patch.dict(os.environ,{'AGENT_UI_TOKEN':''}), patch.object(app,'AgentHTTPServer',side_effect=server):
    store=core.Store(d);thread=threading.Thread(target=app.serve,args=(store,'127.0.0.1',0),daemon=True);thread.start()
    try:
     self.assertTrue(ready.wait(5));base='http://127.0.0.1:'+str(servers[0].server_port)
-    with urlopen(base+'/api/task-modes',timeout=5) as response:data=json.load(response)
+    with http.open(base+'/api/task-modes',timeout=5) as response:data=json.load(response)
     self.assertEqual(len(data['task_modes']),3)
-    with urlopen(base,timeout=5) as response:self.assertIn('id="task-mode"',response.read().decode())
+    with http.open(base,timeout=5) as response:self.assertIn('id="task-mode"',response.read().decode())
     mission=dict(product.SPEC['starter'],context='',task_mode=data['task_modes'][0]['id'])
     request=Request(base+'/api/runs',data=json.dumps(dict(mission=mission,engine='demo')).encode(),headers={'Content-Type':'application/json'})
-    with urlopen(request,timeout=5) as response:created=json.load(response)
+    with http.open(request,timeout=5) as response:created=json.load(response)
     self.assertEqual(store.get_run(created['id'])['mission']['task_mode'],mission['task_mode'])
    finally:
-    if servers:servers[0].shutdown()
+    if servers and thread.is_alive():servers[0].shutdown()
+    if servers:servers[0].server_close()
     thread.join(5)
 
 if __name__=='__main__':unittest.main()

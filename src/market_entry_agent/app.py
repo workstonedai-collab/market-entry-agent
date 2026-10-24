@@ -246,8 +246,13 @@ def serve(store, host, port):
                 self.reply(400, {"error": str(exc)[:180]})
 
     server = AgentHTTPServer((host, port), Handler)
-    print(f"{SPEC['name']}: http://{host}:{server.server_port} (local workspace)", flush=True)
     try:
+        label=SPEC["name"]
+        try:
+            label.encode(getattr(sys.stdout,"encoding",None) or "utf-8")
+        except UnicodeEncodeError:
+            label=SPEC["id"]
+        print(f"{label}: http://{host}:{server.server_port} (local workspace)", flush=True)
         server.serve_forever()
     except KeyboardInterrupt:
         pass
