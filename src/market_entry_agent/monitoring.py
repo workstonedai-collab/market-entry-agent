@@ -59,7 +59,7 @@ def schema(config,store,product):
     c.setdefault('allow_private_delivery',False)
     if type(c['allow_private_delivery']) is not bool:raise ValueError('allow_private_delivery must be boolean')
     if c['delivery']=='hermes':
-        if c['mission'].get('knowledge_ids') and not c['allow_private_delivery']:raise ValueError('Confirm whether selected private knowledge may be included in external digests')
+        if (c['mission'].get('knowledge_ids') or c['engine']=='model') and not c['allow_private_delivery']:raise ValueError('Confirm whether private project context, memory and selected knowledge may be included in external digests')
         from .notifications import binding
         current=binding(c.get('delivery_profile'))
         if c.get('delivery_binding') is not None and c['delivery_binding']!=current:raise ValueError('Delivery settings changed; edit and reconfirm monitor')

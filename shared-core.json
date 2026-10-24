@@ -4,7 +4,7 @@
   "files": {
     "core.py": "10d0597be797c9d03f5f0131e70e7466d442da68e543c20b91ebc8d921a7730f",
     "app.py": "a9c07aa2fdca51872d79605656dcb713933d28b72e692c71fb8e6adc9abb2320",
-    "web.html": "c32f1a1edd785ca5ae0650c821165b44f316aea96e5a7d4a1e23b1317cc972f1",
+    "web.html": "19c6703e435919db02e26e33c597a5c8a0d74f826d086b9eb9a6fccf1b806f25",
     "net.py": "e12b65437dfa8943675158234d4eeecb4a93e97491234f30f53e208c8b572bfe",
     "transport.py": "20ac65c23e3811c5dd42bbbc854160f6273e02f143482aa924109e727774e807",
     "countries.py": "dfb98ff70c71a1ae88b60ec9a82d81859ad45ba006bfdbea344fcce41497fcb0",
@@ -31,9 +31,9 @@
     "task_modes.py": "524ab4437250e267022f25dd94d6b27e4c238f9339ffd47896d59db1c4fc7322",
     "knowledge.py": "f80cdbf817e1a295ab9e000ba7e136c8623a3d7a7c903a070d7f41c1cbe881ed",
     "learning.py": "22ed114f88cdfaf3a480cf189aa3accfe013c88ef10094a0f1d9ef76720de793",
-    "monitoring.py": "14a304b93f2b502040c774baa2181cbc1301b2c5e7bfa86ece29a373be5e7d27",
+    "monitoring.py": "9cf9bee450136cbdbc5fec9980691c02150485b1290e714eca446104c9299a0d",
     "notifications.py": "cb755b9d657518d80ba0373b532959c2e9eb31e9789d765875125ef34b78b99c",
     "lifecycle.py": "355acd79dd6b2a88addbc9a9b138537b6077878c4f932b28e2d4631daa588e95",
-    "lifecycle-ui.js": "7a34d3fb809654d8835dcceb43c244484fb1c567faf6d49c6953aa080e4aa625"
+    "lifecycle-ui.js": "b043f823a8b8fac44b872ed5a41e70f63b395b37138ccc1895bb9c1a608c40c7"
   }
 }

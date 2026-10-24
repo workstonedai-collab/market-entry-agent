@@ -265,6 +265,8 @@ class LifecycleTests(unittest.TestCase):
         with patch.dict(os.environ,{'AGENT_MONITOR_DELIVERY_CONFIG':str(p)}):
             with self.assertRaises(ValueError):self.mon.save('alpha',c)
             self.assertEqual(self.mon.save('alpha',dict(c,allow_private_delivery=True))['state'],'draft')
+            model=dict(c,engine='model',mission=self.mission())
+            with self.assertRaises(ValueError):self.mon.save('alpha',model)
 
     def test_confirmed_watch_bypasses_stale_page_cache(self):
         net=importlib.import_module(MODULE+'.net')
