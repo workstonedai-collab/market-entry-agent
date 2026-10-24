@@ -335,7 +335,7 @@ class Monitors:
         with self.store.tasks() as db:rows=[dict(r) for r in db.execute("SELECT project,id FROM monitors WHERE product=? AND state='active' AND confirmed=hash ORDER BY next_due LIMIT 20",(self.product,))]
         results=[]
         for row in rows:
-            results.append(self.check(row['project'],row['id']))
+            results.append(dict(self.check(row['project'],row['id']),monitor_id=row['id']))
             try:self.deliver(row['project'],row['id'])
             except (ValueError,OSError):pass  # A check receipt and pending digest remain visible; never regenerate analysis.
         return results

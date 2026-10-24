@@ -275,6 +275,21 @@ class LifecycleTests(unittest.TestCase):
             net.fetch_page(self.store,source_id='rule');net.fetch_page(self.store,source_id='rule');self.assertEqual(len(calls),1)
             net.fetch_page(self.store,source_id='rule',fresh=True);self.assertEqual(len(calls),2)
 
+    def test_worker_receipts_do_not_log_private_content(self):
+        lifecycle=importlib.import_module(MODULE+'.lifecycle')
+        self.learn.policy('alpha',{'mode':'local','auto_activate':False,'max_calls_per_day':0});run=self.completed()
+        self.learn.enqueue(run['id'],'PRIVATE_CORRECTION_SENTINEL','alpha')
+        self.evidence('PRIVATE_SOURCE_SENTINEL')
+        m=self.mon.save('alpha',dict(self.config(),notify_first_run=True));self.mon.confirm('alpha',m['id'],m['hash'])
+        result=lifecycle.worker_tick(self.store,SPEC['id']);raw=json.dumps(result)
+        self.assertNotIn('PRIVATE_CORRECTION_SENTINEL',raw);self.assertNotIn('PRIVATE_SOURCE_SENTINEL',raw)
+        self.assertTrue(result['learning']);self.assertTrue(result['monitors'])
+
+    def test_missing_delivery_configuration_is_explained(self):
+        notifications=importlib.import_module(MODULE+'.notifications')
+        with patch.dict(os.environ,{'AGENT_MONITOR_DELIVERY_CONFIG':str(Path(self.tmp.name)/'not-present.json')}):
+            with self.assertRaisesRegex(ValueError,'unavailable or invalid'):notifications.profile('test')
+
     def test_http_upload_scope_and_post_only_management(self):
         from urllib.request import Request,build_opener,ProxyHandler
         from urllib.error import HTTPError

@@ -73,4 +73,7 @@ class Lifecycle:
 
 
 def worker_tick(store,product):
-    return {'monitors':Monitors(store,product).tick(),'learning':Learning(store,product).tick()}
+    watches=Monitors(store,product).tick();learned=Learning(store,product).tick()
+    # Supervisor logs carry receipts/status only, never private source excerpts or corrections.
+    return {'monitors':[{k:v for k,v in r.items() if k in ('id','monitor_id','state','receipt','considered','fresh','delivery_state')} for r in watches],
+            'learning':[{k:v for k,v in r.items() if k in ('id','state','version','error')} for r in learned]}

@@ -31,9 +31,9 @@
     "task_modes.py": "524ab4437250e267022f25dd94d6b27e4c238f9339ffd47896d59db1c4fc7322",
     "knowledge.py": "f80cdbf817e1a295ab9e000ba7e136c8623a3d7a7c903a070d7f41c1cbe881ed",
     "learning.py": "22ed114f88cdfaf3a480cf189aa3accfe013c88ef10094a0f1d9ef76720de793",
-    "monitoring.py": "3479efa3f6778a066113fb8def83b61031785c2fd293fc3527d212ba62a9dfc9",
-    "notifications.py": "9d804cfd5c978aa9e36bc4eaa99fe88783fdf9400829ee1d7bb842cf33ae2138",
-    "lifecycle.py": "e525e749cc30a0063a8d99b8592addd1b5f272fc3fa144b8bda67211a9a99fe3",
+    "monitoring.py": "14a304b93f2b502040c774baa2181cbc1301b2c5e7bfa86ece29a373be5e7d27",
+    "notifications.py": "cb755b9d657518d80ba0373b532959c2e9eb31e9789d765875125ef34b78b99c",
+    "lifecycle.py": "355acd79dd6b2a88addbc9a9b138537b6077878c4f932b28e2d4631daa588e95",
     "lifecycle-ui.js": "7a34d3fb809654d8835dcceb43c244484fb1c567faf6d49c6953aa080e4aa625"
   }
 }

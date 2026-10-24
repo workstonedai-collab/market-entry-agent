@@ -9,7 +9,9 @@ from pathlib import Path
 def profile(name):
     path=os.environ.get('AGENT_MONITOR_DELIVERY_CONFIG','')
     if not path:raise ValueError('Configure AGENT_MONITOR_DELIVERY_CONFIG for external delivery')
-    root=json.loads(Path(path).expanduser().read_text(encoding='utf-8'))
+    try:root=json.loads(Path(path).expanduser().read_text(encoding='utf-8'))
+    except (OSError,ValueError):raise ValueError('Delivery configuration file unavailable or invalid') from None
+    if not isinstance(root,dict):raise ValueError('Delivery configuration must map profile names to objects')
     p=root.get(name)
     if not isinstance(p,dict) or set(p)!={'label','target','executable'} or any(not isinstance(p[x],str) or not p[x] for x in p):raise ValueError('Delivery profile requires label, target and executable')
     binary=Path(p['executable']).expanduser()
