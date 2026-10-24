@@ -13,6 +13,9 @@ def extract(path, pdf_executable=None, timeout=40):
     path=Path(path).expanduser().resolve()
     if not path.is_file() or path.stat().st_size>8_000_000:raise ValueError('Document must be a file of at most 8 MB')
     raw=path.read_bytes();kind=path.suffix.lower()
+    if kind in ('.docx','.xlsx','.pptx'):
+        from .office import office_chunks
+        return raw,office_chunks(raw,kind,timeout)
     if kind=='.pdf':
         program=pdf_executable or shutil.which('pdftotext')
         adapter=os.environ.get('AGENT_PDF_ADAPTER_PYTHON','')
@@ -36,7 +39,7 @@ def extract(path, pdf_executable=None, timeout=40):
             for offset in range(0,len(page),24000):
                 chunks.append((page[offset:offset+24000],{'format':'pdf','page':number,'page_offset':offset}))
         return raw,chunks
-    if kind not in ('.csv','.tsv','.txt','.md'):raise ValueError('Supported documents: PDF (optional adapter), CSV, TSV, TXT, MD')
+    if kind not in ('.csv','.tsv','.txt','.md'):raise ValueError('Supported documents: PDF/Office (optional adapters), CSV, TSV, TXT, MD')
     body=raw.decode('utf-8-sig')
     if kind in ('.csv','.tsv'):
         rows=csv.reader(io.StringIO(body),delimiter='\t' if kind=='.tsv' else ',')
@@ -70,7 +73,7 @@ def ingest(store,path,metadata,pdf_executable=None,timeout=40):
         records.append({'title':metadata['title'],'url':metadata['url'],'countries':metadata['countries'],'topics':metadata['topics'],
                         'published_at':metadata.get('published_at'),'body':body,'status':'source_claim','retrieval_kind':'document_text',
                         'document_location':location,'content_sha256':checksum,'visibility':'public' if public else 'private',
-                        'extraction_limit':'PDF extraction covers pages 1–40; tables preserve cell text and row ranges; OCR is not implied.'})
+                        'extraction_limit':'PDF covers pages 1–40. CSV/TSV preserve rows; Office uses converted text offsets, not certified page/cell/slide locations. OCR is not implied.'})
     store.import_evidence({'schema':'field-evidence/v1','records':records})
     ids=[r['id'] for r in store.export_evidence()['records'] if r.get('content_sha256')==checksum and r.get('title')==metadata['title'] and r['url']==metadata['url']]
     return {'evidence_ids':ids,'chunks':len(records),'content_sha256':checksum,'visibility':'public' if public else 'private','model_calls':0}

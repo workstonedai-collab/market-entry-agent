@@ -123,6 +123,9 @@ def serve(store, host, port):
                     return self.reply(200, {"history":Workflow(store,SPEC["id"]).history(query.get("project_id",[""])[0],query.get("kind",[""])[0],query.get("id",[""])[0])})
                 except ValueError as exc:
                     return self.reply(400, {"error":str(exc)})
+            if path == "/api/task-modes":
+                from .task_modes import catalog
+                return self.reply(200,{"task_modes":catalog(SPEC["id"])})
             if path == "/api/skills":
                 return self.reply(200, {"skills": available_skills})
             if path in ('/api/memory/notes','/api/memory/notes/history'):
@@ -279,6 +282,7 @@ def main(argv=None):
     typed.add_argument('project');typed.add_argument('file')
     typed=sub.add_parser('memory-note-history');typed.add_argument('project');typed.add_argument('key')
     typed=sub.add_parser('memory-note-forget');typed.add_argument('project');typed.add_argument('key')
+    sub.add_parser("task-modes",help="List product research task contracts")
     sub.add_parser("skills", help="List configured document skill metadata")
     sub.add_parser("tools", help="Show public tool schemas and execution policies")
     memory = sub.add_parser("memory", help="Read explicit private project facts")
@@ -299,6 +303,7 @@ def main(argv=None):
     page.add_argument("id")
     run = sub.add_parser("run", help="Run a mission")
     run.add_argument("mission")
+    run.add_argument("--task-mode",help="Optional product task contract; see task-modes")
     run.add_argument("--project")
     run.add_argument("--skill", action="append", default=[])
     run.add_argument("--engine", choices=("demo", "model"), default="model")
@@ -365,6 +370,9 @@ def main(argv=None):
             result = Workflow(store,SPEC["id"]).check(args.project)
         elif args.command == "project-history":
             result = {"history":Workflow(store,SPEC["id"]).history(args.project,args.kind,args.id)}
+        elif args.command == "task-modes":
+            from .task_modes import catalog
+            result={"task_modes":catalog(SPEC["id"])}
         elif args.command == "skills":
             result = {"skills": skill_catalog(snapshot())}
         elif args.command == "tools":
@@ -411,6 +419,8 @@ def main(argv=None):
             result = fetch_feed(store, args.id)
         elif args.command == "run":
             mission = load_json(args.mission)
+            if args.task_mode:
+                mission["task_mode"]=args.task_mode
             if args.project:
                 mission["project_id"] = args.project
             if args.skill:
@@ -435,11 +445,15 @@ def main(argv=None):
                 raise ValueError("Run has no completed report")
             output = Path(args.output)
             output.parent.mkdir(parents=True, exist_ok=True)
-            if output.suffix == ".md":
+            if output.suffix.lower() == ".docx":
+                from .office import export_docx
+                result=export_docx(report,output)
+            elif output.suffix == ".md":
                 output.write_text(markdown(report), encoding="utf-8")
             else:
                 atomic_json(output, report)
-            result = {"saved": str(output)}
+            if output.suffix.lower() != ".docx":
+                result = {"saved": str(output)}
         elif args.command == "export-evidence":
             atomic_json(args.output, store.export_evidence())
             result = {"saved": args.output}

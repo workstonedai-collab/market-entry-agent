@@ -66,3 +66,28 @@ jobs:
       - uses: actions/checkout@v4
       - run: docker build -t field-agent .
       - run: docker run --rm field-agent demo
+
+  office-adapters:
+    name: Office adapters (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install optional document environment
+        run: python -m pip install . "markitdown[docx,xlsx,pptx]==0.1.9"
+      - name: Download pinned local OfficeCLI
+        run: python scripts/ci_office.py
+      - name: Preserve configured Python environment
+        shell: python
+        run: |
+          import os, sys
+          with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as output:
+              output.write('AGENT_DOCUMENT_ADAPTER_PYTHON=' + sys.executable + '\n')
+      - name: Synthetic Word export and three private import formats
+        run: python scripts/verify_office.py

@@ -91,6 +91,10 @@ def validate_mission(mission):
         if not isinstance(mission["as_of"], str):
             raise ValueError("as_of must be an ISO date/time string")
         datetime.fromisoformat(mission["as_of"].replace("Z", "+00:00"))
+    if mission.get("task_mode") is not None:
+        from .task_modes import PROFILES
+        if not isinstance(mission["task_mode"],str) or mission["task_mode"] not in PROFILES:
+            raise ValueError("Unknown task_mode")
     return mission
 
 
@@ -258,6 +262,8 @@ class Store(RuntimeStore):
         return {"registered": len(entries)}
 
     def create_run(self, product, mission, engine):
+        from .task_modes import contract
+        if isinstance(mission,dict):contract(product,mission.get("task_mode"))
         validate_mission(mission)
         rid = uuid.uuid4().hex[:16]
         with self.tasks() as db:
@@ -630,6 +636,9 @@ class Agent:
     def run(self, mission=None, engine="demo", resume=None, allow_paused=True):
         if engine not in ("demo", "model"):
             raise ValueError("engine must be demo or model")
+        if not resume and isinstance(mission,dict):
+            from .task_modes import contract
+            contract(self.spec["id"],mission.get("task_mode"))
         rid = resume or self.store.create_run(self.spec["id"], mission, engine)
         run = self.store.get_run(rid)
         if run["product"] != self.spec["id"]:
@@ -824,6 +833,10 @@ class Agent:
             if target.stat().st_size > 24000:
                 raise ValueError("Configured instructions file exceeds size limit")
             instructions = target.read_text(encoding="utf-8")
+        from .task_modes import contract
+        mode=contract(self.spec["id"],mission.get("task_mode"))
+        if mode:
+            instructions += "\nSelected task contract: " + json.dumps(mode,ensure_ascii=False)
         return (self.spec["system"] + "\n" + instructions + "\nYou are an agent. Select ONE action per turn as strict JSON: "
             '{"action":"tool_name","arguments":{...}}. No prose outside JSON. '
             "Use these tools: " + json.dumps(self.task_tools(mission), ensure_ascii=False) +

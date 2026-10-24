@@ -1,10 +1,10 @@
 {
-  "version": "0.11.0",
+  "version": "0.12.0",
   "module": "market_entry_agent",
   "files": {
-    "core.py": "086a6dd3768fce7c357f66c5f70f5f6f0afd0585980111e4125b53b1d6ffea3e",
-    "app.py": "b8a7a3f9a48710ca18c19462cec751e3b8852a92a05d01dd83b1243b73f1471f",
-    "web.html": "697d16bd29e1261cc0b10f8214fa7bbfa911abff43fec31b28a83fc1d1e98a5b",
+    "core.py": "5166c1e28e21da366bfa49b06c843129b039da0ea76137bc52ebdd9e93234e43",
+    "app.py": "ae92dea5285daeb00da11ae9aefe1f12f78af1f6a4bb19c03cc39b96dfcf4d14",
+    "web.html": "278eaafce4ce6af51996bb9255f30bf2947571e9cd20b4b0859cb2d931df7f83",
     "net.py": "173a869e8e68522a66eb093d7d408f858059217ea69daa616ed583c9549d7e60",
     "transport.py": "20ac65c23e3811c5dd42bbbc854160f6273e02f143482aa924109e727774e807",
     "countries.py": "dfb98ff70c71a1ae88b60ec9a82d81859ad45ba006bfdbea344fcce41497fcb0",
@@ -21,11 +21,13 @@
     "decision.py": "c139b3d655cfc8fbc84ee27a1fe84cece1d347177fae4ed7ea7b35fff60b9048",
     "notebook.py": "695fcf2d87a3869be45ac284e9ae01c81ea247bd2df6a3169eaf7ef5dec18094",
     "adaptive.py": "2b80ce2307cbd4e59992bdcdc418eed019c0224d61acd9be842f5f56df868b23",
-    "documents.py": "0971909e5ab0c2030e58fb6202bfb38f0651d5101cc08ec359aee01347dd8cc2",
+    "documents.py": "f2e99e034f9e14dead625255df3ffe5afcade30fb84907b3b68ceeb39f6a77a6",
     "continuity.py": "d83baec5fb007b0ab596a555655d738947901e5be354af50c99d1ac79dc504a5",
     "economics.py": "fd5cc62697742fe6d513b1928305142a7466b71f106dc72672848a779c4f7b12",
     "mcp.py": "7d7fb6bf5eef24ba0934340e425f0ba18a90f930faf275857e2b61535d4acd55",
     "depth.py": "2b32fe0b354f5b7f962cf7aaa4148f472ca833f60922146bc5b051208fd5721d",
-    "mcp_client.py": "34e22585ec5a2c69dbcbc74bd850668889e182cb90aa801197507c764abce9c0"
+    "mcp_client.py": "34e22585ec5a2c69dbcbc74bd850668889e182cb90aa801197507c764abce9c0",
+    "office.py": "a8b97b49e1eb7037d7ea1dca657a3d5a606dd2467014882347db5b4972e2e588",
+    "task_modes.py": "524ab4437250e267022f25dd94d6b27e4c238f9339ffd47896d59db1c4fc7322"
   }
 }

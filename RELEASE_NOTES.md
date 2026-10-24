@@ -1,3 +1,11 @@
+# v0.12.0 · 办公资料与按任务研究
+
+可选本地 MarkItDown 适配器导入 DOCX/XLSX/PPTX；iOfficeAI/OfficeCLI 将完整已保存报告导出为可编辑 Word，不额外调用模型。六类产品任务契约接入网页、CLI、HTTP 与原有 MCP 运行接口，首次保存后恢复沿用原内容。
+
+The base runtime remains standard-library only. Optional adapters are operator-configured local programs; no third-party prompt collection or team runtime is bundled. Research tasks can omit enterprise context. See [setup and limits](docs/office-and-tasks.md) and [integration decisions](docs/integration-references.md).
+
+---
+
 # v0.11.0 · 工具接入与可选研究深度
 
 本地 MCP 服务默认只读；显式开放后，客户端可以在原有范围和预算内创建、恢复、暂停或取消任务。外部 MCP 搜索只接收允许的公开关键词；可选研究分支将不同问题的进度与结论随任务保存。文档技能增加输入输出说明与依赖提示，仍不执行脚本或增加权限。

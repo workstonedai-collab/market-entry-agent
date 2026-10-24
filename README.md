@@ -348,3 +348,8 @@ Record manufacturer, exporter, seller, importer and buyer separately. Operator q
 ### Connect tools and choose research depth
 
 Expose saved tasks, reports and project state through an opt-in [MCP stdio adapter](docs/mcp.md), read-only by default. Explicit startup permission enables bounded task execution. Operator-configured outbound MCP search receives public queries only. [Optional research branches](docs/research-depth.md) retain separate question paths inside the same run and budgets; document skills describe inputs, outputs and tool needs without granting permissions.
+
+
+### Office files and task-focused research
+
+Choose a task in the browser or CLI: geopolitical topic research, event/reporting preparation or interest monitoring; market options, transaction review or operating-premise monitoring. Optional MarkItDown imports local DOCX/XLSX/PPTX, while a local iOfficeAI/OfficeCLI adapter exports the complete saved report as editable DOCX without another model call. [Setup and boundaries](docs/office-and-tasks.md) · [Integration references](docs/integration-references.md).
