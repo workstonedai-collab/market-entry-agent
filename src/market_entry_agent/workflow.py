@@ -7,7 +7,7 @@ DIMENSIONS = ('demand','access','channel','delivery','economics','risks')
 
 
 class Workflow(Records):
-    kinds = ('profile','option','assumption','stage','decision')
+    kinds = ('profile','option','assumption','stage','decision','transaction','economics')
     context_kinds = kinds
     agent_kinds = ('option','assumption','stage')
 
@@ -15,6 +15,14 @@ class Workflow(Records):
         super().__init__(store, product)
 
     def normalize(self, kind, data, as_of=None):
+        if kind == 'transaction':
+            fields(data,['name','option_id','manufacturer','exporter','seller','importer','buyer','incoterm','responsibility_note'])
+            return {'name':text(data.get('name'),200),'option_id':identifier(data.get('option_id')),
+                **{k:text(data.get(k,''),500,optional=True) for k in ('manufacturer','exporter','seller','importer','buyer','incoterm')},
+                'responsibility_note':text(data.get('responsibility_note'))}
+        if kind == 'economics':
+            from .economics import normalize
+            return normalize(data)
         if kind == 'profile':
             fields(data,['product','buyer','stage','countries','capabilities','constraints','budget'])
             return {'product':text(data.get('product'),500),'buyer':text(data.get('buyer'),500),
@@ -38,7 +46,7 @@ class Workflow(Records):
                 out['profile_revision'] = data['profile_revision']
             return out
         if kind == 'assumption':
-            fields(data,['statement','status','countries','topics','option_ids','stage_ids','evidence_ids','note'])
+            fields(data,['statement','status','countries','topics','option_ids','stage_ids','evidence_ids','note','blocking','decision_impact','effort','validation_owner','next_test','if_supported','if_not'])
             out = {'statement':text(data.get('statement')),'status':choice(data.get('status','unchecked'),('unchecked','supported','challenged','needs_review')),
                 'countries':strings(data.get('countries',[])),'topics':strings(data.get('topics',[])),
                 'option_ids':strings(data.get('option_ids',[])), 'stage_ids':strings(data.get('stage_ids',[])),
@@ -46,6 +54,13 @@ class Workflow(Records):
             if not out['countries'] or not out['topics']:
                 raise ValueError('Assumption monitoring requires countries and topics')
             out['evidence_ids'] = self.references(data.get('evidence_ids',[]),out['countries'],out['topics'],as_of)
+            if 'blocking' in data:
+                if type(data['blocking']) is not bool:raise ValueError('blocking must be boolean')
+                out['blocking']=data['blocking']
+            for key in ('decision_impact','effort'):
+                if key in data:out[key]=choice(data[key],('low','medium','high'))
+            for key in ('validation_owner','next_test','if_supported','if_not'):
+                if key in data:out[key]=text(data[key],optional=True)
             return out
         if kind == 'stage':
             fields(data,['goal','actions','deliverables','completion_signal','option_id','depends_on','status','note','evidence_ids'])
@@ -107,6 +122,9 @@ class Workflow(Records):
                 visit(sid,set())
             if data['status']=='done' and not data['note']:
                 raise ValueError('Completed stage requires an operator completion note')
+        if kind in ('transaction','economics'):
+            if not self.get(db,project,'option',data['option_id']):raise ValueError('Transaction/economics references an unknown option')
+            if origin!='operator':raise ValueError('Transaction responsibility and quote inputs require operator entry')
         if kind == 'decision':
             for oid in data['option_ids']:
                 if not self.get(db,project,'option',oid):
@@ -128,11 +146,22 @@ class Workflow(Records):
         return sorted(result)
 
     def change(self, db, project, command, origin, run=None):
+        if not isinstance(command,dict):raise ValueError('Project command must be an object')
         if run and command.get('kind') == 'option':
             snapshot = self.store.meta(run['id']).get('project_state', {}).get('records', {}).get('profile', [])
             if snapshot:
                 command = dict(command, data=dict(command['data'], profile_revision=snapshot[0]['revision']))
+        before=self.get(db,project,command.get('kind'),command.get('id'))
         result = super().change(db,project,command,origin,run)
+        if command['kind']=='economics' and before and not result.get('unchanged'):
+            from .economics import calculate
+            old=calculate(before['data']);new=calculate(result['data'])
+            changed=[k for k in result['data']['values'] if before['data']['values'].get(k)!=result['data']['values'][k]]
+            rid=fingerprint(['economics',result['id'],result['revision']])
+            self.save(db,project,'review',rid,{'assumption_id':'','statement':'报价或测算条件已更新：'+result['data']['name'],
+                'new_evidence_ids':[],'option_ids':[result['data']['option_id']],'stage_ids':[],
+                'kind':'economics_changed','changed_inputs':changed,'before':old,'after':new,
+                'note':'Operator scenario inputs changed. Compare the arithmetic and responsibility before revising the selected route; selection was not changed automatically.'},0,'runtime')
         if command['kind']=='assumption' and not result.get('unchanged'):
             cursor = self.get(db,project,'assumption_cursor',result['id'])
             # All currently saved matching evidence becomes the baseline; the operator can examine refs.
@@ -146,6 +175,24 @@ class Workflow(Records):
         profile = next(iter(value['profile']),None)
         value['comparison'] = [{'id':o['id'],'revision':o['revision'],**o['data'],
             'profile_changed':bool(profile and o['data'].get('profile_revision') != profile['revision'])} for o in value['option']]
+        from .economics import calculate
+        value['economic_scenarios']=[{'id':r['id'],'revision':r['revision'],**r['data'],'calculation':calculate(r['data'])} for r in value['economics']]
+        impacts={'low':0,'medium':1,'high':2};effort={'low':0,'medium':1,'high':2}
+        pending=[r for r in value['assumption'] if r['data']['status'] in ('unchecked','challenged','needs_review')]
+        pending.sort(key=lambda r:(-int(r['data'].get('blocking',False)),-impacts[r['data'].get('decision_impact','medium')],effort[r['data'].get('effort','medium')],r['id']))
+        value['validation_queue']=[{'id':r['id'],**r['data'],'rank':i+1,'why_ranked':{'blocking':r['data'].get('blocking',False),'decision_impact':r['data'].get('decision_impact','medium'),'effort':r['data'].get('effort','medium')},'note':'Qualitative operator/proposal labels; ordered by blocker, impact then effort, not a success probability.'} for i,r in enumerate(pending)]
+        return value
+
+    def snapshot(self, project):
+        value=super().snapshot(project)
+        from .economics import calculate
+        for row in value['records'].get('economics',[]):row['data']['calculation']=calculate(row['data'])
+        pending=[r for r in value['records'].get('assumption',[]) if r['data']['status'] in ('unchecked','challenged','needs_review')]
+        importance={'low':0,'medium':1,'high':2}
+        pending.sort(key=lambda r:(-int(r['data'].get('blocking',False)),-importance[r['data'].get('decision_impact','medium')],importance[r['data'].get('effort','medium')],r['id']))
+        ranks={r['id']:{'rank':i+1,'why_ranked':{k:r['data'].get(k,False if k=='blocking' else 'medium') for k in ('blocking','decision_impact','effort')}} for i,r in enumerate(pending)}
+        for row in value['records'].get('assumption',[]):
+            if row['id'] in ranks:row['data']['validation_priority']=ranks[row['id']]
         return value
 
     def check(self, project):
@@ -168,6 +215,9 @@ class Workflow(Records):
             review_id = fingerprint([aid,added])
             review = {'assumption_id':aid,'statement':data['statement'],'new_evidence_ids':added,
                       'option_ids':data['option_ids'],'stage_ids':data['stage_ids'],
+                      'before':{'assumption_status':data['status'],'evidence_ids':data['evidence_ids']},
+                      'after':{'assumption_status':'needs_review','new_evidence_ids':added},
+                      'affected_decision_ids':[d['id'] for d in self.list(db,project,'decision') if set(d['data']['option_ids']).intersection(data['option_ids'])],
                       'note':'New matching source material. Relevance and effect on this assumption require research; no automatic legal or commercial conclusion.'}
             self.save(db,project,'review',review_id,review,0,'runtime')
             self.save(db,project,'assumption_cursor',aid,{'seen':sorted(set(seen)|set(current))},cursor['revision'] if cursor else 0,'runtime')
@@ -182,7 +232,7 @@ class Workflow(Records):
         return {**value,'checked_at':saved['updated']}
 
     def guide(self):
-        return {'product':self.product,'agent_writable_kinds':list(self.agent_kinds), 'dimensions':list(DIMENSIONS),
+        return {'product':self.product,'transaction_and_economics':'Read frozen transaction/economics records via project_state kind and id. Economics include deterministic single-currency calculations with null gaps; quote/role inputs are operator-only. Read assumption validation_priority and conditional next checks. Never infer origin from transit or replace missing prices with zero.','agent_writable_kinds':list(self.agent_kinds), 'dimensions':list(DIMENSIONS),
           'contracts':{
           'option':{'name':'entry option','countries':['mission country'],'mode':'entry channel','rationale':'conditional recommendation',
                     'tradeoff':'what is gained and given up','requirements':'resources and conditions needed; preserve unknown costs','next_validation':'what to verify first and why',

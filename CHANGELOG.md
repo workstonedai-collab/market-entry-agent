@@ -1,3 +1,8 @@
+# v0.10.0
+
+- Product-specific operational paths: see docs/decision-paths.md for fields, arithmetic, actor permissions and limits.
+- Preserve saved source histories, operator choices, current APIs and three-platform runtime.
+
 # v0.9.0
 
 - Typed private research memory with provenance, operator-only decisions, revision reasons and removal.

@@ -328,3 +328,7 @@ Code is MIT licensed. World Bank observations retain their own attribution and t
 ### Continue research with typed memory
 
 Source statements, hypotheses, judgments and proposed decisions stay distinct across runs of an explicit project. Context selection uses the current question and critical constraints, retaining relevant opposing evidence. Operators can record decisions, inspect revisions and remove memory; resumed runs retain their frozen context. Previous analysis never becomes newly read evidence. See [research memory and context](docs/research-memory.md).
+
+### Compare responsibility and scenario economics
+
+Record manufacturer, seller, importer and buyer separately. Explicit quotes or assumptions drive deterministic single-currency arithmetic; missing inputs stay unknown. Quote changes retain before/after results, while ranked premise checks and source changes point to affected options and decisions. See [entry decision paths](docs/decision-paths.md).

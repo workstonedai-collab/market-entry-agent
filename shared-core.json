@@ -1,5 +1,5 @@
 {
-  "version": "0.9.0",
+  "version": "0.10.0",
   "module": "market_entry_agent",
   "files": {
     "core.py": "c3494a76a359a546ff6dc9889e44c757b1c255cab4652ac8db6956891d10a06e",
@@ -16,12 +16,13 @@
     "skills.py": "d5a81631c3f68b8ba6537c94bc1b45748f35143c2b055250ff78dbf56a443614",
     "runtime.py": "9e2403baa8f2fc38a3dc6f904d7e5d16bb0b651552d96248ff42e31d90e062da",
     "business.py": "41b96518596c52dfd924f5cf045bc1048c5c0b25b81d992248995c78db258e38",
-    "workflow-ui.js": "fe8759b8a95b988d4fe9c8c8d9930b4dbcf36f8efee487b3c48763c2fb920ba3",
+    "workflow-ui.js": "dccdaba9e983dd13b4d1278fa2a4d57c0b460c7a9c4107026ab1589c2fbe71af",
     "source_health.py": "fae5e1f0828e7a2f8d254b28daae92c7b975bc6ab183e24eb4e4baeac4893f50",
     "decision.py": "c139b3d655cfc8fbc84ee27a1fe84cece1d347177fae4ed7ea7b35fff60b9048",
     "notebook.py": "695fcf2d87a3869be45ac284e9ae01c81ea247bd2df6a3169eaf7ef5dec18094",
     "adaptive.py": "eab616e8eabcfb45cd9ae6d706bd0533ffc33d65f6a07b7a23999ff050e8eb67",
     "documents.py": "0971909e5ab0c2030e58fb6202bfb38f0651d5101cc08ec359aee01347dd8cc2",
-    "continuity.py": "d83baec5fb007b0ab596a555655d738947901e5be354af50c99d1ac79dc504a5"
+    "continuity.py": "d83baec5fb007b0ab596a555655d738947901e5be354af50c99d1ac79dc504a5",
+    "economics.py": "0da2bf38b1c7ad6fc1c26238ec1cab1e28602add77285c2d61b3071f116ad513"
   }
 }

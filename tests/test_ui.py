@@ -31,6 +31,10 @@ for(const kind of Object.keys(fieldSpec)){
  assert.ok(!html.includes('<script>'));assert.ok(!html.includes('<unsafe>'));assert.ok(html.includes('&lt;script&gt;'));
  assert.ok(html.includes('keep me'));assert.ok(html.includes('one；two'));assert.ok(!html.includes('>false<'));
 }
+businessForm('economics',{id:'quote',revision:2,data:{name:'Synthetic',values:{freight:{value:'0',basis:'operator_quote',note:'<unsafe quote>'}}}});
+assert.ok($('business-fields').innerHTML.includes('value="0"'));assert.ok($('business-fields').innerHTML.includes('&lt;unsafe quote&gt;'));assert.ok(!$('business-fields').innerHTML.includes('<unsafe quote>'));
+assert.ok(historyFields('economics',{contribution_before_other_costs:'680'}).includes('贡献额'));
+assert.ok(attentionReason('Operator deadline within seven days').includes('7天'));
 const dimensions=historyFields('option',{dimensions:{demand:'demand detail',economics:'cost detail'},status:'selected'});
 assert.ok(dimensions.includes('demand detail'));assert.ok(dimensions.includes('cost detail'));assert.ok(!dimensions.includes('>selected<'));
 assert.ok(!historyFields('stage',{status:'done'}).includes('>done<'));
