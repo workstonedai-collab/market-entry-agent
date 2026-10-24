@@ -21,6 +21,14 @@ class MCPTests(unittest.TestCase):
         self.temp=tempfile.TemporaryDirectory();self.addCleanup(self.temp.cleanup)
         self.store=core.Store(Path(self.temp.name)/'workspace')
         self.mission={'question':'Synthetic MCP test','countries':['Vietnam'],'topics':['trade'],'project_id':'fixture','max_steps':8,'deadline_seconds':30}
+    def wait_workers(self,adapter):
+        acquired=0
+        try:
+            for _ in range(2):
+                self.assertTrue(adapter.workers.acquire(timeout=15),"MCP worker must release its database before cleanup")
+                acquired+=1
+        finally:
+            for _ in range(acquired):adapter.workers.release()
     def init(self,adapter):
         response=adapter.dispatch({'jsonrpc':'2.0','id':1,'method':'initialize','params':{'protocolVersion':'2025-11-25','capabilities':{},'clientInfo':{'name':'fixture','version':'1'}}})
         self.assertEqual(response['result']['protocolVersion'],'2025-11-25')
@@ -49,6 +57,7 @@ class MCPTests(unittest.TestCase):
         with self.assertRaises(ValueError):a.call('run_status',{'id':foreign})
     def test_explicit_create_and_retries_use_saved_command_without_duplicate_model_calls(self):
         a=mcp.Adapter(self.store,SPEC,allow_runs=True,project='fixture')
+        self.addCleanup(self.wait_workers,a)
         args={'client_key':'create-fixture','mission':self.mission,'engine':'demo'}
         result=a.call('run_create',args);deadline=time.monotonic()+5
         while a.run(result['id'])['state'] not in ('completed','failed') and time.monotonic()<deadline:time.sleep(.01)
