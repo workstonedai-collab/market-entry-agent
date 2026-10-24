@@ -25,11 +25,19 @@ Market Entry Agent · [English guide](#english-guide) · [中文完整说明](RE
 
 ## 把研究接着做下去
 
+例如，一家设备企业正在比较两个市场，可以先把产品资料、渠道报价和已有调研放入项目知识库，结合公开准入与营商资料开展研究。形成方案后，再围绕会影响选择的经营前提设置持续关注。以后拿到新报价或政策材料，可以更新文件，回看原来的测算依据，再决定先补什么资料、是否调整方案。
+
 你提供的材料可以在“我的知识库”里按项目整理：上传文件、查看解析状态，再选择本次研究使用哪些资料。原件、版本与出处留在私有工作空间，更新资料后仍能追溯旧任务。
+
+不同项目可以分别整理产品、渠道和目标市场资料，本次研究只选需要的知识库。引用保留文档版本与可取得的出处位置，文件更新后仍能追溯旧任务使用的版本。原件和片段保存在私有工作空间，不进入两个项目交换的公共证据包；选中材料的相关内容会按配置交给模型服务。
 
 希望持续关注时，先保存监测方案，预览并确认范围、提醒标准和检查/汇总频率，再启动工作进程。事件风险、长期议题和经营机会分别设置；没有新增内容时保持安静。需要飞书等渠道时，可显式接入已有 Hermes 发送配置。
 
+持续关注可以围绕准入条件、渠道安排、交付限制或新的经营机会设置，不必把所有消息都归为高危风险。检查与汇总采用各自的频率，免打扰时段和首次是否提醒也由你决定。规则模式按明确词项和来源筛选；需要判断新资料是否符合文字标准时，可以选择有预算的模型模式。方案、来源配置或外部接收位置变化后，需要重新预览并确认。
+
 项目还可以按你的选择积累研究经验：本地整理有效步骤与纠正，或在独立额度内让模型提炼技能候选。技能保留来源任务与版本，可以启用、停用和回退；不会自动扩大工具权限或公开你的资料。[知识库、持续监测与技能学习说明](docs/continuous-research.md)
+
+比如，你可以补充“比较进口安排前，先确认进口主体和费用由谁承担”，把这条经验整理成项目技能候选。默认由你选择版本启用，以后也能停用或回退。学习在报告保存后另行处理，本地整理不增加模型调用，模型提炼使用单独限额；新技能不会替你改写已有决策，也不能增加工具权限。
 
 你可以围绕一个问题跑一次研究，也可以把资料、方案和判断保存在同一个项目中接着做。来源陈述、假设、分析和操作者决定分别保留，修改有版本和原因；新的问题与输入优先。周期跟踪需要单独启动工作进程，获取新资料与本地对比是不同操作。
 
@@ -85,6 +93,14 @@ See the [Windows installation, model configuration and troubleshooting guide](do
 ## Background and open scope
 
 Build named private knowledge collections from your files, then select them for a project task. Draft and preview a watch, confirm its scope, criteria and check/digest cadence, and run a separate worker. Optional procedural learning turns completed tool paths and explicit corrections into private, versioned skills; activation and rollback remain visible. Model distillation has its own opt-in daily budget. [Setup and limits](docs/continuous-research.md).
+
+For an equipment business comparing two markets, start with product documents, channel quotes and earlier research in a private library, then combine selected material with public entry and business-environment sources. Once an option is documented, watch the operating premises that could affect it. Updated quotes or policy documents give you a basis to revisit the assumptions and decide what to verify or change next.
+
+Organize product, channel and market documents by project, selecting only the libraries needed for the current task. Citations retain document versions and available source locations, so earlier tasks remain traceable after a file is replaced. Originals and searchable fragments stay outside shared public evidence bundles; relevant selected material goes to your configured model service.
+
+Watches can cover entry requirements, channel arrangements, delivery constraints and business opportunities. Set checking and digest intervals separately, choose quiet hours and decide whether to notify on the first check. Rules mode matches explicit terms and sources; model mode assesses your written criteria within a research budget. Changes to the watch, source configuration or external destination require preview and confirmation again.
+
+A correction such as “identify the importer and who bears each cost before comparing import arrangements” can become a private skill candidate. You choose which version to activate, disable or restore. Learning runs after the report is saved: local extraction adds no model calls, while model distillation has a separate allowance. A skill cannot change your recorded decision or grant additional tool permissions.
 
 A research agent for the choices businesses face when entering and operating in overseas markets. Describe the product, customers, target markets, current stage and constraints. The agent reads permitted sources and connects available evidence to market access, channels, delivery, costs and execution, with explicit conditions and questions to verify.
 
@@ -310,6 +326,8 @@ The public package includes generic role instructions, the published research ou
 | Monitoring | Confirmed event/topic/operating watches with separate check and digest cadence, meaningful-change records and recovery; a separate worker executes them |
 | Delivery | Save reports immediately; export Markdown/JSON; local inbox by default, optional explicitly confirmed Hermes destination with receipts |
 | Interfaces | CLI, browser workspace, loopback HTTP API, opt-in local MCP stdio adapter and container recipe |
+| Knowledge libraries | Selected project collections retain original files, versions and source locations; local retrieval and index rebuilding stay in the private workspace |
+| Procedural skills | Opt-in local extraction or separately budgeted model distillation, with visible candidate versions, activation, disabling and rollback |
 
 Available tools: `country_baseline`, `research_plan`, `search_evidence`, `read_evidence`, `recall`, `list_sources`, `fetch_feed`, `web_search`, `fetch_page`, `finish`, `load_skill`, `read_result`, `project_state`. Saved-research tools add `research_state` and `update_research`; optional public-term composition adds `adaptive_search`, while research depth adds `research_branch` and `close_branch`. Tools are exposed only when their prerequisites are configured. There is no model-generated shell execution. Finding citations must reference records the agent actually read. This validates provenance, not the truth of every model statement.
 
@@ -361,6 +379,16 @@ Code is MIT licensed. World Bank observations retain their own attribution and t
 ## Release and evaluation history
 
 [当前正式版本 v0.13.0](https://github.com/workstonedai-collab/market-entry-agent/releases/tag/v0.13.0) · [完整更新记录](RELEASE_NOTES.md) · [报告案例与实际限制](docs/report-quality.md)
+
+Recent releases connect incoming material, everyday research tools and continued project work:
+
+| Release | What changes in use | Guide |
+|---|---|---|
+| v0.13.0: private libraries, watches and procedural skills | Import files, preview and confirm monitoring, and choose whether to generate, activate or roll back private skills | [Setup, recovery and limits](docs/continuous-research.md) |
+| v0.12.0–v0.12.1: Office files and task entry points | Choose a task, optionally import Office material or export a complete Word report; Windows test cleanup waits for file handles to close | [Office and tasks](docs/office-and-tasks.md) |
+| v0.11.0: tool integration and question branches | Read saved research through MCP, explicitly enable task execution, and investigate separate questions within the original task budget | [MCP](docs/mcp.md) · [Research branches](docs/research-depth.md) |
+
+The v0.13.0 installed-package checks exercised library creation, report saving and reopening, watch confirmation and skill generation. Cross-platform checks continue on macOS, Windows and Linux. Scripted substitutes cover the new model branches and Hermes receipts; real-model report cases and their limits remain documented in the case guide linked above.
 
 <details>
 <summary>Earlier v0.11.0 product paths and evaluation</summary>
