@@ -1,7 +1,7 @@
 {
   "schema": "field-agent/v1",
   "id": "market-entry-agent",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "entrypoint": "market-entry-agent",
   "python_module": "market_entry_agent",
   "engines": {
@@ -59,10 +59,19 @@
       "csv",
       "tsv",
       "txt",
-      "md"
+      "md",
+      "docx_optional",
+      "xlsx_optional",
+      "pptx_optional"
     ],
     "research_depth": "optional_sequential_shared_budget",
     "typed_research_memory": true,
-    "mcp_public_search": "operator_configured_public_queries_only"
+    "mcp_public_search": "operator_configured_public_queries_only",
+    "office_export": "docx_optional_local_complete_text",
+    "task_modes": [
+      "market-options",
+      "transaction-review",
+      "operating-watch"
+    ]
   }
 }
