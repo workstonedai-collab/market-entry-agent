@@ -1,7 +1,7 @@
 {
   "schema": "field-agent/v1",
   "id": "market-entry-agent",
-  "version": "0.12.1",
+  "version": "0.13.0",
   "entrypoint": "market-entry-agent",
   "python_module": "market_entry_agent",
   "engines": {
@@ -35,7 +35,7 @@
     "http",
     "mcp-stdio"
   ],
-  "external_sending": false,
+  "external_sending": "opt_in_confirmed_hermes_cli",
   "shared_core": "shared-core.json",
   "license": "MIT",
   "name_zh": "企业出海咨询/国区营商环境监测智能体",
@@ -72,6 +72,10 @@
       "market-options",
       "transaction-review",
       "operating-watch"
-    ]
+    ],
+    "private_knowledge_collections": true,
+    "confirmed_monitoring": true,
+    "procedural_learning": "opt_in_local_or_budgeted_model",
+    "skill_versions_and_rollback": true
   }
 }

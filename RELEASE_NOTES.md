@@ -1,3 +1,11 @@
+# v0.13.0 · 文件建库、确认后监测与私有技能学习
+
+浏览器和 CLI 支持按项目建立私有知识库，保存原件、版本、出处与可重建索引；监测方案预览并确认后执行，区分检查与汇总周期，保留增量、失败和发送回执；学习默认关闭，可选择本地整理或限额模型提炼，查看并回退私有技能。保留原有报告、看板、产品路径与 Mac/Windows/Linux 支持。
+
+Private collections, confirmed watches and opt-in procedural learning share the existing standard-library runtime. External delivery requires an operator-configured Hermes CLI destination and explicit confirmation; no jobs or recipients are enabled by installation. See [setup, recovery and limits](docs/continuous-research.md).
+
+---
+
 # v0.12.1 · 等待任务结束后清理测试工作空间
 
 HTTP 任务创建验收先确认后台任务已完成并释放数据库，再清理临时工作空间，避免 Windows 的文件占用错误。保留 v0.12.0 的办公适配与六类任务能力。

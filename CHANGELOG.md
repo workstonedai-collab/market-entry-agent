@@ -1,3 +1,10 @@
+# v0.13.0
+
+- Private project collections with asynchronous browser import, original/version storage, scoped lexical retrieval, source locations, replacement, deletion and index rebuild.
+- Confirmed event/topic/operating watches, separate check/digest cadence, incremental receipts, quiet periods, recovery and optional Hermes delivery.
+- Opt-in local or budgeted model learning, private skill candidates, source runs, version activation/export/rollback and frozen active runs.
+- Existing CLI/product/report/MCP paths retained; same standard-library base on Mac, Windows and Linux.
+
 # v0.11.0
 
 - Opt-in MCP stdio adapter, read-only default, explicit bounded task execution and project scope.

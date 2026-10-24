@@ -13,7 +13,7 @@ market-entry-agent export RUN_ID --output report.md
 
 The recurring worker is an explicit foreground process. Use one intended process supervisor. Due schedules are leased so two workers do not both claim the same due task. The next run is scheduled after the current attempt; failures remain visible as failed runs. Pause a schedule with `pause SCHEDULE_ID`.
 
-Recurring tasks research the current imported evidence; a model may choose to refresh registered feeds. A deterministic demo never makes network requests. Stable evidence and mission identity deduplicate notification entries, while reports retain independent versions. Notifications are local and pending review; `approve` marks one approved but does not send it anywhere. External delivery connectors require a separate implementation and destination authorization.
+Recurring tasks research the current imported evidence; a model may choose to refresh registered feeds. A deterministic demo never makes network requests. Stable evidence and mission identity deduplicate notification entries, while reports retain independent versions. Notifications are local and pending review; `approve` marks one approved but does not send it anywhere. New confirmed watches provide an opt-in Hermes CLI connector with destination binding, private-material consent and durable send receipts; legacy approve still changes local state only. See [continuous research](continuous-research.md).
 
 Project memory, bounded context, document skills, run controls and usage receipts: [shared kernel guide](kernel.md).
 

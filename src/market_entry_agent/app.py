@@ -37,11 +37,20 @@ def public_run(run):
 def tick(store, spec=SPEC):
     results = []
     for schedule in store.due():
+        error=None
         try:
             run = Agent(store, spec).run(json.loads(schedule["mission"]), schedule["engine"])
             results.append({"schedule": schedule["id"], "run": run["id"], "state": run["state"]})
+            if run['state']!='completed':error=run.get('error') or run['state']
+        except Exception as exc:
+            error=type(exc).__name__
+            results.append({'schedule':schedule['id'],'state':'failed','error':error})
         finally:
-            store.schedule_complete(schedule["id"])
+            store.schedule_complete(schedule["id"],error)
+    from .lifecycle import worker_tick
+    extra=worker_tick(store,spec['id'])
+    results.extend({'monitor':r} for r in extra['monitors'] if r.get('state')!='not_due_or_not_confirmed')
+    results.extend({'learning':r} for r in extra['learning'] if r.get('state') not in ('disabled','daily_budget_wait'))
     return results
 
 
@@ -55,6 +64,14 @@ def serve(store, host, port):
     project_asset = Path(__file__).with_name("workflow-ui.js").read_bytes()
     threads = threading.BoundedSemaphore(2)
     available_skills = skill_catalog(snapshot())
+    from .lifecycle import Lifecycle
+    lifecycle=Lifecycle(store,SPEC['id'])
+    def background(work):
+        if not threads.acquire(blocking=False):raise ValueError('Two workspace workers are active; retry shortly')
+        def perform():
+            try:work()
+            finally:threads.release()
+        threading.Thread(target=perform,daemon=True).start()
 
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *_):
@@ -100,14 +117,25 @@ def serve(store, host, port):
                 return self.reply(200, asset, "text/html; charset=utf-8")
             if path == "/workflow-ui.js":
                 return self.reply(200, project_asset, "text/javascript; charset=utf-8")
+            if path == '/lifecycle-ui.js':
+                return self.reply(200,Path(__file__).with_name('lifecycle-ui.js').read_bytes(),'text/javascript; charset=utf-8')
+            if path.startswith(('/api/knowledge/','/api/monitors/','/api/learning/')):
+                try:
+                    _,_,area,action=path.split('/')
+                    if action not in ('list','jobs','search','read','original','preview','history','status','export'):raise ValueError('This operation requires POST')
+                    body={k:v[0] for k,v in parse_qs(urlsplit(self.path).query).items()}
+                    if 'collection_ids' in body:body['collection_ids']=body['collection_ids'].split(',')
+                    result=lifecycle.dispatch(area,action,body)
+                    return self.reply(200,result,'application/octet-stream' if isinstance(result,bytes) else 'application/json; charset=utf-8')
+                except (ValueError,KeyError,TypeError) as exc:return self.reply(400,{'error':str(exc)[:180]})
             if path == "/health":
                 return self.reply(200, {"status": "ok", "product": SPEC["id"], "version": __version__})
             if path == "/api/research":
                 try:
-                    from .notebook import snapshot
+                    from .notebook import snapshot as notebook_snapshot
                     rid=parse_qs(urlsplit(self.path).query).get("run_id",[""])[0]
                     from .depth import snapshot as branch_snapshot
-                    return self.reply(200,dict(snapshot(store,rid),branches=branch_snapshot(store,rid)))
+                    return self.reply(200,dict(notebook_snapshot(store,rid),branches=branch_snapshot(store,rid)))
                 except ValueError as exc:return self.reply(400,{"error":str(exc)})
             if path == "/api/source-health":
                 return self.reply(200,source_overview(store))
@@ -127,7 +155,8 @@ def serve(store, host, port):
                 from .task_modes import catalog
                 return self.reply(200,{"task_modes":catalog(SPEC["id"])})
             if path == "/api/skills":
-                return self.reply(200, {"skills": available_skills})
+                project=parse_qs(urlsplit(self.path).query).get('project_id',[None])[0]
+                return self.reply(200, {"skills": skill_catalog(snapshot(store,SPEC['id'],project)) if project else available_skills})
             if path in ('/api/memory/notes','/api/memory/notes/history'):
                 try:
                     from .continuity import ResearchMemory
@@ -177,11 +206,15 @@ def serve(store, host, port):
                 return
             try:
                 length = int(self.headers.get("Content-Length", "0"))
-                if length <= 0 or length > 100_000 or self.headers.get_content_type() != "application/json":
+                if length <= 0 or length > (10_800_000 if self.path=="/api/knowledge/import" else 100_000) or self.headers.get_content_type() != "application/json":
                     return self.reply(400, {"error": "Expected bounded application/json body"})
                 body = json.loads(self.rfile.read(length))
                 if not isinstance(body, dict):
                     raise ValueError("Request body must be an object")
+                if self.path.startswith(('/api/knowledge/','/api/monitors/','/api/learning/')):
+                    _,_,area,action=self.path.split('/')
+                    result=lifecycle.dispatch(area,action,body,background)
+                    return self.reply(200,result,'application/octet-stream' if isinstance(result,bytes) else 'application/json; charset=utf-8')
                 if self.path == "/api/project":
                     return self.reply(200, Workflow(store,SPEC["id"]).save_command(body["project_id"],body["command"]))
                 if self.path == "/api/project/check":
@@ -348,6 +381,11 @@ def main(argv=None):
     mcp=sub.add_parser('mcp-serve',help='Opt-in MCP stdio adapter; read-only unless --allow-runs')
     mcp.add_argument('--allow-runs',action='store_true',help='Permit explicit task create/resume/control; model mode may incur charges')
     mcp.add_argument('--project',help='Restrict private project/task access to this explicit project ID')
+    manage=sub.add_parser('manage',help='Private knowledge, confirmed monitoring and learning; see docs/continuous-research.md')
+    manage.add_argument('area',choices=('knowledge','monitors','learning'));manage.add_argument('action')
+    manage.add_argument('--project',required=True);manage.add_argument('--data',help='JSON command file')
+    manage.add_argument('--file',help='Knowledge import file; never interpreted as a command')
+    manage.add_argument('--output',help='Explicit local export destination')
     ui = sub.add_parser("serve")
     ui.add_argument("--host", default="127.0.0.1")
     ui.add_argument("--port", type=int, default=SPEC["port"])
@@ -481,6 +519,20 @@ def main(argv=None):
                 if args.once:
                     break
                 time.sleep(5)
+        elif args.command == 'manage':
+            from .lifecycle import Lifecycle
+            body=load_json(args.data) if args.data else {}
+            body['project_id']=args.project
+            if args.file:
+                import base64
+                document=Path(args.file)
+                if not document.is_file() or document.stat().st_size>8_000_000:raise ValueError('File unavailable or over 8 MB')
+                body.update(filename=document.name,content_base64=base64.b64encode(document.read_bytes()).decode())
+            result=Lifecycle(store,SPEC['id']).dispatch(args.area,args.action,body)
+            if isinstance(result,bytes):
+                if not args.output:raise ValueError('Binary/original/skill exports require --output')
+                with Path(args.output).open('xb') as output:output.write(result)
+                result={'output':args.output}
         elif args.command == "serve":
             serve(store, args.host, args.port)
         if result is not None:

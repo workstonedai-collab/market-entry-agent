@@ -1,0 +1,35 @@
+{
+  "config": {
+    "name": "练习资料变化观察",
+    "mission": {
+      "project_id": "example-project",
+      "question": "观察本地练习资料中的规则变化。",
+      "countries": [
+        "Vietnam"
+      ],
+      "topics": [
+        "trade"
+      ],
+      "max_steps": 12,
+      "deadline_seconds": 180,
+      "max_model_calls": 12
+    },
+    "kind": "operating",
+    "source_ids": [],
+    "criteria": "关注适用范围与日期的实质变化；重复表述不提醒。",
+    "include_terms": [],
+    "exclude_terms": [],
+    "min_sources": 1,
+    "check_interval": 3600,
+    "digest_interval": 86400,
+    "timezone": "UTC+08:00",
+    "quiet_hours": [
+      22,
+      8
+    ],
+    "engine": "rules",
+    "notify_first_run": false,
+    "delivery": "local",
+    "allow_private_delivery": false
+  }
+}

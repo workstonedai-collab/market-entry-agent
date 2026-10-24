@@ -70,7 +70,7 @@ def search_query(store,mission,query,timeout=30,profile=None):
     if not key:
         raise ValueError('Set AGENT_SEARCH_API_KEY for public web search')
     identity=digest({'provider':provider,'query':query,'domains':domains})
-    payload=cached(store,'search:'+identity,3600)
+    payload=None if mission.get('monitor_refresh') else cached(store,'search:'+identity,3600)
     hit=payload is not None
     if not hit:
         # Fixed official service endpoint; no model-controlled credentials or URLs.
@@ -106,18 +106,18 @@ def search_query(store,mission,query,timeout=30,profile=None):
     return {'query':query,'cached':hit,'results':[store.read(eid) for eid in ids],
         'limitation':'Search snippets only. Fetch and read relevant pages before factual conclusions. Provider dates are not verified publication dates.'}
 
-def fetch_page(store, evidence_id=None, source_id=None, timeout=20):
+def fetch_page(store, evidence_id=None, source_id=None, timeout=20, fresh=False):
     from .source_health import retrieve
     source=next((s for s in store.sources() if s["id"]==source_id),None) if source_id else None
     if not source_id and evidence_id:
         evidence=store.read(evidence_id)
         source=next((s for s in store.sources() if s.get("kind")=="page" and s["url"]==evidence["url"]),None)
-    operation=lambda: _fetch_page(store,evidence_id,source_id,timeout)
+    operation=lambda: _fetch_page(store,evidence_id,source_id,timeout,fresh=fresh) if fresh else _fetch_page(store,evidence_id,source_id,timeout)
     if not source or source.get("kind")!="page":return operation()
     return retrieve(store,source["id"],operation)
 
 
-def _fetch_page(store, evidence_id=None, source_id=None, timeout=20):
+def _fetch_page(store, evidence_id=None, source_id=None, timeout=20, fresh=False):
     from .core import digest,fetch_public_https
     if source_id:
         source=next((s for s in store.sources() if s['id']==source_id and s.get('kind')=='page'),None)
@@ -133,7 +133,7 @@ def _fetch_page(store, evidence_id=None, source_id=None, timeout=20):
         if registered:
             source=registered; hosts=source['allowed_hosts']
     identity=digest({'url':url,'hosts':hosts,'countries':source['countries'],'topics':source['topics'],'published_at':source.get('published_at')})
-    previous=cached(store,'page:'+identity,3600)
+    previous=None if fresh else cached(store,'page:'+identity,3600)
     if previous:
         return dict(previous,cached=True,retrieval_kind=previous.get('retrieval_kind','page_text'))
     retrieval_deadline=time.monotonic()+timeout

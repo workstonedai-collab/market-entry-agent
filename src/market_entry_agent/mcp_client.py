@@ -88,7 +88,7 @@ def search(store,mission,query,timeout,config):
     from .core import digest
     from .net import cached,cache
     identity=digest({'provider':'mcp','version':config['version'],'query':query,'domains':mission.get('search_domains',[])})
-    payload=cached(store,'mcp-search:'+identity,3600);hit=payload is not None
+    payload=None if mission.get('monitor_refresh') else cached(store,'mcp-search:'+identity,3600);hit=payload is not None
     if not hit:
         client=None
         try:

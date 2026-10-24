@@ -1,11 +1,11 @@
 {
-  "version": "0.12.1",
+  "version": "0.13.0",
   "module": "market_entry_agent",
   "files": {
-    "core.py": "5166c1e28e21da366bfa49b06c843129b039da0ea76137bc52ebdd9e93234e43",
-    "app.py": "439ae9102948667bdd0be7d0767b38c39f34c296af00a189684ae0cb166a6294",
-    "web.html": "278eaafce4ce6af51996bb9255f30bf2947571e9cd20b4b0859cb2d931df7f83",
-    "net.py": "173a869e8e68522a66eb093d7d408f858059217ea69daa616ed583c9549d7e60",
+    "core.py": "10d0597be797c9d03f5f0131e70e7466d442da68e543c20b91ebc8d921a7730f",
+    "app.py": "a9c07aa2fdca51872d79605656dcb713933d28b72e692c71fb8e6adc9abb2320",
+    "web.html": "c32f1a1edd785ca5ae0650c821165b44f316aea96e5a7d4a1e23b1317cc972f1",
+    "net.py": "e12b65437dfa8943675158234d4eeecb4a93e97491234f30f53e208c8b572bfe",
     "transport.py": "20ac65c23e3811c5dd42bbbc854160f6273e02f143482aa924109e727774e807",
     "countries.py": "dfb98ff70c71a1ae88b60ec9a82d81859ad45ba006bfdbea344fcce41497fcb0",
     "research.py": "ba84d52a19f22745abedc6db0f6f8eb925b4bdd4ddfacd025defe8a2f403ad55",
@@ -13,7 +13,7 @@
     "memory.py": "35873a8bdf4a0e8341b89024d956b355afd17e42395343f8733164ebfccfea13",
     "context.py": "46eac29bc80730d37faa0659b3e8a143d8859bd021dc1d5141420b8f1f4a79eb",
     "contracts.py": "df3070a22f7365d20d2b54f30845d65ab26e7873a309e3bb1977bd614b4a6705",
-    "skills.py": "f73524e94d613fb8ca072390b3b4fd1cf4156f6b150ed098892fed3343ccbbaa",
+    "skills.py": "d1ec1ab2d4204bc6b13c9c14dfbee941c132d944176c38a2a6c0b9b6393a33cf",
     "runtime.py": "7f5bfbe5aedc5cc82063f32f8ce8c7096e5b719cee1f9dddf41547e0e2f10bfc",
     "business.py": "41b96518596c52dfd924f5cf045bc1048c5c0b25b81d992248995c78db258e38",
     "workflow-ui.js": "75d5407b0f6354d1d2f973eb67de175a587e22e2c21b97b93f610bd647c91e26",
@@ -26,8 +26,14 @@
     "economics.py": "fd5cc62697742fe6d513b1928305142a7466b71f106dc72672848a779c4f7b12",
     "mcp.py": "7d7fb6bf5eef24ba0934340e425f0ba18a90f930faf275857e2b61535d4acd55",
     "depth.py": "2b32fe0b354f5b7f962cf7aaa4148f472ca833f60922146bc5b051208fd5721d",
-    "mcp_client.py": "34e22585ec5a2c69dbcbc74bd850668889e182cb90aa801197507c764abce9c0",
+    "mcp_client.py": "5ee89998dd74424c865101a46d5f9cc67b3ca6ab25c6b8b55a31d27f2afc130e",
     "office.py": "a8b97b49e1eb7037d7ea1dca657a3d5a606dd2467014882347db5b4972e2e588",
-    "task_modes.py": "524ab4437250e267022f25dd94d6b27e4c238f9339ffd47896d59db1c4fc7322"
+    "task_modes.py": "524ab4437250e267022f25dd94d6b27e4c238f9339ffd47896d59db1c4fc7322",
+    "knowledge.py": "f80cdbf817e1a295ab9e000ba7e136c8623a3d7a7c903a070d7f41c1cbe881ed",
+    "learning.py": "22ed114f88cdfaf3a480cf189aa3accfe013c88ef10094a0f1d9ef76720de793",
+    "monitoring.py": "3479efa3f6778a066113fb8def83b61031785c2fd293fc3527d212ba62a9dfc9",
+    "notifications.py": "9d804cfd5c978aa9e36bc4eaa99fe88783fdf9400829ee1d7bb842cf33ae2138",
+    "lifecycle.py": "e525e749cc30a0063a8d99b8592addd1b5f272fc3fa144b8bda67211a9a99fe3",
+    "lifecycle-ui.js": "7a34d3fb809654d8835dcceb43c244484fb1c567faf6d49c6953aa080e4aa625"
   }
 }

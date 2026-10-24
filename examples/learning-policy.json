@@ -1,0 +1,7 @@
+{
+  "policy": {
+    "mode": "local",
+    "auto_activate": false,
+    "max_calls_per_day": 0
+  }
+}

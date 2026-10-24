@@ -16,7 +16,7 @@ import ssl
 import time
 import uuid
 import xml.etree.ElementTree as ET
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlsplit, urljoin
@@ -79,6 +79,9 @@ def validate_mission(mission):
     chosen = mission.get("skill_ids", [])
     if not isinstance(chosen, list) or len(chosen) > 3 or any(not isinstance(x, str) or not 1 <= len(x) <= 64 for x in chosen):
         raise ValueError("skill_ids must contain at most 3 skill names")
+    collections=mission.get("knowledge_ids",[])
+    if not isinstance(collections,list) or len(collections)>8 or any(not isinstance(x,str) or len(x)>80 for x in collections):raise ValueError("knowledge_ids must select at most eight collections")
+    if collections and not mission.get("project_id"):raise ValueError("Selected knowledge collections require project_id")
     from .net import public_queries
     public_queries(mission)
     from .adaptive import validate as validate_search
@@ -232,6 +235,13 @@ class Store(RuntimeStore):
         return [dict(x[2], retrieval_score=x[0]) for x in scored[:max(1, min(int(limit), 20))]]
 
     def read(self, evidence_id):
+        if str(evidence_id).startswith('kb-'):
+            from .knowledge import Knowledge
+            with self.tasks() as db:
+                try:row=db.execute('SELECT c.product FROM kb_chunks ch JOIN kb_versions v ON v.id=ch.version_id JOIN kb_documents d ON d.id=v.document_id JOIN kb_collections c ON c.id=d.collection_id WHERE ch.id=?',(evidence_id,)).fetchone()
+                except sqlite3.OperationalError:row=None
+            if not row:raise ValueError('Unknown document evidence')
+            return Knowledge(self,row[0]).read_internal(evidence_id)
         with self.evidence() as db:
             row = db.execute("SELECT content FROM evidence WHERE id=?", (evidence_id,)).fetchone()
         if not row:
@@ -261,12 +271,12 @@ class Store(RuntimeStore):
                 db.execute("INSERT OR REPLACE INTO sources VALUES(?,?)", (source["id"], json.dumps(source)))
         return {"registered": len(entries)}
 
-    def create_run(self, product, mission, engine):
+    def create_run(self, product, mission, engine, db=None):
         from .task_modes import contract
         if isinstance(mission,dict):contract(product,mission.get("task_mode"))
         validate_mission(mission)
         rid = uuid.uuid4().hex[:16]
-        with self.tasks() as db:
+        with (nullcontext(db) if db is not None else self.tasks()) as db:
             db.execute("INSERT INTO runs VALUES(?,?,?,?,?,?,?,?,?,?,?)",
                 (rid, product, json.dumps(mission, ensure_ascii=False), "queued", engine, now(), now(), None, None, "[]", 0))
             if mission.get("project_id"):
@@ -349,7 +359,7 @@ class Store(RuntimeStore):
             report["writing_skill"] = {"name":"report-writing", "version":writing["version"]}
         if run["mission"].get("project_id"):
             report["project_id"] = run["mission"]["project_id"]
-        report["sources"] = [{k: row.get(k) for k in ("id", "title", "url", "status", "published_at", "observed_at", "event_key", "retrieval_kind", "text_truncated", "date_basis", "data_period", "method_version", "upstream_sources", "document_location", "content_sha256", "visibility")} for row in selected]
+        report["sources"] = [{k: row.get(k) for k in ("id", "title", "url", "status", "published_at", "observed_at", "event_key", "retrieval_kind", "text_truncated", "date_basis", "data_period", "method_version", "upstream_sources", "document_location", "content_sha256", "visibility", "extraction_limit")} for row in selected]
         # Atomic durable result + local notification outbox. No network delivery.
         with self.tasks() as db:
             db.execute("BEGIN IMMEDIATE")
@@ -387,6 +397,11 @@ class Store(RuntimeStore):
             db.execute("UPDATE runs SET state='completed',report=?,lease_until=0,updated=? WHERE id=?", (json.dumps(report, ensure_ascii=False), now(), rid))
             key = digest({"product": run["product"], "mission": run["mission"], "evidence": sorted(report["evidence_ids"])})[:24]
             db.execute("INSERT OR IGNORE INTO outbox VALUES(?,?,?,?,?)", (key, rid, "pending_review", json.dumps(report, ensure_ascii=False), now()))
+        if run['mission'].get('project_id'):
+            try:
+                from .learning import Learning
+                Learning(self,run['product']).enqueue(rid)
+            except (ValueError,sqlite3.Error,OSError):pass  # Learning never discards a saved report.
         return report
 
     def outbox(self):
@@ -419,9 +434,14 @@ class Store(RuntimeStore):
                 db.execute("UPDATE schedule SET lease_until=? WHERE id=?", (time.time()+660, row["id"]))
         return [dict(r) for r in rows]
 
-    def schedule_complete(self, sid):
+    def schedule_complete(self, sid, error=None):
         with self.tasks() as db:
-            db.execute("UPDATE schedule SET next_due=?+interval_seconds,lease_until=0 WHERE id=?", (time.time(), sid))
+            db.execute('CREATE TABLE IF NOT EXISTS schedule_failures(id TEXT PRIMARY KEY,failures INTEGER,error TEXT)')
+            old=db.execute('SELECT failures FROM schedule_failures WHERE id=?',(sid,)).fetchone()
+            failures=(old[0]+1 if old else 1) if error else 0
+            db.execute('INSERT OR REPLACE INTO schedule_failures VALUES(?,?,?)',(sid,failures,error))
+            if error:db.execute('UPDATE schedule SET next_due=?,lease_until=0 WHERE id=?',(time.time()+min(86400,60*2**min(failures-1,10)),sid))
+            else:db.execute("UPDATE schedule SET next_due=?+interval_seconds,lease_until=0 WHERE id=?", (time.time(), sid))
 
     def schedules(self):
         with self.tasks() as db:
@@ -524,7 +544,7 @@ def _fetch_feed(store, source_id, timeout=12):
         if not title or not text or urlsplit(link).scheme not in ("http", "https"):
             continue
         records.append({"title": title, "body": re.sub("<[^>]+>", " ", text)[:12000], "url": link,
-            "countries": source["countries"], "topics": source["topics"], "status": "source_claim", "retrieval_kind": "feed_excerpt",
+            "countries": source["countries"], "topics": source["topics"], "status": "source_claim", "retrieval_kind": "feed_excerpt", "source_id":source_id,
             "published_at": value(entry, ["pubDate", "{http://www.w3.org/2005/Atom}updated", "{http://www.w3.org/2005/Atom}published"]) or None})
     return store.import_evidence({"schema": "field-evidence/v1", "records": records})
 
@@ -675,12 +695,15 @@ class Agent:
             meta = self.store.meta(rid)
             seed = (run["messages"] or [])[:2]
             if not meta.get("initialized"):
-                available = snapshot()
+                available = snapshot(self.store,self.spec["id"],mission.get("project_id"))
                 meta = {"initialized": True, "core_version": CORE_VERSION, "skills": available,
                         "legacy_history_unmetered": bool(seed or run["steps"]),
                         "writing_skill": available["report-writing"],
                         "loaded_skills": {}, "context_budget_chars": mission.get("context_budget_chars", 48000),
                         "memory": ProjectMemory(self.store, self.spec["id"]).recall(mission, rid)}
+                if mission.get('knowledge_ids'):
+                    from .knowledge import Knowledge
+                    meta['knowledge_snapshot']=Knowledge(self.store,self.spec['id']).pin(mission['project_id'],mission['knowledge_ids'])
                 if mission.get('mcp_search'):
                     from .mcp_client import profile
                     meta['mcp_profile']=profile(mission['mcp_search'])
@@ -700,6 +723,8 @@ class Agent:
                 seed[0] = dict(seed[0], content=seed[0]["content"] + "\nConfigured document skill catalog: " + json.dumps(catalog(available), ensure_ascii=False) +
                                "\nThe report-writing skill and available memory are already supplied in context; do not load or recall them again just to start a task. Load another skill only if it supplies needed guidance. Full tool results stay in local steps; use read_result or read_evidence offset/limit to inspect more. Current mission input overrides historical project data.")
                 self.store.save_meta(rid, meta, owner, seed)
+            if mission.get('monitor_criteria') and 'MONITOR_DECISION_CONTRACT' not in seed[0]['content']:
+                seed[0]=dict(seed[0],content=seed[0]['content']+'\nMONITOR_DECISION_CONTRACT: Apply the user-confirmed criteria in monitor_criteria. Compare substantive evidence, distinguish research value, business opportunity and urgency. Return monitor_decision: {"notify": boolean, "reason": "why this change does or does not meet the criteria"} in the final report. A wording-only change is not an alert. Save the report even when notify=false.')
             if len(seed) != 2:
                 raise ValueError("missing_saved_instructions")
             # This also pins instructions for a failure before the first tool checkpoint.
@@ -918,12 +943,28 @@ class Agent:
             return plan(self.spec["id"], mission)
         if name == "search_evidence":
             rows = self.store.search(args.get("query", ""), mission["countries"], mission["topics"], predicate=lambda row: self.in_time(row, mission))
+            if mission.get('knowledge_ids'):
+                from .knowledge import Knowledge
+                rows=Knowledge(self.store,self.spec['id']).search(self.store.meta(run['id']).get('knowledge_snapshot'),args.get('query',''))+rows
+            if mission.get('monitor_evidence_ids'):
+                permitted=set(mission['monitor_evidence_ids'])
+                rows=[r for r in rows if r['id'] in permitted]
+                # The monitor supplies a bounded list of newly changed, permitted records.
+                existing={r['id'] for r in rows}
+                for eid in mission['monitor_evidence_ids']:
+                    if eid not in existing and not eid.startswith('kb-'):
+                        row=self.store.read(eid)
+                        if scope_keys(mission['countries']).intersection(scope_keys(row['countries'])) and set(mission['topics']).intersection(row['topics']):rows.append(row)
             if run["engine"] == "demo":
                 rows = [row for row in rows if row["synthetic"]]
             rows = [row for row in rows if self.in_time(row, mission)]
             return {"results": [{k: (v[:400] if k == "body" else v) for k, v in row.items()} for row in rows]}
         if name == "read_evidence":
-            row = self.store.read(args["id"])
+            if str(args['id']).startswith('kb-'):
+                from .knowledge import Knowledge
+                row=Knowledge(self.store,self.spec['id']).read(self.store.meta(run['id']).get('knowledge_snapshot'),args['id'])
+            else:row = self.store.read(args["id"])
+            if mission.get('monitor_evidence_ids') and row['id'] not in mission['monitor_evidence_ids']:raise ValueError('Evidence outside this monitor change set')
             if row.get("retrieval_kind") == "country_baseline":
                 from .countries import matches
                 if not matches(mission["countries"], row["countries"][0]):
@@ -973,6 +1014,10 @@ class Agent:
             report = args.get("report")
             if not isinstance(report, dict):
                 raise ValueError("finish requires report object")
+            if mission.get('monitor_criteria'):
+                decision=report.get('monitor_decision')
+                if not isinstance(decision,dict) or type(decision.get('notify')) is not bool or not isinstance(decision.get('reason'),str) or not 1<=len(decision['reason'])<=2000:raise ValueError('Monitoring report requires monitor_decision with notify boolean and reason')
+                if decision['notify'] and not report.get('evidence_ids'):raise ValueError('A monitoring alert requires read source evidence')
             for field in ("title", "summary", "assessment"):
                 if not isinstance(report.get(field), str) or not report[field]:
                     raise ValueError(f"Report requires text {field}")
@@ -1090,6 +1135,7 @@ def markdown(report):
     lines.extend(["", "## Sources / 来源", ""])
     for source in report["sources"]:
         lines.append(f"- [{source['id']}] {source['title']} — {source['url']} ({source['status']}; published: {source.get('published_at') or 'unknown'})")
+        if source.get('document_location'):lines.append('  - Document location: '+json.dumps(source['document_location'],ensure_ascii=False)+'; SHA256: '+str(source.get('content_sha256','')))
         for upstream in source.get("upstream_sources") or []:
             lines.append(f"  - World Bank: {upstream['name']} ({upstream['period']}) — {upstream['url']}; {upstream['license']}. Changes: selected and recombined as a research derivative; no endorsement.")
     return "\n".join(lines) + "\n"

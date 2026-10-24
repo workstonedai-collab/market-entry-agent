@@ -18,3 +18,8 @@
 ## 后续按使用反馈推进
 
 办公接线完成后，继续围绕专题研究、报道准备、利益观察，以及市场选择、交易评估、经营跟踪改进来源和成果形式。当前 DOCX 导出以完整文字为先；Word 排版模板、PPTX/XLSX 成果导出和更多外部数据服务尚未实现。不会因参考项目带有多智能体或审稿流程，就默认增加模型调用或改变直接交付方式。
+
+
+## 持续研究与学习的参考
+
+本次借鉴 [Hermes Skills](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills) 的按需技能与经验整理，以及 [Cron](https://hermes-agent.nousresearch.com/docs/user-guide/features/cron) 的调度、执行、交付分离和静默机制；参考 [Letta Code](https://github.com/letta-ai/letta-code) 的长期状态与版本管理、[Mem0](https://github.com/mem0ai/mem0) 的有范围记忆、[LightRAG](https://github.com/HKUDS/LightRAG) 的资料版本与引用、[changedetection.io](https://github.com/dgtlmoon/changedetection.io) 的有效变化筛选，以及 [Dify](https://github.com/langgenius/dify) 的导入与处理状态体验。这里复用设计经验，没有打包这些 SDK、模型、提示词或私有内容；Hermes CLI 发送适配器是可选的独立安装。向量/图谱、模型权重训练与完整知识平台不属于本版。见[当前功能与边界](continuous-research.md)。

@@ -17,7 +17,7 @@ BUILTINS = [
 ]
 
 
-def snapshot():
+def snapshot(store=None, product=None, project=None):
     entries = [dict(x, origin="bundled") for x in BUILTINS]
     configured = os.environ.get("AGENT_SKILLS_DIR", "")
     if configured:
@@ -55,6 +55,13 @@ def snapshot():
                     raise ValueError("Duplicate skill metadata")
                 metadata[key] = value
             entries.append({**metadata, "instructions": parts[2].strip(), "origin": "operator_directory"})
+    if store is not None and product and project:
+        from .learning import Learning
+        entries.extend({k:v for k,v in r.items() if k in ("name","description","instructions","requires_tools","inputs","outputs","origin")} for r in Learning(store,product).active(project))
+    return normalize(entries)
+
+
+def normalize(entries):
     result = {}
     for entry in entries:
         name, description = entry.get("name"), entry.get("description")

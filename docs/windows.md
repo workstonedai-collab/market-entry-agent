@@ -128,3 +128,8 @@ The last check exercises CLI and loopback HTTP, Unicode paths, report persistenc
 Project memory, bounded context, document skills, run controls and usage receipts: [shared kernel guide](kernel.md).
 
 Private product workflow, versioned records and public-source replay: [guide](product-workflow.md).
+
+
+## 私有知识库、监测与技能学习
+
+上述安装也包含新能力。页面按项目上传资料、预览并确认监测方案，在独立 PowerShell 窗口运行 `python -m market_entry_agent worker`。固定偏移时区如 `UTC+08:00` 不需要额外包；IANA 地区时区可能需要可选 `tzdata`。Hermes 发送须配置实际可执行文件的绝对路径，不通过 shell 执行命令；如果 Windows 的 Hermes 安装方式不提供可直接执行的程序，继续使用本地收件箱或在受支持的 Hermes 宿主运行发送适配器。服务、收件目标和模型学习均不自动启用。完整流程见[持续研究](continuous-research.md)。
