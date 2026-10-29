@@ -529,12 +529,12 @@ def main(argv=None):
             with WorkerSession(store,SPEC['id']) as session:
                 while True:
                     session.begin()
-                    try:result=tick(store)
+                    try:batch=tick(store)
                     except Exception as exc:
                         session.finish(type(exc).__name__)
                         raise
                     else:session.finish()
-                    print(json.dumps(result, ensure_ascii=False), flush=True)
+                    print(json.dumps(batch, ensure_ascii=False), flush=True)
                     if args.once:
                         break
                     time.sleep(5)

@@ -112,6 +112,7 @@ def verify():
         checks.append('real_stdio_explicit_demo_execution_and_saved_status')
         worker=subprocess.run([sys.executable,'-m',module,'--workspace',str(workspace),'worker','--once'],capture_output=True,text=True,encoding='utf-8',timeout=20,check=False)
         assert worker.returncode==0,worker.stderr
+        assert isinstance(json.loads(worker.stdout),list),'worker --once must emit one JSON array'
         status=worker_status(store,SPEC['id']);assert status['sessions'][0]['observed_state']=='stopped';assert status['sessions'][0]['tick_finished']
         checks.append('real_worker_once_heartbeat_tick_and_stop')
         assert not store.export_evidence()['records'];checks.append('private_material_stays_out_of_public_exchange')

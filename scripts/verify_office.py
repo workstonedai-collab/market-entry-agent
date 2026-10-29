@@ -4,6 +4,9 @@ import json
 import os
 from pathlib import Path
 import tempfile
+import subprocess
+import sys
+from unittest.mock import patch
 from openpyxl import Workbook
 from pptx import Presentation
 
@@ -15,7 +18,16 @@ documents=importlib.import_module(MODULE+'.documents')
 with tempfile.TemporaryDirectory(prefix='office 中文 ') as folder:
  root=Path(folder);store=core.Store(root/'workspace')
  report=core.Agent(store,product.SPEC).run(dict(product.SPEC['starter']),'demo')['report']
- word=root/'研究报告.docx';receipt=office.export_docx(report,word)
+ word=root/'研究报告.docx'
+ original_run=subprocess.run
+ def diagnostic_run(*args,**kwargs):
+  kwargs['stderr']=subprocess.PIPE
+  result=original_run(*args,**kwargs)
+  if result.returncode:
+   print('Synthetic Office adapter exit '+str(result.returncode)+': '+(result.stderr or b'').decode('utf-8','replace')[-4000:],file=sys.stderr)
+  return result
+ with patch.object(office.subprocess,'run',side_effect=diagnostic_run):
+  receipt=office.export_docx(report,word)
  book=Workbook();sheet=book.active;sheet.append(['Fictional quote','USD']);sheet.append(['Product A',100]);book.save(root/'报价.xlsx');book.close()
  slides=Presentation();slide=slides.slides.add_slide(slides.slide_layouts[1]);slide.shapes.title.text='Fictional public briefing';slide.placeholders[1].text='Synthetic route; no actual customer';slides.save(root/'简报.pptx')
  results=[]
