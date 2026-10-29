@@ -25,6 +25,8 @@ Market Entry Agent · [English guide](#english-guide) · [中文完整说明](RE
 
 ## 把研究接着做下去
 
+研究做过几轮后，可以从项目页的研究档案找回报告、未解决的问题、已有判断和来源。知识库支持部分机构与术语的中英文别名匹配、发布日期筛选和匹配片段阅读；从报告打开引用时，仍使用当时的文件版本。另提供少量可选择登记的官方来源配置。[在一个项目里接着研究](docs/project-research.md)
+
 例如，一家设备企业正在比较两个市场，可以先把产品资料、渠道报价和已有调研放入项目知识库，结合公开准入与营商资料开展研究。形成方案后，再围绕会影响选择的经营前提设置持续关注。以后拿到新报价或政策材料，可以更新文件，回看原来的测算依据，再决定先补什么资料、是否调整方案。
 
 你提供的材料可以在“我的知识库”里按项目整理：上传文件、查看解析状态，再选择本次研究使用哪些资料。原件、版本与出处留在私有工作空间，更新资料后仍能追溯旧任务。
@@ -91,6 +93,8 @@ py -3.11 -m venv .venv
 See the [Windows installation, model configuration and troubleshooting guide](docs/windows.md). CI exercises Python 3.11–3.13 on Windows, macOS and Linux, plus a clean PowerShell installation. The package is installed from this repository or its release wheel; no PyPI publication is claimed.
 
 ## Background and open scope
+
+The project desk brings saved reports, open questions, judgments and sources together. Private libraries add limited bilingual name matching, publication-date filters and readable matching excerpts; report citations reopen the document version used by that task. Small official-source packs remain opt-in. [Continue project research](docs/project-research.md).
 
 Build named private knowledge collections from your files, then select them for a project task. Draft and preview a watch, confirm its scope, criteria and check/digest cadence, and run a separate worker. Optional procedural learning turns completed tool paths and explicit corrections into private, versioned skills; activation and rollback remain visible. Model distillation has its own opt-in daily budget. [Setup and limits](docs/continuous-research.md).
 

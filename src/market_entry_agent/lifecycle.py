@@ -12,6 +12,9 @@ class Lifecycle:
 
     def dispatch(self,area,action,body,background=None):
         project=body.get('project_id')
+        if area=='desk' and action=='overview':
+            from .project_desk import overview
+            return overview(self.store,self.product,project)
         if area=='knowledge':
             service=Knowledge(self.store,self.product)
             if action=='create':return service.create(project,body['name'])
@@ -31,8 +34,13 @@ class Lifecycle:
                 return service.process(project,body['id'])
             if action=='search':
                 pin=service.pin(project,body['collection_ids'])
-                return {'results':service.search(pin,body.get('query',''))}
+                return {'results':service.search(pin,body.get('query',''),filters=body.get('filters'))}
             if action=='read':return service.read(service.pin(project,body['collection_ids']),body['id'])
+            if action=='cited':
+                run=self.store.get_run(body['run_id'])
+                if run['product']!=self.product or run['mission'].get('project_id')!=project:raise ValueError('Cited document outside project/product')
+                if not run.get('report') or body['id'] not in run['report'].get('evidence_ids',[]):raise ValueError('Document is not cited by this saved report')
+                return service.read(self.store.meta(run['id']).get('knowledge_snapshot'),body['id'])
             if action=='original':return service.original(project,body['collection_id'],body['version'])
             if action=='delete':return service.delete(project,body['collection_id'],body['id'])
             if action=='rebuild':return service.rebuild(project)

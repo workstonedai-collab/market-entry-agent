@@ -54,7 +54,7 @@ function historyHTML(kind,id,history){
  return '<h3>修改记录 · '+esc(id)+'</h3>'+history.map(r=>'<details><summary>第 '+r.revision+' 版 · '+esc(r.updated)+'</summary>'+historyFields(kind,r.data)+'<details><summary>查看原始 JSON</summary><pre>'+esc(JSON.stringify(r.data,null,2))+'</pre></details></details>').join('');
 }
 async function openProject(){
- try{let id=$('business-project').value.trim(); let [data,health]=await Promise.all([api('/api/project?project_id='+encodeURIComponent(id)),api('/api/source-health')]);if(id!==$('business-project').value.trim())return;projectDesk=data;state.source_health=health;$('project-id').value=id;renderProject();$('business-status').textContent='已打开私有项目 '+id;}catch(e){error(e)}
+ try{let id=$('business-project').value.trim(); let [data,health]=await Promise.all([api('/api/project?project_id='+encodeURIComponent(id)),api('/api/source-health')]);if(id!==$('business-project').value.trim())return;projectDesk=data;state.source_health=health;$('project-id').value=id;renderProject();loadResearchDesk(id);$('business-status').textContent='已打开私有项目 '+id;}catch(e){error(e)}
 }
 function renderProject(){
  if(!projectDesk)return;
@@ -97,7 +97,7 @@ if(!topics.length&&risk)topics=rows.flatMap(r=>r.topics||[]);
 $('countries').value=[...new Set(countries)].join(', ');$('topics').value=[...new Set(topics)].join(', ');
 $('context').value='';$('search-queries').value='';$('skill-choice').value='project-continuity';$('question').value=projectDesk.product==='georisk-agent'?'本项目关注的事件有什么新进展？说明哪些业务可能受影响、判断依据是什么，接下来要留意哪些变化；有资料支持时更新事件记录。':'结合企业情况和已有方案，分析当前最需要做的选择。比较各方案的机会、进入条件、成本与约束，说明哪些前提需要验证、下一步先做什么。';$('engine').value=state.model_configured?'model':'demo';openView('work');$('run-status').textContent='已带入本项目的国区和主题，上一项任务的背景与搜索词已清空。补充这次要解决的问题和可公开搜索的关键词后，再点“开始研究”。模型模式会接收本项目资料。'};
 $('business-export').onclick=()=>{if(projectDesk)saveBlob(projectDesk,projectDesk.project_id+'-private-project.json')};
-$('business-project').oninput=()=>{projectDesk=null;editingRecord=null;$('business-editor').classList.add('hidden');$('business-records').innerHTML='';$('business-notices').innerHTML='';$('business-history').innerHTML='';$('business-status').textContent='请打开当前项目。'};
+$('business-project').oninput=()=>{projectDesk=null;editingRecord=null;$('business-editor').classList.add('hidden');$('business-records').innerHTML='';$('business-notices').innerHTML='';$('business-history').innerHTML='';$('business-overview').innerHTML='';$('business-status').textContent='请打开当前项目。'};
 document.querySelector('[data-view="project-desk"]').addEventListener('click',()=>{if(!$('business-project').value)$('business-project').value=$('project-id').value});
 
 function projectSourceLinks(rows){
@@ -136,4 +136,28 @@ function economicsHTML(rows){
  const metrics=[['revenue','销售收入'],['goods_cost','产品成本'],['duty','关税'],['operating_cost','已列费用合计'],['contribution_before_other_costs','扣除已列费用后的贡献额'],['cash_outlay_including_recoverable_tax','含可抵扣税款的现金支出'],['contribution_margin','贡献额占收入比例']];
  const format=(k,v)=>v===null||v===undefined?'未填写':Number.isFinite(Number(v))?(k==='contribution_margin'?(Number(v)*100).toFixed(2)+'%':Number(v).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2})):String(v);
  return '<div class="card"><h2>报价情景测算</h2><p class="hint">各情景使用表头所示币种；不同币种不直接比较。缺项保留为空，贡献额尚未扣除未列费用。页面保留两位小数，导出保留计算原值。</p><div class="table-scroll"><table><tr><th>测算项目</th>'+rows.map(r=>'<th>'+esc(r.name)+'<br>'+esc(r.currency)+'</th>').join('')+'</tr>'+metrics.map(([k,label])=>'<tr><td>'+esc(label)+'</td>'+rows.map(r=>'<td>'+esc(format(k,r.calculation.metrics[k]))+'</td>').join('')+'</tr>').join('')+'</table></div>'+rows.map(r=>'<details class="source"><summary>'+esc(r.name)+' · 输入依据</summary><p>未填项目：'+esc(economicNames(r.calculation.missing)||'无')+'</p><p>采用假设：'+esc(economicNames(r.calculation.assumptions)||'无')+'</p></details>').join('')+'</div>';
+}
+
+/* Project-scoped saved research. Actions reopen records; nothing runs automatically. */
+async function loadResearchDesk(project){
+ const target=$('business-overview');target.textContent='正在读取本项目的研究记录…';
+ try{const d=await api('/api/desk/overview?project_id='+encodeURIComponent(project));if(project!==$('business-project').value.trim())return;
+ const risk=state.product.id==='georisk-agent';
+ target.innerHTML='<h2>'+(risk?'议题研究档案':'方案研究档案')+'</h2><p class="hint">本项目已保存的材料与判断；不会自动刷新来源或调整已有选择。</p>'+
+ '<p>知识库 '+d.collections.length+' 个 · 持续关注 '+d.monitors.filter(m=>m.state==='active').length+' 项 · 最近研究 '+d.recent.length+' 项'+(d.has_more_runs?'（还有更早记录）':'')+'</p>'+
+ d.recent.map(r=>'<div class="source"><b>'+esc(r.title||r.question)+'</b><p>'+esc(r.summary?r.summary.slice(0,360)+(r.summary.length>360?'…':''):'任务尚未保存报告。')+'</p><p class="hint">'+esc(r.updated)+' · '+esc(({completed:'已保存',running:'运行中',queued:'等待处理',failed:'失败，可查看记录',paused:'已暂停',cancelled:'已取消'})[r.state]||r.state)+'</p><button data-desk-run="'+esc(r.id)+'">打开任务与报告</button></div>').join('')+
+ '<h3>仍在研究的问题</h3>'+list(d.open_questions.map(q=>q.text))+
+ Object.entries(d.memory).filter(([k,v])=>v.length).map(([kind,rows])=>'<h3>'+esc(({source_fact:'来源陈述',hypothesis:'假设',judgment:'已有判断',decision_proposal:'拟议方案',operator_decision:'你的决定'})[kind])+'</h3>'+list(rows.map(r=>r.text))).join('')+
+ '<h3>最近报告的来源</h3>'+d.sources.map(s=>'<div class="source"><b>'+esc(s.title||s.id)+'</b><p class="hint">'+esc(s.published_at||'发布日期未提供')+' · '+esc(({document_text:'本地文档文字',page_text:'已获取网页正文',attributed_public_summary:'署名摘要',search_snippet:'搜索摘要，供发现来源'})[s.retrieval_kind]||s.retrieval_kind||'来源类型未提供')+(s.document_location?' · '+esc(savedSourcePlace(s.document_location)):'')+'</p></div>').join('');
+ target.querySelectorAll('[data-desk-run]').forEach(b=>b.onclick=async()=>{try{const run=await api('/api/runs/'+encodeURIComponent(b.dataset.deskRun));state.runs=state.runs.filter(r=>r.id!==run.id);state.runs.unshift(run);selected=run.id;openView('work');renderDetail()}catch(e){error(e)}});
+ }catch(e){if(project===$('business-project').value.trim())target.textContent='暂时无法读取研究档案：'+(e.message||e)}
+}
+
+function savedSourcePlace(loc){
+ if(!loc)return '';
+ if(loc.page)return '第 '+loc.page+' 页'+(loc.section_heading?' · '+loc.section_heading:'');
+ if(loc.row_start)return '第 '+loc.row_start+'—'+loc.row_end+' 行';
+ if(loc.section_heading)return '章节：'+loc.section_heading;
+ const offset=(loc.text_offset||loc.page_offset||0)+(loc.chunk_offset||0);
+ return '转换后文字位置 '+offset;
 }

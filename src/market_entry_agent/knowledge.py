@@ -9,6 +9,7 @@ import uuid
 from pathlib import Path
 
 from .memory import project_id
+from . import retrieval
 
 
 def token_text(value):
@@ -118,18 +119,15 @@ class Knowledge:
             raw,parts=extract(upload)
             if not parts or len(parts)>100:raise ValueError('Document needs 1..100 readable extraction parts; OCR is not implied')
             checksum=hashlib.sha256(raw).hexdigest()
-            meta=dict(payload['metadata'],extraction_limit='PDF: pages 1–40 only; scanned/image content is not OCR. Office: converted text offsets, not certified page/cell/slide positions. Tables preserve row ranges. Large documents may need splitting.');cid=job['collection_id']
+            meta=dict(payload['metadata'],chunking_version='paragraph-overlap-v1',extraction_limit='PDF: pages 1–40 only; scanned/image content is not OCR. Office: converted text offsets, not certified page/cell/slide positions. Tables preserve row ranges. Large documents may need splitting.');cid=job['collection_id']
             did=payload.get('document_id') or 'document-'+hashlib.sha256((cid+payload['filename']).encode()).hexdigest()[:24]
             vid='version-'+hashlib.sha256((did+checksum+json.dumps(meta,sort_keys=True)).encode()).hexdigest()[:32]
             originals=self.store.workspace/'knowledge'/'originals';originals.mkdir(parents=True,exist_ok=True,mode=0o700)
             blob=vid+payload['suffix'];(originals/blob).write_bytes(raw)
             chunks=[]
             for body,location in parts:
-                for offset in range(0,len(body),1600):
-                    excerpt=body[offset:offset+1600]
-                    if not excerpt.strip():continue
+                for excerpt,loc in retrieval.chunks(body,location):
                     eid='kb-'+hashlib.sha256((vid+str(len(chunks))).encode()).hexdigest()[:32]
-                    loc=dict(location,chunk_offset=offset)
                     chunks.append((eid,vid,excerpt,json.dumps(loc,ensure_ascii=False),token_text(meta['title']+' '+excerpt)))
             if not chunks or len(chunks)>1500:raise ValueError('Document has no readable text or exceeds chunk budget')
             with self.store.tasks() as db:
@@ -146,6 +144,7 @@ class Knowledge:
                     db.executemany('INSERT INTO kb_fts VALUES(?,?)',[(r[0],r[4]) for r in chunks])
                 except sqlite3.OperationalError:pass
                 db.execute("UPDATE kb_jobs SET state='completed',version_id=?,lease=0,updated=? WHERE id=?",(vid,time.time(),jid))
+            committed=True
             upload.unlink(missing_ok=True)
         except Exception as exc:
             if blob and not committed:(self.store.workspace/'knowledge'/'originals'/blob).unlink(missing_ok=True)
@@ -171,8 +170,10 @@ class Knowledge:
         meta=json.loads(row['metadata'])
         return dict(id=row['id'],title=meta['title'],url='document://'+row['document_id']+'/'+row['version_id'],body=row['body'],countries=meta['countries'],topics=meta['topics'],published_at=meta.get('published_at'),observed_at=__import__('datetime').datetime.fromtimestamp(row['created'],__import__('datetime').timezone.utc).isoformat(),status='source_claim',synthetic=False,event_key=row['document_id'],retrieval_kind='document_text',visibility='private',document_location=json.loads(row['location']),content_sha256=row['checksum'],collection_id=row['collection_id'],document_version=row['version_id'],extraction_limit=meta.get('extraction_limit'))
 
-    def search(self, pin, query='', limit=12):
-        rows=self._rows(pin);terms=set(token_text(query).split());ranks={}
+    def search(self, pin, query='', limit=12, filters=None):
+        if not isinstance(query,str) or len(query)>4000:raise ValueError('Knowledge query must be at most 4000 characters')
+        selected=retrieval.filters(filters)
+        rows=self._rows(pin);terms=retrieval.expanded_tokens(query);literal=retrieval.tokens(query);ranks={}
         if terms:
             try:
                 with self.store.tasks() as db:
@@ -181,11 +182,21 @@ class Knowledge:
             except sqlite3.OperationalError:pass
         scored=[]
         for row in rows:
-            overlap=len(terms.intersection(row['tokens'].split()))
+            meta=json.loads(row['metadata'])
+            if not retrieval.matches(meta,selected):continue
+            # Recompute lexical terms so pre-upgrade chunks work without a migration.
+            value=meta['title']+' '+row['body']
+            overlap=len(terms.intersection(retrieval.expanded_tokens(value)))
             if terms and not overlap:continue
-            scored.append((overlap,ranks.get(row['id'],0),row['created'],row['id'],row))
-        scored.sort(key=lambda x:x[:4],reverse=True)
-        return [dict(self.evidence(r[-1]),retrieval_score=r[0],body=r[-1]['body'][:400]) for r in scored[:max(1,min(20,int(limit)))]]
+            exact=len(literal.intersection(retrieval.tokens(value)))
+            scored.append((exact,overlap,ranks.get(row['id'],0),row['created'],row['id'],row))
+        scored.sort(key=lambda x:x[:5],reverse=True)
+        results=[]
+        for item in scored[:max(1,min(20,int(limit)))]:
+            row=item[-1];snippet,offset=retrieval.excerpt(row['body'],query)
+            results.append(dict(self.evidence(row),retrieval_score=item[1],literal_score=item[0],body=snippet,snippet_offset=offset,
+                                matched_terms=sorted(terms.intersection(retrieval.expanded_tokens(row['body'])))[:30],retrieval_method='local-lexical-aliases'))
+        return results
 
     def read(self, pin, eid):
         row=next((r for r in self._rows(pin) if r['id']==eid),None)

@@ -35,6 +35,7 @@
     "docs/mcp.md",
     "docs/office-and-tasks.md",
     "docs/product-workflow.md",
+    "docs/project-research.md",
     "docs/report-quality.md",
     "docs/research-depth.md",
     "docs/research-memory.md",
@@ -54,6 +55,7 @@
     "examples/project-mission.json",
     "examples/public-data-mission.json",
     "examples/public-project-case.json",
+    "examples/public-source-pack.json",
     "examples/public-sources.json",
     "examples/report-cases.json",
     "examples/sources.json",
@@ -102,7 +104,9 @@
     "src/market_entry_agent/notifications.py",
     "src/market_entry_agent/office.py",
     "src/market_entry_agent/product.py",
+    "src/market_entry_agent/project_desk.py",
     "src/market_entry_agent/research.py",
+    "src/market_entry_agent/retrieval.py",
     "src/market_entry_agent/runtime.py",
     "src/market_entry_agent/skills.py",
     "src/market_entry_agent/source_health.py",
@@ -124,9 +128,11 @@
     "tests/test_network.py",
     "tests/test_portability.py",
     "tests/test_product_paths.py",
+    "tests/test_project_desk.py",
     "tests/test_projects.py",
     "tests/test_report_cases.py",
     "tests/test_research_state.py",
+    "tests/test_retrieval.py",
     "tests/test_ui.py"
   ]
 }

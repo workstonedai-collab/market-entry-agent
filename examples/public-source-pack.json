@@ -1,0 +1,40 @@
+{
+  "sources": [
+    {
+      "id": "eu-cbam",
+      "title": "European Commission: CBAM",
+      "kind": "page",
+      "url": "https://taxation-customs.ec.europa.eu/carbon-border-adjustment-mechanism_en",
+      "allowed_hosts": [
+        "taxation-customs.ec.europa.eu"
+      ],
+      "countries": [
+        "Germany",
+        "Netherlands"
+      ],
+      "topics": [
+        "cbam",
+        "trade"
+      ],
+      "refresh_hours": 24
+    },
+    {
+      "id": "uk-cptpp",
+      "title": "UK government: CPTPP collection",
+      "kind": "page",
+      "url": "https://www.gov.uk/government/collections/the-uk-and-the-comprehensive-and-progressive-agreement-for-trans-pacific-partnershipcptpp",
+      "allowed_hosts": [
+        "www.gov.uk"
+      ],
+      "countries": [
+        "United Kingdom",
+        "Vietnam"
+      ],
+      "topics": [
+        "cptpp",
+        "trade"
+      ],
+      "refresh_hours": 24
+    }
+  ]
+}

@@ -3,8 +3,8 @@
   "module": "market_entry_agent",
   "files": {
     "core.py": "10d0597be797c9d03f5f0131e70e7466d442da68e543c20b91ebc8d921a7730f",
-    "app.py": "a9c07aa2fdca51872d79605656dcb713933d28b72e692c71fb8e6adc9abb2320",
-    "web.html": "19c6703e435919db02e26e33c597a5c8a0d74f826d086b9eb9a6fccf1b806f25",
+    "app.py": "0c7c2e17072862cc788116bc66f708070e4f326f56f2947ce1cddef81edb8a4d",
+    "web.html": "311bf557e4bc6a2d3ed1d7d64810d40ea47f84557ef8bd563be2439d8b97b7b1",
     "net.py": "e12b65437dfa8943675158234d4eeecb4a93e97491234f30f53e208c8b572bfe",
     "transport.py": "20ac65c23e3811c5dd42bbbc854160f6273e02f143482aa924109e727774e807",
     "countries.py": "dfb98ff70c71a1ae88b60ec9a82d81859ad45ba006bfdbea344fcce41497fcb0",
@@ -16,7 +16,7 @@
     "skills.py": "d1ec1ab2d4204bc6b13c9c14dfbee941c132d944176c38a2a6c0b9b6393a33cf",
     "runtime.py": "7f5bfbe5aedc5cc82063f32f8ce8c7096e5b719cee1f9dddf41547e0e2f10bfc",
     "business.py": "41b96518596c52dfd924f5cf045bc1048c5c0b25b81d992248995c78db258e38",
-    "workflow-ui.js": "75d5407b0f6354d1d2f973eb67de175a587e22e2c21b97b93f610bd647c91e26",
+    "workflow-ui.js": "886be83ce2da00735a7493b21d6a0b5ab233f6b88dc2bfde622ad8886d674c6c",
     "source_health.py": "fae5e1f0828e7a2f8d254b28daae92c7b975bc6ab183e24eb4e4baeac4893f50",
     "decision.py": "c139b3d655cfc8fbc84ee27a1fe84cece1d347177fae4ed7ea7b35fff60b9048",
     "notebook.py": "695fcf2d87a3869be45ac284e9ae01c81ea247bd2df6a3169eaf7ef5dec18094",
@@ -28,12 +28,14 @@
     "depth.py": "2b32fe0b354f5b7f962cf7aaa4148f472ca833f60922146bc5b051208fd5721d",
     "mcp_client.py": "5ee89998dd74424c865101a46d5f9cc67b3ca6ab25c6b8b55a31d27f2afc130e",
     "office.py": "a8b97b49e1eb7037d7ea1dca657a3d5a606dd2467014882347db5b4972e2e588",
-    "task_modes.py": "524ab4437250e267022f25dd94d6b27e4c238f9339ffd47896d59db1c4fc7322",
-    "knowledge.py": "f80cdbf817e1a295ab9e000ba7e136c8623a3d7a7c903a070d7f41c1cbe881ed",
+    "task_modes.py": "9dc77f9e5aaeb1c963b30ac77acd5b06a1188cbdf22820b2b5d6751017273648",
+    "knowledge.py": "d8f8ef0ce6fc808950b2743b24ab9a1d955d0b3f3a5fad66d8d5af760aa75ccb",
     "learning.py": "22ed114f88cdfaf3a480cf189aa3accfe013c88ef10094a0f1d9ef76720de793",
     "monitoring.py": "9cf9bee450136cbdbc5fec9980691c02150485b1290e714eca446104c9299a0d",
     "notifications.py": "cb755b9d657518d80ba0373b532959c2e9eb31e9789d765875125ef34b78b99c",
-    "lifecycle.py": "355acd79dd6b2a88addbc9a9b138537b6077878c4f932b28e2d4631daa588e95",
-    "lifecycle-ui.js": "b043f823a8b8fac44b872ed5a41e70f63b395b37138ccc1895bb9c1a608c40c7"
+    "lifecycle.py": "a7a6d9b8b1c9914a0e7a5cc5bd521135e2291a75dc7c09b52e78aec0d5ea2556",
+    "lifecycle-ui.js": "3ad8076de7b9a4cc230c5a443c2adb96b1aee008bfc075d967d977c3018e150d",
+    "retrieval.py": "bef8d07fa316fadf4ec8b2523e1c7b61bfe683dbb9d3c1be1b4d24d65c416928",
+    "project_desk.py": "1fdbcb6b1c94deccb3d5df0b558edf1fbff82704b33e13aeb56e13b786101da1"
   }
 }
