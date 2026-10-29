@@ -590,7 +590,7 @@ class Model:
         self.key = env.get("AGENT_MODEL_API_KEY", "")
         self.name = env.get("AGENT_MODEL_NAME", "")
         p = urlsplit(self.base)
-        if not self.base or not self.name or p.username or p.password or p.query or p.fragment:
+        if not self.base or not self.name or not p.hostname or any(ord(c)<32 for c in self.base) or p.username or p.password or p.query or p.fragment:
             raise ValueError("Set AGENT_MODEL_BASE_URL and AGENT_MODEL_NAME; credentials belong in AGENT_MODEL_API_KEY")
         if p.scheme != "https" and not (p.scheme == "http" and p.hostname in ("localhost", "127.0.0.1", "::1")):
             raise ValueError("Model endpoint requires HTTPS or explicit loopback HTTP")
@@ -650,8 +650,10 @@ class Model:
 
 
 class Agent:
-    def __init__(self, store, spec, model_factory=Model):
-        self.store, self.spec, self.model_factory = store, spec, model_factory
+    def __init__(self, store, spec, model_factory=None):
+        from .setup import environment
+        self.store, self.spec = store, spec
+        self.model_factory = model_factory if model_factory is not None else lambda: Model(environment(store))
 
     def run(self, mission=None, engine="demo", resume=None, allow_paused=True):
         if engine not in ("demo", "model"):

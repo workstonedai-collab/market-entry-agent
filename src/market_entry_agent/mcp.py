@@ -33,7 +33,9 @@ class Adapter:
           ('run_status','Read saved task state and budgets in this workspace.',schema({'id':TEXT},['id'])),
           ('run_report','Read a bounded saved report excerpt; not a new model call.',schema({'id':TEXT,**PAGE},['id'])),
           ('research_read','Read a bounded research notebook excerpt for a saved run.',schema({'id':TEXT,**PAGE},['id'])),
-          ('project_read','Read a bounded private business-project snapshot.',schema({'project_id':TEXT,**PAGE},['project_id']))]
+          ('project_read','Read a bounded private business-project snapshot.',schema({'project_id':TEXT,**PAGE},['project_id'])),
+          ('project_overview','Read saved reports, open questions, memory and source locations for a scoped private project.',schema({'project_id':TEXT,**PAGE},['project_id'])),
+          ('knowledge_citation','Read the frozen local-document fragment cited by a saved report; deletion revokes access.',schema({'id':TEXT,'evidence_id':TEXT,**PAGE},['id','evidence_id']))]
         if self.allow_runs:entries += [
           ('run_create','Explicitly create a bounded task. Model mode can incur configured provider charges. client_key deduplicates create retries.',schema({'client_key':TEXT,'mission':field('object'),'engine':field('string',maxLength=8)},['client_key','mission','engine'])),
           ('run_resume','Explicitly resume an existing task with its saved scope, instructions and budgets.',schema({'id':TEXT},['id'])),
@@ -70,6 +72,15 @@ class Adapter:
         if name=='country_compare':
             from .countries import compare
             return compare(args['countries'])
+        if name=='project_overview':
+            if self.project and args['project_id']!=self.project:raise ValueError('Project outside adapter scope')
+            from .project_desk import overview
+            return self.page(overview(self.store,self.spec['id'],args['project_id']),args)
+        if name=='knowledge_citation':
+            run=self.run(args['id'])
+            from .lifecycle import Lifecycle
+            value=Lifecycle(self.store,self.spec['id']).dispatch('knowledge','cited',{'project_id':run['mission'].get('project_id'),'run_id':run['id'],'id':args['evidence_id']})
+            return self.page(value,args)
         if name=='project_read':
             if self.project and args['project_id']!=self.project:raise ValueError('Project outside adapter scope')
             from .workflow import Workflow

@@ -1,5 +1,5 @@
 // Incremental private project desk; all text from sources and operator data is escaped.
-let projectDesk=null, editingRecord=null;
+let projectDesk=null, editingRecord=null, projectOverview=null;
 const fieldSpec={
  event:[['title','事件名称'],['subject','事件主体'],['location','地点'],['occurred_at','事件发生日期（如 2024-02-18）'],['published_at','本次进展发布日期'],['countries','国区','list'],['topics','主题标签','list'],['summary','来源怎么说','area'],['severity','严重程度','low|moderate|high|critical'],['confidence','信息依据','unconfirmed|source_statement|corroborated'],['status','事件状态','tracking|escalated|easing|closed'],['impact','可能影响及不确定性','area'],['next_check','接下来检查什么','area'],['change_note','本次改变了什么','area'],['evidence_ids','来源编号','list'],['entity_keys','关联业务对象编号（可留空）','list']],
  exposure:[['name','关注对象名称'],['countries','关注国区（可留空）','list'],['topics','关注主题（可留空）','list'],['min_severity','达到什么程度开始提醒','low|moderate|high|critical'],['active','是否启用','bool'],['note','对象说明（私有）','area'],['object_type','对象类型','other|route|port|supplier|project|country'],['entity_keys','关联对象编号（如 port-jebel-ali）','list'],['deadline','关键业务日期（可留空）'],['importance','业务重要程度','medium|low|high']],
@@ -54,7 +54,7 @@ function historyHTML(kind,id,history){
  return '<h3>修改记录 · '+esc(id)+'</h3>'+history.map(r=>'<details><summary>第 '+r.revision+' 版 · '+esc(r.updated)+'</summary>'+historyFields(kind,r.data)+'<details><summary>查看原始 JSON</summary><pre>'+esc(JSON.stringify(r.data,null,2))+'</pre></details></details>').join('');
 }
 async function openProject(){
- try{let id=$('business-project').value.trim(); let [data,health]=await Promise.all([api('/api/project?project_id='+encodeURIComponent(id)),api('/api/source-health')]);if(id!==$('business-project').value.trim())return;projectDesk=data;state.source_health=health;$('project-id').value=id;renderProject();loadResearchDesk(id);$('business-status').textContent='已打开私有项目 '+id;}catch(e){error(e)}
+ try{let id=$('business-project').value.trim(); let [data,health]=await Promise.all([api('/api/project?project_id='+encodeURIComponent(id)),api('/api/source-health')]);if(id!==$('business-project').value.trim())return;projectDesk=data;state.source_health=health;$('project-id').value=id;$('lc-project').value=id;if(typeof syncProject==='function')syncProject();renderProject();if(typeof loadKnowledge==='function')await loadKnowledge();await loadResearchDesk(id);if(id!==$('business-project').value.trim())return;$('business-status').textContent='已打开私有项目 '+id;}catch(e){error(e)}
 }
 function renderProject(){
  if(!projectDesk)return;
@@ -89,15 +89,17 @@ $('business-save').onclick=async()=>{try{
 $('business-check').onclick=async()=>{try{if(!projectDesk)throw Error('请先打开项目。');let d=await api('/api/project/check',{project_id:projectDesk.project_id});await openProject();$('business-status').textContent='已对比本地资料，新增提醒 '+(d.alerts_created??d.reviews_created)+' 条。此操作未访问外部来源。'}catch(e){error(e)}};
 $('business-research').onclick=()=>{if(!projectDesk)return error('请先打开项目。');$('project-id').value=projectDesk.project_id;
 let risk=projectDesk.product==='georisk-agent', profile=projectDesk.profile?.[0]?.data;
+let prior=projectOverview?.project_id===projectDesk.project_id?(projectOverview.recent.find(r=>r.engine==='model'&&r.state==='completed')||projectOverview.recent[0]):null;
 let rows=risk?projectDesk.exposure.filter(r=>r.data.active).map(r=>r.data):projectDesk.option.map(r=>r.data);
 let countries=profile?.countries?.length?profile.countries:rows.flatMap(r=>r.countries||[]);
 if(!countries.length&&risk)countries=projectDesk.event.flatMap(r=>r.data.countries||[]);
 let topics=(risk?projectDesk.event:projectDesk.assumption).flatMap(r=>r.data.topics||[]);
 if(!topics.length&&risk)topics=rows.flatMap(r=>r.topics||[]);
+if(!countries.length&&prior)countries=prior.countries||[];if(!topics.length&&prior)topics=prior.topics||[];
 $('countries').value=[...new Set(countries)].join(', ');$('topics').value=[...new Set(topics)].join(', ');
-$('context').value='';$('search-queries').value='';$('skill-choice').value='project-continuity';$('question').value=projectDesk.product==='georisk-agent'?'本项目关注的事件有什么新进展？说明哪些业务可能受影响、判断依据是什么，接下来要留意哪些变化；有资料支持时更新事件记录。':'结合企业情况和已有方案，分析当前最需要做的选择。比较各方案的机会、进入条件、成本与约束，说明哪些前提需要验证、下一步先做什么。';$('engine').value=state.model_configured?'model':'demo';openView('work');$('run-status').textContent='已带入本项目的国区和主题，上一项任务的背景与搜索词已清空。补充这次要解决的问题和可公开搜索的关键词后，再点“开始研究”。模型模式会接收本项目资料。'};
+$('context').value='';$('search-queries').value='';$('skill-choice').value='project-continuity';$('question').value=projectDesk.product==='georisk-agent'?'本项目关注的事件有什么新进展？说明哪些业务可能受影响、判断依据是什么，接下来要留意哪些变化；有资料支持时更新事件记录。':'结合企业情况和已有方案，分析当前最需要做的选择。比较各方案的机会、进入条件、成本与约束，说明哪些前提需要验证、下一步先做什么。';if(prior?.task_mode){$('task-mode').value=prior.task_mode;if(['topic-research','event-tracking'].includes(prior.task_mode))$('question').value='接着本项目的研究继续：\n'+Array.from(prior.question).slice(0,1500).join('')+'\n围绕已有解释、仍需检验的问题和下一步取材展开，不虚构企业背景。';}for(const option of [...($('knowledge-choice').options||[])])option.selected=(prior?.knowledge_ids||[]).includes(option.value);for(const id of ['public-terms','public-facets','external-search-profile'])if($(id))$(id).value='';if($('research-depth'))$('research-depth').checked=false;$('engine').value=state.model_configured?'model':'demo';openView('work');$('run-status').textContent='已带入本项目的国区和主题，上一项任务的背景与搜索词已清空。补充这次要解决的问题和可公开搜索的关键词后，再点“开始研究”。模型模式会接收本项目资料。'};
 $('business-export').onclick=()=>{if(projectDesk)saveBlob(projectDesk,projectDesk.project_id+'-private-project.json')};
-$('business-project').oninput=()=>{projectDesk=null;editingRecord=null;$('business-editor').classList.add('hidden');$('business-records').innerHTML='';$('business-notices').innerHTML='';$('business-history').innerHTML='';$('business-overview').innerHTML='';$('business-status').textContent='请打开当前项目。'};
+$('business-project').oninput=()=>{projectDesk=null;projectOverview=null;editingRecord=null;$('business-editor').classList.add('hidden');$('business-records').innerHTML='';$('business-notices').innerHTML='';$('business-history').innerHTML='';$('business-overview').innerHTML='';$('business-status').textContent='请打开当前项目。'};
 document.querySelector('[data-view="project-desk"]').addEventListener('click',()=>{if(!$('business-project').value)$('business-project').value=$('project-id').value});
 
 function projectSourceLinks(rows){
@@ -142,6 +144,7 @@ function economicsHTML(rows){
 async function loadResearchDesk(project){
  const target=$('business-overview');target.textContent='正在读取本项目的研究记录…';
  try{const d=await api('/api/desk/overview?project_id='+encodeURIComponent(project));if(project!==$('business-project').value.trim())return;
+ if(!Array.isArray(d.recent)||!Array.isArray(d.collections))throw Error('研究档案格式不可用');projectOverview=d;
  const risk=state.product.id==='georisk-agent';
  target.innerHTML='<h2>'+(risk?'议题研究档案':'方案研究档案')+'</h2><p class="hint">本项目已保存的材料与判断；不会自动刷新来源或调整已有选择。</p>'+
  '<p>知识库 '+d.collections.length+' 个 · 持续关注 '+d.monitors.filter(m=>m.state==='active').length+' 项 · 最近研究 '+d.recent.length+' 项'+(d.has_more_runs?'（还有更早记录）':'')+'</p>'+

@@ -2,9 +2,9 @@
 
 围绕企业真正要做的选择，比较市场与进入方式，理清交易责任、成本和经营前提，形成带来源的分析与后续验证安排。
 
-[English guide](README.md#english-guide) · [先跑示例](#先跑通一个示例) · [工作流程](#一次研究怎样完成) · [正式版本](https://github.com/workstonedai-collab/market-entry-agent/releases/tag/v0.13.0) · [Windows 安装](docs/windows.md)
+[English guide](README.md#english-guide) · [先跑示例](#先跑通一个示例) · [工作流程](#一次研究怎样完成) · [正式版本](https://github.com/workstonedai-collab/market-entry-agent/releases/tag/v0.14.0) · [Windows 安装](docs/windows.md)
 
-当前正式版本为 **v0.13.0**。项目仍处于 Alpha 阶段，可自行部署；离线演示不需要模型密钥，真实研究需配置模型与来源。
+当前正式版本为 **v0.14.0**。项目仍处于 Alpha 阶段，可自行部署；离线演示不需要模型密钥，真实研究需配置模型与来源。
 
 ## 项目背景与开放范围
 
@@ -23,6 +23,8 @@
 **经营前提与方案跟踪：进入市场后，继续看哪些条件发生了变化。** 一项贸易安排、投资规则或当地经营政策，可能带来机会，也可能改变原来的计划。围绕已经记录的方案与假设，可以查看新资料关联了哪些选项、阶段和决策，安排接下来需要谁取得什么材料、在什么节点再作判断。是否调整选择，仍由你决定。
 
 ## 把研究接着做下去
+
+第一次配置时，可以在网页填写模型设置、单独测试连接，再选择要添加的官方来源。日常使用时，查看持续运行进程的最近心跳与检查记录；已保存报告可直接导出带标题、列表的可编辑 Word，不额外调用模型。原有 OfficeCLI 和 MCP 入口继续保留。[配置与日常使用](docs/setup-and-use.md)
 
 报告和快报保存后，可以留下是否有用、是否重复或需要怎样纠正的反馈，再决定是否调整持续关注。“经验与技能”也能查看某个版本何时被带进后续任务、关联报告收到了什么反馈，便于决定继续使用、停用或回退。[反馈与技能记录](docs/feedback-and-skills.md)
 
@@ -293,12 +295,13 @@ market-entry-agent skills
 
 ## 版本与验证记录
 
-[当前正式版本 v0.13.0](https://github.com/workstonedai-collab/market-entry-agent/releases/tag/v0.13.0) · [完整更新记录](RELEASE_NOTES.md) · [报告案例与实际限制](docs/report-quality.md)
+[当前正式版本 v0.14.0](https://github.com/workstonedai-collab/market-entry-agent/releases/tag/v0.14.0) · [完整更新记录](RELEASE_NOTES.md) · [报告案例与实际限制](docs/report-quality.md)
 
 这几轮更新分别补上了资料进入研究、研究接到日常工作，以及后续持续使用的环节：
 
 | 更新 | 使用时有什么变化 | 说明 |
 |---|---|---|
+| v0.14.0：接着研究与日常使用 | 研究档案、引用版本、明确反馈、技能使用记录、网页配置与直接 Word 导出 | [配置与使用](docs/setup-and-use.md) |
 | v0.13.0：知识库、持续关注与经验技能 | 上传资料建库；预览并确认监测；选择是否积累、启用和回退私有技能 | [设置、恢复与限制](docs/continuous-research.md) |
 | v0.12.0–v0.12.1：办公资料与任务入口 | 按本次问题选择任务；可选导入 Office 文件、导出完整 Word 报告；修复 Windows 测试清理时的文件占用 | [办公资料与使用方式](docs/office-and-tasks.md) |
 | v0.11.0：工具接入与分别取材 | 自有客户端通过 MCP 读取研究；显式开启后可运行任务；不同子问题共用原任务预算 | [MCP](docs/mcp.md) · [研究分支](docs/research-depth.md) |

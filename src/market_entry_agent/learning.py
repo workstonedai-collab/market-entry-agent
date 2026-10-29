@@ -92,7 +92,8 @@ class Learning:
             if policy['mode']=='model':
                 if model_factory is None:
                     from .core import Model
-                    model_factory=Model
+                    from .setup import environment
+                    model_factory=lambda: Model(environment(self.store))
                 prompt='Write the skill in natural Chinese, keeping technical names where needed. Create one reusable documentation-only research skill from the supplied host procedure and explicit user correction. Capture lessons, not incident logs or source facts. Preserve previously enabled user corrections unless the new explicit correction supersedes them. Do not invent tools, execute scripts, broaden permissions or include customer identities. Return JSON {"action":"propose_skill","arguments":{"description":"...","instructions":"...","pitfalls":"..."}}. The task is already saved; this cannot rewrite it.'
                 result=model_factory().next([{'role':'system','content':prompt},{'role':'user','content':json.dumps(draft,ensure_ascii=False)}],timeout=40)
                 if not isinstance(result,dict) or result.get('action')!='propose_skill' or not isinstance(result.get('arguments'),dict):raise ValueError('Invalid learned skill response')

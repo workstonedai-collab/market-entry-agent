@@ -45,4 +45,14 @@ class ProjectDeskTests(unittest.TestCase):
         desk=overview(self.store,SPEC['id'],'beta',limit=2)
         self.assertEqual(len(desk['recent']),2);self.assertTrue(desk['has_more_runs'])
 
+    def test_mcp_overview_is_read_only_bounded_and_scoped(self):
+        Adapter=importlib.import_module(MODULE+'.mcp').Adapter
+        adapter=Adapter(self.store,SPEC,project='alpha')
+        tool=next(x for x in adapter.tools() if x['name']=='project_overview')
+        self.assertTrue(tool['annotations']['readOnlyHint'])
+        result=adapter.call('project_overview',{'project_id':'alpha','limit':100})
+        self.assertLessEqual(len(result['text']),100)
+        with self.assertRaises(ValueError):adapter.call('project_overview',{'project_id':'beta'})
+        with self.assertRaises(ValueError):adapter.call('run_create',{'client_key':'test','engine':'demo','mission':self.mission('alpha')})
+
 if __name__=='__main__':unittest.main()

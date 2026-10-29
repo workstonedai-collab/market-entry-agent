@@ -2,7 +2,7 @@
 
 围绕企业真正要做的选择，比较市场与进入方式，理清交易责任、成本和经营前提，形成带来源的分析与后续验证安排。
 
-Market Entry Agent · [English guide](#english-guide) · [中文完整说明](README.zh-CN.md) · [先跑示例](#try-it-in-two-minutes) · [正式版本 / Release](https://github.com/workstonedai-collab/market-entry-agent/releases/tag/v0.13.0)
+Market Entry Agent · [English guide](#english-guide) · [中文完整说明](README.zh-CN.md) · [先跑示例](#try-it-in-two-minutes) · [正式版本 / Release](https://github.com/workstonedai-collab/market-entry-agent/releases/tag/v0.14.0)
 
 [![CI](https://github.com/workstonedai-collab/market-entry-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/workstonedai-collab/market-entry-agent/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -24,6 +24,8 @@ Market Entry Agent · [English guide](#english-guide) · [中文完整说明](RE
 **经营前提与方案跟踪：进入市场后，继续看哪些条件发生了变化。** 一项贸易安排、投资规则或当地经营政策，可能带来机会，也可能改变原来的计划。围绕已经记录的方案与假设，可以查看新资料关联了哪些选项、阶段和决策，安排接下来需要谁取得什么材料、在什么节点再作判断。是否调整选择，仍由你决定。
 
 ## 把研究接着做下去
+
+第一次配置时，可以在网页填写模型设置、单独测试连接，再选择要添加的官方来源。日常使用时，查看持续运行进程的最近心跳与检查记录；已保存报告可直接导出带标题、列表的可编辑 Word，不额外调用模型。原有 OfficeCLI 和 MCP 入口继续保留。[配置与日常使用](docs/setup-and-use.md)
 
 报告和快报保存后，可以留下是否有用、是否重复或需要怎样纠正的反馈，再决定是否调整持续关注。“经验与技能”也能查看某个版本何时被带进后续任务、关联报告收到了什么反馈，便于决定继续使用、停用或回退。[反馈与技能记录](docs/feedback-and-skills.md)
 
@@ -51,7 +53,7 @@ Market Entry Agent · [English guide](#english-guide) · [中文完整说明](RE
 
 **开放范围与交流：** 国区评分配方、分项权重、贡献计算与通用研究步骤已公开。部分进一步的研究方法、专用提示词和相关知识内容暂未开源。如有需要或希望进一步交流，欢迎[联系作者](https://github.com/workstonedai-collab)或提交[项目 Issue](https://github.com/workstonedai-collab/market-entry-agent/issues/new)；私人资料请勿直接发布在公开 Issue。
 
-当前正式版本为 **v0.13.0**。可自行部署，项目仍处于 Alpha 阶段；离线演示无需模型密钥，真实研究需配置模型与来源。
+当前正式版本为 **v0.14.0**。可自行部署，项目仍处于 Alpha 阶段；离线演示无需模型密钥，真实研究需配置模型与来源。
 
 <a id="english-guide"></a>
 
@@ -95,6 +97,8 @@ py -3.11 -m venv .venv
 See the [Windows installation, model configuration and troubleshooting guide](docs/windows.md). CI exercises Python 3.11–3.13 on Windows, macOS and Linux, plus a clean PowerShell installation. The package is installed from this repository or its release wheel; no PyPI publication is claimed.
 
 ## Background and open scope
+
+Configure the chosen model in the workspace, test it explicitly, and select official sources. Inspect worker heartbeats and completed checks during everyday use. Saved reports can download as editable Word with headings and lists without another model call; explicit OfficeCLI and existing MCP paths remain available. [Setup and everyday use](docs/setup-and-use.md).
 
 Saved reports and digests accept explicit feedback. Review suggested watch adjustments before changing and confirming settings. The skills page records which versions entered later task contexts and the feedback on related reports, helping you decide what to keep or roll back. [Feedback and skill records](docs/feedback-and-skills.md).
 
@@ -386,12 +390,13 @@ Code is MIT licensed. World Bank observations retain their own attribution and t
 
 ## Release and evaluation history
 
-[当前正式版本 v0.13.0](https://github.com/workstonedai-collab/market-entry-agent/releases/tag/v0.13.0) · [完整更新记录](RELEASE_NOTES.md) · [报告案例与实际限制](docs/report-quality.md)
+[当前正式版本 v0.14.0](https://github.com/workstonedai-collab/market-entry-agent/releases/tag/v0.14.0) · [完整更新记录](RELEASE_NOTES.md) · [报告案例与实际限制](docs/report-quality.md)
 
 Recent releases connect incoming material, everyday research tools and continued project work:
 
 | Release | What changes in use | Guide |
 |---|---|---|
+| v0.14.0: continued project research and everyday use | Read dossiers and cited file versions, leave explicit feedback, inspect skill-context records, configure the workspace and export editable Word | [Setup and use](docs/setup-and-use.md) |
 | v0.13.0: private libraries, watches and procedural skills | Import files, preview and confirm monitoring, and choose whether to generate, activate or roll back private skills | [Setup, recovery and limits](docs/continuous-research.md) |
 | v0.12.0–v0.12.1: Office files and task entry points | Choose a task, optionally import Office material or export a complete Word report; Windows test cleanup waits for file handles to close | [Office and tasks](docs/office-and-tasks.md) |
 | v0.11.0: tool integration and question branches | Read saved research through MCP, explicitly enable task execution, and investigate separate questions within the original task budget | [MCP](docs/mcp.md) · [Research branches](docs/research-depth.md) |

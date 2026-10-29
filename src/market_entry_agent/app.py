@@ -20,6 +20,7 @@ from .skills import snapshot, catalog as skill_catalog
 from .core import REGISTRY
 from .workflow import Workflow
 from .source_health import overview as source_overview
+from .setup import model_configured
 
 
 class AgentHTTPServer(ThreadingHTTPServer):
@@ -119,7 +120,7 @@ def serve(store, host, port):
                 return self.reply(200, project_asset, "text/javascript; charset=utf-8")
             if path == '/lifecycle-ui.js':
                 return self.reply(200,Path(__file__).with_name('lifecycle-ui.js').read_bytes(),'text/javascript; charset=utf-8')
-            if path.startswith(('/api/knowledge/','/api/monitors/','/api/learning/','/api/desk/','/api/feedback/')):
+            if path.startswith(('/api/knowledge/','/api/monitors/','/api/learning/','/api/desk/','/api/feedback/','/api/setup/')):
                 try:
                     _,_,area,action=path.split('/')
                     if action not in ('list','jobs','search','read','original','preview','history','status','export','overview','cited','suggestions','usage'):raise ValueError('This operation requires POST')
@@ -193,7 +194,15 @@ def serve(store, host, port):
                     "runs": [public_run(r) for r in store.list_runs()], "evidence": store.export_evidence()["records"],
                     "outbox": store.outbox(), "schedules": store.schedules(), "sources": store.sources(),
                     "source_health": source_overview(store),
-                    "model_configured": bool(os.environ.get("AGENT_MODEL_BASE_URL") and os.environ.get("AGENT_MODEL_NAME"))})
+                    "model_configured": model_configured(store)})
+            if path == '/api/report.docx':
+                try:
+                    rid=parse_qs(urlsplit(self.path).query).get('run_id',[''])[0]
+                    run=store.get_run(rid)
+                    if run['product']!=SPEC['id'] or run['state']!='completed' or not run.get('report'):raise ValueError('Open a completed report for this product')
+                    from .report_document import docx_bytes
+                    return self.reply(200,docx_bytes(run['report']),'application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                except (ValueError,TypeError) as exc:return self.reply(400,{'error':str(exc)})
             if path.startswith("/api/runs/"):
                 try:
                     return self.reply(200, public_run(store.get_run(path.rsplit("/", 1)[-1])))
@@ -211,7 +220,7 @@ def serve(store, host, port):
                 body = json.loads(self.rfile.read(length))
                 if not isinstance(body, dict):
                     raise ValueError("Request body must be an object")
-                if self.path.startswith(('/api/knowledge/','/api/monitors/','/api/learning/','/api/desk/','/api/feedback/')):
+                if self.path.startswith(('/api/knowledge/','/api/monitors/','/api/learning/','/api/desk/','/api/feedback/','/api/setup/')):
                     _,_,area,action=self.path.split('/')
                     result=lifecycle.dispatch(area,action,body,background)
                     return self.reply(200,result,'application/octet-stream' if isinstance(result,bytes) else 'application/json; charset=utf-8')
@@ -381,8 +390,10 @@ def main(argv=None):
     mcp=sub.add_parser('mcp-serve',help='Opt-in MCP stdio adapter; read-only unless --allow-runs')
     mcp.add_argument('--allow-runs',action='store_true',help='Permit explicit task create/resume/control; model mode may incur charges')
     mcp.add_argument('--project',help='Restrict private project/task access to this explicit project ID')
+    doctor=sub.add_parser('doctor',help='Read configuration and worker state; no network unless --test-model')
+    doctor.add_argument('--test-model',action='store_true',help='Explicitly make one model request without project materials')
     manage=sub.add_parser('manage',help='Private knowledge, confirmed monitoring and learning; see docs/continuous-research.md')
-    manage.add_argument('area',choices=('knowledge','monitors','learning','desk','feedback'));manage.add_argument('action')
+    manage.add_argument('area',choices=('knowledge','monitors','learning','desk','feedback','setup'));manage.add_argument('action')
     manage.add_argument('--project',required=True);manage.add_argument('--data',help='JSON command file')
     manage.add_argument('--file',help='Knowledge import file; never interpreted as a command')
     manage.add_argument('--output',help='Explicit local export destination')
@@ -514,11 +525,23 @@ def main(argv=None):
         elif args.command == "schedules":
             result = store.schedules()
         elif args.command == "worker":
-            while True:
-                print(json.dumps(tick(store), ensure_ascii=False), flush=True)
-                if args.once:
-                    break
-                time.sleep(5)
+            from .worker_health import WorkerSession
+            with WorkerSession(store,SPEC['id']) as session:
+                while True:
+                    session.begin()
+                    try:result=tick(store)
+                    except Exception as exc:
+                        session.finish(type(exc).__name__)
+                        raise
+                    else:session.finish()
+                    print(json.dumps(result, ensure_ascii=False), flush=True)
+                    if args.once:
+                        break
+                    time.sleep(5)
+        elif args.command == 'doctor':
+            from . import setup
+            result=setup.status(store,SPEC['id'])
+            if args.test_model:result['connection_test']=setup.connection_test(store,SPEC['id'])
         elif args.command == 'manage':
             from .lifecycle import Lifecycle
             body=load_json(args.data) if args.data else {}

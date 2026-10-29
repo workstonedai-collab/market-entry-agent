@@ -12,6 +12,12 @@ class Lifecycle:
 
     def dispatch(self,area,action,body,background=None):
         project=body.get('project_id')
+        if area=='setup':
+            from . import setup
+            if action=='status':return setup.status(self.store,self.product)
+            if action=='model':return setup.save_model(self.store,body['settings'])
+            if action=='test':return setup.connection_test(self.store,self.product)
+            if action=='sources':return setup.register_sources(self.store,body['source_ids'])
         if area=='feedback':
             from .feedback import Feedback
             service=Feedback(self.store,self.product)

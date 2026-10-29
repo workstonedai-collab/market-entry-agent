@@ -3,7 +3,7 @@ let monitorDraft=null, lifecycleTimer=null, lifecycleProject='', lifecycleCollec
 const lcProject=()=>($('lc-project').value||$('project-id').value).trim();
 const lcLines=id=>$(id).value.split(/[\n,，]/).map(x=>x.trim()).filter(Boolean);
 function lcStatus(id,value){$(id).textContent=value}
-function syncProject(){const p=lcProject();$('project-id').value=p;if(lifecycleProject!==p){monitorDraft=null;lifecycleProject=p;skillsLoaded=false;$('learn-run').value='';$('skill-choice').value='';}return p}
+function syncProject(){const p=lcProject();$('project-id').value=p;if(lifecycleProject!==p){monitorDraft=null;lifecycleProject=p;skillsLoaded=false;$('knowledge-choice').innerHTML='';lifecycleCollections=[];for(const id of ['kb-list','kb-jobs','kb-results','monitor-list','monitor-history','learn-list'])if($(id))$(id).innerHTML='';$('learn-run').value='';$('skill-choice').value='';}return p}
 function jsonDownload(value,name){const u=URL.createObjectURL(new Blob([typeof value==='string'?value:JSON.stringify(value,null,2)],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}
 async function lc(area,action,body={}){return api('/api/'+area+'/'+action,{...body,project_id:syncProject()})}
 async function loadKnowledge(){try{const p=syncProject(),d=await lc('knowledge','list');if(p!==lcProject())return;lifecycleCollections=d.collections;const selected=[...$('knowledge-choice').selectedOptions].map(o=>o.value);$('knowledge-choice').innerHTML=d.collections.map(c=>'<option value="'+esc(c.id)+'" '+(selected.includes(c.id)?'selected':'')+'>'+esc(c.name)+' · '+c.documents.length+' 份文件</option>').join('');$('kb-list').innerHTML=d.collections.map(c=>'<div class="card"><h3>'+esc(c.name)+'</h3><p class="small">'+esc(c.id)+'</p><button data-kb-use="'+esc(c.id)+'">用于当前研究</button>'+c.documents.map(doc=>'<div class="source"><b>'+esc(doc.title)+'</b><p class="hint">'+esc(doc.filename)+' · '+doc.chunks+' 个片段 · '+esc(doc.version_id)+'</p><div class="buttons"><button data-kb-original="'+esc(c.id)+'" data-version="'+esc(doc.version_id)+'" data-filename="'+esc(doc.filename)+'">下载原件</button><button data-kb-replace="'+esc(doc.id)+'" data-collection="'+esc(c.id)+'">替换文件</button><button data-kb-delete="'+esc(doc.id)+'" data-collection="'+esc(c.id)+'">删除资料</button></div></div>').join('')+'</div>').join('')||'<p class="hint">创建一个知识库，再导入本项目需要的资料。</p>';$('kb-collection').innerHTML=d.collections.map(c=>'<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>').join('');$('kb-jobs').innerHTML=d.jobs.map(j=>'<div class="source">'+esc(j.filename)+' · '+esc(({queued:'等待处理',processing:'正在解析',completed:'已入库',failed:'解析失败'})[j.state]||j.state)+(j.error?'<p class="error-box">'+esc(j.error)+'</p>':'')+(['failed','queued'].includes(j.state)?'<button data-kb-retry="'+esc(j.id)+'">重试已保存的导入</button>':'')+'</div>').join('');
@@ -65,3 +65,32 @@ function deliveryStateHTML(item,channel){
  const receipt=item.payload.external_receipt;
  return esc(state)+(receipt?'<p class="hint">接收位置：'+esc(receipt.destination_label)+'；消息回执 '+esc(receipt.message_id)+'。回执不表示对方已读。</p>':'');
 }
+
+let setupProfileLoaded=false,setupDirty=false;
+async function loadSetup(){
+ try{const d=await api('/api/setup/status');if(!setupProfileLoaded){$('setup-base').value=d.model.base_url||'';$('setup-name').value=d.model.name||'';$('setup-tokens').value=d.model.max_tokens;$('setup-effort').value=d.model.reasoning_effort;$('setup-remember').checked=d.model.credential_persisted;setupProfileLoaded=true;}$('setup-test').disabled=setupDirty||!d.model.configured;$('setup-model-state').textContent=d.model.configured?'已读取模型设置：'+d.model.name+' · '+d.model.endpoint_host+'。'+(d.model.last_connection_test?'上次连接测试：'+(d.model.last_connection_test.state==='success'?'成功':'失败')+'，'+new Date(d.model.last_connection_test.checked*1000).toLocaleString():'尚未进行连接测试。'):'尚未读取有效模型设置。可以填写下方内容，或沿用启动进程时的环境变量。';
+ $('setup-sources').innerHTML=d.source_pack.map(s=>'<label class="source"><input type="checkbox" data-setup-source="'+esc(s.id)+'" '+(d.sources.sources.some(x=>x.id===s.id)?'checked':'')+'> '+esc(s.title)+'<p class="hint">'+esc(s.countries.join('、'))+' · '+esc(s.topics.join('、'))+'</p><a href="'+esc(safeLink(s.url))+'" target="_blank" rel="noopener noreferrer">'+esc(s.url)+'</a></label>').join('');
+ $('setup-source-health').innerHTML=sourceHealthHTML(d.sources);
+ $('setup-adapters').textContent='Office 导入：'+(d.adapters.office_import.file_available?'已找到配置的程序，尚需实际转换验证':'尚未找到可用程序')+'；内置 Word 导出可用。可选 OfficeCLI：'+(d.adapters.word_export.file_available?'已找到配置的程序，尚需实际导出验证':'尚未找到可用程序')+'；PDF：'+(d.adapters.pdf.configured?'已有工具配置':'尚未配置')+'。可选 MCP 搜索：'+(d.optional_connections.mcp_search_configured?'已设置配置位置':'未配置')+'；Hermes 发送：'+(d.optional_connections.hermes_delivery_configured?'已设置配置位置，仍需确认接收目标':'未配置')+'。';
+ $('setup-worker-state').innerHTML='<h3>持续运行进程</h3><p class="hint">最近心跳表示进程仍在回应，不等于研究已完成。启动网页或创建方案不会自动启动 worker。</p>'+(d.workers.sessions.length?d.workers.sessions.map(w=>'<div class="source"><b>'+esc(({idle:'正在等待到期任务',working:'正在执行检查',error:'最近一轮发生错误',stopped:'已记录停止',stale:'近期没有心跳，进程可能已停止'})[w.observed_state])+'</b><p class="hint">最近心跳：'+new Date(w.heartbeat*1000).toLocaleString()+'；最近一轮结束：'+(w.tick_finished?new Date(w.tick_finished*1000).toLocaleString():'尚无')+(w.error?'；错误类别：'+esc(w.error):'')+'</p></div>').join(''):'<p>这个工作空间还没有 worker 运行记录。请按部署说明单独启动。</p>');
+ }catch(e){$('setup-result').textContent=e.message||String(e)}
+}
+window.addEventListener('load',()=>{
+ $('setup-minimax').onclick=()=>{$('setup-base').value='https://api.minimax.io/v1';$('setup-name').value='MiniMax-M3.1-Flash';$('setup-effort').value='low';setupDirty=true;$('setup-test').disabled=true;$('setup-result').textContent='已填入官方接口示例；尚未保存、请求模型或读取密钥。'};
+ $('setup-save').onclick=async()=>{try{const r=await api('/api/setup/model',{settings:{base_url:$('setup-base').value,model:$('setup-name').value,api_key:$('setup-key').value,remember_key:$('setup-remember').checked,max_tokens:Number($('setup-tokens').value),reasoning_effort:$('setup-effort').value}});$('setup-key').value='';setupProfileLoaded=false;setupDirty=false;$('setup-result').textContent='模型设置已保存，尚未测试连接。'+({current_process_only:'密钥仅在当前进程使用；单独启动的 worker 需要环境变量密钥或明确保存的配置。',private_file_unencrypted:'已按你的选择保存在本机工作空间的未加密配置中。',not_configured:'没有保存密钥；无密钥服务可直接使用，其他服务需要补充密钥。'})[r.credential_storage];await loadSetup();await refresh()}catch(e){$('setup-result').textContent=e.message||String(e)}};
+ $('setup-test').onclick=async()=>{const button=$('setup-test');button.disabled=true;$('setup-result').textContent='正在进行一次无研究资料的模型连接测试…';try{const r=await api('/api/setup/test',{});$('setup-result').textContent=r.state==='success'?'连接测试成功。只发送了诊断短句，没有发送项目资料。':'连接测试失败：'+r.error;await loadSetup()}catch(e){$('setup-result').textContent=e.message||String(e)}finally{button.disabled=false}};
+ $('setup-register').onclick=async()=>{try{const r=await api('/api/setup/sources',{source_ids:[...document.querySelectorAll('[data-setup-source]:checked')].map(el=>el.dataset.setupSource)});$('setup-result').textContent='已登记 '+r.registered+' 个官方来源；尚未抓取，也没有启用监测。';await loadSetup()}catch(e){$('setup-result').textContent=e.message||String(e)}};
+ $('setup-refresh').onclick=loadSetup;
+ for(const id of ['setup-base','setup-name','setup-key','setup-remember','setup-tokens','setup-effort'])$(id).addEventListener('input',()=>{setupDirty=true;$('setup-test').disabled=true;$('setup-result').textContent='输入已修改，请先保存设置，再测试连接。'});
+ document.querySelectorAll('[data-view="about"]').forEach(b=>b.addEventListener('click',loadSetup));
+ $('setup-open').onclick=()=>{openView('about');loadSetup()};
+});
+
+document.addEventListener('click',async event=>{
+ if(event.target.id!=='download-docx')return;
+ const button=event.target;button.disabled=true;
+ try{const rid=selected;const response=await fetch('/api/report.docx?run_id='+encodeURIComponent(rid),{headers:{Authorization:'Bearer '+(sessionStorage.getItem('workspace-token')||'')}});
+ if(!response.ok)throw Error('Word 导出失败，请确认已经打开保存完成的报告。');
+ const blob=await response.blob(),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='report-'+rid+'.docx';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+ }catch(e){error(e)}finally{button.disabled=false}
+});

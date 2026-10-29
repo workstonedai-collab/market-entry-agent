@@ -10,6 +10,8 @@
 
 ## 导出可编辑 Word 报告
 
+从 v0.14.0 开始，基础安装已有内置 DOCX 导出，可在网页直接下载，或用原来的导出命令，不必额外配置 OfficeCLI。内置路径保留完整文字，设置标题和列表；不调用模型。下面的 OfficeCLI 配置仍适用于希望继续使用该可选程序的操作者，命令行在明确设置它后沿用原路径。[配置与日常使用](setup-and-use.md)
+
 使用 [iOfficeAI/OfficeCLI](https://github.com/iOfficeAI/OfficeCLI) v1.0.158 的本机二进制，先核对其发行校验值。这里使用的是本地文档编辑工具；同名的其他服务需要单独评估。
 
 macOS / Linux:
@@ -44,6 +46,6 @@ $env:AGENT_DOCUMENT_ADAPTER_PYTHON = 'C:\Tools\document-venv\Scripts\python.exe'
 
 ## Integration status
 
-Office import uses an optional operator-owned MarkItDown environment; DOCX export invokes a pinned, separately installed iOfficeAI/OfficeCLI binary. These adapters are available through the CLI, not arbitrary model tools or browser file pickers. Product task selection is wired to browser, CLI, HTTP and the existing MCP run interface. Existing reports, source contracts and independent Mac/Windows/Linux workspaces remain supported.
+Office import uses an optional operator-owned MarkItDown environment; DOCX export invokes a pinned, separately installed iOfficeAI/OfficeCLI binary. The explicit OfficeCLI adapter remains a CLI option; browser report downloads use the built-in DOCX writer, and private library uploads reuse the optional import adapter. None is an arbitrary model-executed command. Product task selection is wired to browser, CLI, HTTP and the existing MCP run interface. Existing reports, source contracts and independent Mac/Windows/Linux workspaces remain supported.
 
 See [integration references and boundaries](integration-references.md) for adoption decisions. Generic contracts and adapters are public; specialized instructions, private knowledge and customer files stay outside the repository.

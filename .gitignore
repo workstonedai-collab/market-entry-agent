@@ -16,3 +16,7 @@ internal/
 *.bundle
 *.log
 .local-instructions*
+
+# Operator-owned model credentials must never be staged.
+model-profile.json
+.model-profile-*

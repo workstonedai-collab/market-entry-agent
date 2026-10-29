@@ -64,3 +64,8 @@ flowchart LR
   N --> E["Discovery → fetch/read original evidence"]
   E --> W["Direct writing → save → display/export"]
 ```
+
+
+## 项目档案与文档引用
+
+`project_overview` 接受 `project_id` 及可选分页参数，读取已保存研究档案。`knowledge_citation` 接受任务 `id`、文档 `evidence_id` 及可选分页参数，读取该报告引用的固定版本；已删除文件不可继续读取。两者默认只读，沿用本产品及 `--project` 范围限制。详情见[配置与日常使用](setup-and-use.md)。

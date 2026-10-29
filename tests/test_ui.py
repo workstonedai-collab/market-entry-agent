@@ -15,7 +15,7 @@ class ProjectBrowser(unittest.TestCase):
 const fs=require('node:fs'), vm=require('node:vm'), assert=require('node:assert/strict');
 const elements=new Map();
 const element=id=>{if(!elements.has(id))elements.set(id,{value:'',textContent:'',innerHTML:'',disabled:false,classList:{remove(){},add(){}},addEventListener(){}});return elements.get(id)};
-const context=vm.createContext({assert,$:element,document:{querySelector:element,querySelectorAll:()=>[]},esc:v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))});
+const context=vm.createContext({assert,$:element,state:{model_configured:false},openView(){},document:{querySelector:element,querySelectorAll:()=>[]},esc:v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))});
 vm.runInContext(fs.readFileSync(process.argv[1],'utf8'),context);
 vm.runInContext(`
 businessForm('event');assert.equal($('business-id').value,'auto');assert.ok($('business-id-hint').textContent.includes('auto'));
@@ -47,6 +47,11 @@ const aids=decisionHTML({decision_options:[{name:hostile,fit:'conditional',trade
 assert.ok(aids.includes('quote needed'));assert.ok(aids.includes('pause'));assert.ok(!aids.includes('<img'));
 const health=sourceHealthHTML({registered:1,fresh:0,latest_failed:1,sources:[{title:hostile,freshness:'stale',refresh_hours:24,latest_attempt_failed:true,last_error:'retrieval_failed'}]});
 assert.ok(!health.includes('<img'));assert.ok(health.includes('retrieval_failed'));
+projectDesk={project_id:'topic-project',product:'georisk-agent',exposure:[],event:[]};
+projectOverview={project_id:'topic-project',recent:[{engine:'model',state:'completed',countries:['Yemen'],topics:['shipping'],task_mode:'topic-research',question:'How did positions change?',knowledge_ids:['selected-only']}]};
+$('knowledge-choice').options=[{value:'selected-only',selected:false},{value:'other-project',selected:true}];$('public-terms').value='other project terms';
+$('business-research').onclick();
+assert.equal($('countries').value,'Yemen');assert.equal($('topics').value,'shipping');assert.equal($('task-mode').value,'topic-research');assert.ok($('question').value.includes('How did positions change?'));assert.ok($('question').value.includes('不虚构企业背景'));assert.equal($('knowledge-choice').options[0].selected,true);assert.equal($('knowledge-choice').options[1].selected,false);assert.equal($('public-terms').value,'');
 const paragraphs=reportProse('first paragraph\\n\\n<script>second</script>');
 assert.equal((paragraphs.match(/<p>/g)||[]).length,2);assert.ok(!paragraphs.includes('<script>'));assert.ok(paragraphs.includes('&lt;script&gt;'));
 

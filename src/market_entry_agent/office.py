@@ -70,6 +70,9 @@ def office_chunks(raw, suffix, timeout=40):
             for i in range(0,len(text),24000)]
 
 def export_docx(report, output, timeout=60):
+    if not os.environ.get('AGENT_OFFICECLI'):
+        from .report_document import export_docx as builtin_export
+        return builtin_export(report,output)
     from .core import markdown
     program=executable('AGENT_OFFICECLI')
     destination=Path(output).expanduser().absolute()
