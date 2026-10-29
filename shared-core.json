@@ -3,8 +3,8 @@
   "module": "market_entry_agent",
   "files": {
     "core.py": "10d0597be797c9d03f5f0131e70e7466d442da68e543c20b91ebc8d921a7730f",
-    "app.py": "0c7c2e17072862cc788116bc66f708070e4f326f56f2947ce1cddef81edb8a4d",
-    "web.html": "311bf557e4bc6a2d3ed1d7d64810d40ea47f84557ef8bd563be2439d8b97b7b1",
+    "app.py": "dab7851c9fbcba341708dafc8d6fbde35720187ddeb11afbe429721ed425acfe",
+    "web.html": "f1408a69d76dba717c89b00093a9810756ed03f51175623c03b42b223b293cf9",
     "net.py": "e12b65437dfa8943675158234d4eeecb4a93e97491234f30f53e208c8b572bfe",
     "transport.py": "20ac65c23e3811c5dd42bbbc854160f6273e02f143482aa924109e727774e807",
     "countries.py": "dfb98ff70c71a1ae88b60ec9a82d81859ad45ba006bfdbea344fcce41497fcb0",
@@ -33,9 +33,10 @@
     "learning.py": "22ed114f88cdfaf3a480cf189aa3accfe013c88ef10094a0f1d9ef76720de793",
     "monitoring.py": "9cf9bee450136cbdbc5fec9980691c02150485b1290e714eca446104c9299a0d",
     "notifications.py": "cb755b9d657518d80ba0373b532959c2e9eb31e9789d765875125ef34b78b99c",
-    "lifecycle.py": "a7a6d9b8b1c9914a0e7a5cc5bd521135e2291a75dc7c09b52e78aec0d5ea2556",
-    "lifecycle-ui.js": "3ad8076de7b9a4cc230c5a443c2adb96b1aee008bfc075d967d977c3018e150d",
+    "lifecycle.py": "5a7c69790f38d3a878b99567b8bf385445471092188d1f6708d08c9f98ed6aba",
+    "lifecycle-ui.js": "2e5b08beaa65239f5fe27291efca88027e66332059e304d1137f1183420e8a7a",
     "retrieval.py": "bef8d07fa316fadf4ec8b2523e1c7b61bfe683dbb9d3c1be1b4d24d65c416928",
-    "project_desk.py": "1fdbcb6b1c94deccb3d5df0b558edf1fbff82704b33e13aeb56e13b786101da1"
+    "project_desk.py": "1fdbcb6b1c94deccb3d5df0b558edf1fbff82704b33e13aeb56e13b786101da1",
+    "feedback.py": "23cc3c26924569861880607e17bf39cb445c0f26a2c8af56f13de2980042bfd5"
   }
 }

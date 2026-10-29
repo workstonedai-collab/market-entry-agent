@@ -119,10 +119,10 @@ def serve(store, host, port):
                 return self.reply(200, project_asset, "text/javascript; charset=utf-8")
             if path == '/lifecycle-ui.js':
                 return self.reply(200,Path(__file__).with_name('lifecycle-ui.js').read_bytes(),'text/javascript; charset=utf-8')
-            if path.startswith(('/api/knowledge/','/api/monitors/','/api/learning/','/api/desk/')):
+            if path.startswith(('/api/knowledge/','/api/monitors/','/api/learning/','/api/desk/','/api/feedback/')):
                 try:
                     _,_,area,action=path.split('/')
-                    if action not in ('list','jobs','search','read','original','preview','history','status','export','overview','cited'):raise ValueError('This operation requires POST')
+                    if action not in ('list','jobs','search','read','original','preview','history','status','export','overview','cited','suggestions','usage'):raise ValueError('This operation requires POST')
                     body={k:v[0] for k,v in parse_qs(urlsplit(self.path).query).items()}
                     if 'collection_ids' in body:body['collection_ids']=body['collection_ids'].split(',')
                     result=lifecycle.dispatch(area,action,body)
@@ -211,7 +211,7 @@ def serve(store, host, port):
                 body = json.loads(self.rfile.read(length))
                 if not isinstance(body, dict):
                     raise ValueError("Request body must be an object")
-                if self.path.startswith(('/api/knowledge/','/api/monitors/','/api/learning/','/api/desk/')):
+                if self.path.startswith(('/api/knowledge/','/api/monitors/','/api/learning/','/api/desk/','/api/feedback/')):
                     _,_,area,action=self.path.split('/')
                     result=lifecycle.dispatch(area,action,body,background)
                     return self.reply(200,result,'application/octet-stream' if isinstance(result,bytes) else 'application/json; charset=utf-8')
@@ -382,7 +382,7 @@ def main(argv=None):
     mcp.add_argument('--allow-runs',action='store_true',help='Permit explicit task create/resume/control; model mode may incur charges')
     mcp.add_argument('--project',help='Restrict private project/task access to this explicit project ID')
     manage=sub.add_parser('manage',help='Private knowledge, confirmed monitoring and learning; see docs/continuous-research.md')
-    manage.add_argument('area',choices=('knowledge','monitors','learning','desk'));manage.add_argument('action')
+    manage.add_argument('area',choices=('knowledge','monitors','learning','desk','feedback'));manage.add_argument('action')
     manage.add_argument('--project',required=True);manage.add_argument('--data',help='JSON command file')
     manage.add_argument('--file',help='Knowledge import file; never interpreted as a command')
     manage.add_argument('--output',help='Explicit local export destination')

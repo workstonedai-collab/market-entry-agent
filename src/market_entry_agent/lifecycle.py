@@ -12,6 +12,13 @@ class Lifecycle:
 
     def dispatch(self,area,action,body,background=None):
         project=body.get('project_id')
+        if area=='feedback':
+            from .feedback import Feedback
+            service=Feedback(self.store,self.product)
+            if action=='save':return service.save(project,body['kind'],body['target'],body['rating'],body.get('note',''),body.get('context',''))
+            if action=='list':return {'feedback':service.list(project,body.get('kind'),body.get('context'))}
+            if action=='suggestions':return service.suggestions(project,body['monitor_id'])
+            if action=='usage':return service.skill_usage(project)
         if area=='desk' and action=='overview':
             from .project_desk import overview
             return overview(self.store,self.product,project)
@@ -61,7 +68,9 @@ class Lifecycle:
         if area=='learning':
             service=Learning(self.store,self.product)
             if action=='policy':return service.policy(project,body.get('policy'))
-            if action=='status':return {'policy':service.policy(project),'skills':service.versions(project),'jobs':service.jobs(project)}
+            if action=='status':
+                from .feedback import Feedback
+                return {'policy':service.policy(project),'skills':service.versions(project),'jobs':service.jobs(project),'usage':Feedback(self.store,self.product).skill_usage(project)}
             if action=='feedback':
                 result=service.enqueue(body['run_id'],body.get('lesson',''),project)
                 if 'id' in result:
