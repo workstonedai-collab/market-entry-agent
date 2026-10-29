@@ -41,6 +41,8 @@ class CapabilityTests(unittest.TestCase):
   with patch.dict(os.environ,{'AGENT_MODEL_API_KEY':'private-test-value','UNRELATED_KEY':'private-test-value'}):
    self.assertNotIn('AGENT_MODEL_API_KEY',office.process_env())
    self.assertNotIn('UNRELATED_KEY',office.process_env())
+   self.assertEqual(office.process_env()['OFFICECLI_NO_AUTO_RESIDENT'],'1')
+   self.assertEqual(office.process_env()['OFFICECLI_SKIP_UPDATE'],'1')
   with patch.dict(os.environ,{'AGENT_OFFICECLI':'relative-tool'}):
    with self.assertRaises(ValueError):office.executable('AGENT_OFFICECLI')
 

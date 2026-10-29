@@ -49,3 +49,7 @@ $env:AGENT_DOCUMENT_ADAPTER_PYTHON = 'C:\Tools\document-venv\Scripts\python.exe'
 Office import uses an optional operator-owned MarkItDown environment; DOCX export invokes a pinned, separately installed iOfficeAI/OfficeCLI binary. The explicit OfficeCLI adapter remains a CLI option; browser report downloads use the built-in DOCX writer, and private library uploads reuse the optional import adapter. None is an arbitrary model-executed command. Product task selection is wired to browser, CLI, HTTP and the existing MCP run interface. Existing reports, source contracts and independent Mac/Windows/Linux workspaces remain supported.
 
 See [integration references and boundaries](integration-references.md) for adoption decisions. Generic contracts and adapters are public; specialized instructions, private knowledge and customer files stay outside the repository.
+
+适配器运行时使用直接写入模式，并关闭 OfficeCLI 本次调用的后台自动更新，避免导出过程中程序被替换。用户仍可自行更新已配置的适配器；CI 检查固定版本的校验值在前后保持一致。
+
+Adapter calls use direct writes with background auto-update disabled for that invocation. Operators can update their chosen adapter separately; CI verifies that its pinned binary stays unchanged across the roundtrip.

@@ -19,7 +19,7 @@ def executable(variable):
 def process_env():
     keys=('PATH','HOME','USERPROFILE','SYSTEMROOT','WINDIR','TEMP','TMP','TMPDIR','LANG','LC_ALL','DOTNET_ROOT')
     env={k:v for k,v in os.environ.items() if k.upper() in keys}
-    env.update(OFFICECLI_NO_AUTO_RESIDENT='1',PYTHONIOENCODING='utf-8')
+    env.update(OFFICECLI_NO_AUTO_RESIDENT='1',OFFICECLI_SKIP_UPDATE='1',PYTHONIOENCODING='utf-8')
     return env
 
 def invoke(command, timeout=40, cwd=None):

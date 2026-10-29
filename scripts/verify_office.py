@@ -1,5 +1,6 @@
 """Opt-in real local Office roundtrip; synthetic data, no model or publishing."""
 import importlib
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -18,6 +19,7 @@ documents=importlib.import_module(MODULE+'.documents')
 with tempfile.TemporaryDirectory(prefix='office 中文 ') as folder:
  root=Path(folder);store=core.Store(root/'workspace')
  report=core.Agent(store,product.SPEC).run(dict(product.SPEC['starter']),'demo')['report']
+ program=Path(os.environ['AGENT_OFFICECLI']);program_sha=hashlib.sha256(program.read_bytes()).hexdigest()
  word=root/'研究报告.docx'
  original_run=subprocess.run
  def diagnostic_run(*args,**kwargs):
@@ -39,5 +41,6 @@ with tempfile.TemporaryDirectory(prefix='office 中文 ') as folder:
   assert imported['visibility']=='private' and imported['evidence_ids']
   results.append(dict(format=Path(name).suffix,private_import=True,chunks=len(chunks)))
  assert receipt['model_calls']==0
+ assert hashlib.sha256(program.read_bytes()).hexdigest()==program_sha,'The pinned adapter binary must remain unchanged'
  assert store.get_run(store.list_runs()[0]['id'])['report']==report
  print(json.dumps(dict(word_export='complete text verified',imports=results,report_unchanged=True,model_calls=0),ensure_ascii=False))
